@@ -49,6 +49,12 @@ function validateConfig(config) {
         }
     }
 
+    function isTrue(label, v) {
+        if (!v) {
+            return label;
+        }
+    }
+
     // Generic column mapping
     // ----------------------
     function checkColumnMapping(label, columnMappingObject) {
@@ -101,9 +107,11 @@ function validateConfig(config) {
                 isObject("", v) ||
                 isString(".op", v.op) ||
                 // value is either a number or a string
+                // or v.op is 'same_value_for_all_rows'
                 (isString(".value", v.value) &&
                     isNumber(".value", v.value) &&
-                    isStringList(".value", v.value))
+                    isStringList(".value", v.value) &&
+                    isTrue('same_value_for_all_rows', v.op === 'same_value_for_all_rows'))
             ),validations[k])
         }, null)
 

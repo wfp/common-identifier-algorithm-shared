@@ -53,7 +53,7 @@ class ValidatorBase {
     }
 
     // the core validation function that takes a field and returns nothing / a validationError
-    validate(value, row) {
+    validate(value, {row, sheet, column}) {
         throw new Error(`No 'validate()' defined for validator type '${this.kind}'`)
         // return new ValidationError(ERROR_CODE, "not implemented");
     }

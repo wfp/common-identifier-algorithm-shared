@@ -66,7 +66,7 @@ function baseFileName(filePath) {
 
 
 async function preprocessFile(config, inputFilePath, limit) {
-    console.log("------------ preprocessFile -----------------")
+    console.log("[PROCESSING] ------------ preprocessFile -----------------")
 
     // the input file path
     // let inputFilePath = program.args[0];
@@ -93,7 +93,7 @@ async function preprocessFile(config, inputFilePath, limit) {
 
     // apply limiting if needed
     if (limit) {
-        console.log("[LOAD] Using input row limit: ",  limit);
+        console.log("[PROCESSING] [LOAD] Using input row limit: ",  limit);
         decoded.sheets[0].data = decoded.sheets[0].data.slice(0, limit);
     }
 
@@ -133,7 +133,7 @@ async function preprocessFile(config, inputFilePath, limit) {
 
 
 async function processFile(config, ouputPath, inputFilePath, limit, format) {
-    console.log("------------ preprocessFile -----------------")
+    console.log("[PROCESSING] ------------ preprocessFile -----------------")
 
 
 
@@ -157,7 +157,7 @@ async function processFile(config, ouputPath, inputFilePath, limit, format) {
 
     // apply limiting if needed
     if (limit) {
-        console.log("[LOAD] Using input row limit: ",  limit);
+        console.log("[PROCESSING] [LOAD] Using input row limit: ",  limit);
         decoded.sheets[0].data = decoded.sheets[0].data.slice(0, limit);
     }
 

@@ -7,10 +7,10 @@ const ValidationError = require('./ValidationError')
 
 // Validates a single value with a list of validators.
 // The row is passed to allow for cross-column checks
-function validateValueWithList(validatorList, value, row) {
+function validateValueWithList(validatorList, value, {row, sheet, column}) {
     return validatorList.reduce((memo, validator) => {
         // check if the validator says OK
-        let result = validator.validate(value, row);
+        let result = validator.validate(value, {row, sheet, column});
         // if failed add to the list of errors
         if (result) {
             memo.push(result);
@@ -19,7 +19,7 @@ function validateValueWithList(validatorList, value, row) {
     }, [])
 }
 
-function validateRowWithListDict(validatorListDict, row) {
+function validateRowWithListDict(validatorListDict, row, sheet) {
     // check if all expected columns are present
     let missingColumns = Object.keys(validatorListDict).map((k) => {
         return (typeof row[k] === 'undefined') ? k : null;
@@ -44,7 +44,7 @@ function validateRowWithListDict(validatorListDict, row) {
         let fieldValue = row[fieldName];
 
         // use the validators
-        memo[fieldName] = validateValueWithList(validatorList, fieldValue, row);
+        memo[fieldName] = validateValueWithList(validatorList, fieldValue, {row, sheet, column: fieldName});
 
         return memo;
     }, {})
@@ -65,6 +65,7 @@ const makeMaxValueValidator = require('./max_value');
 
 const makeDateDiffValidator = require('./date_diff');
 const makeDateFieldDiffValidator = require('./date_field_diff');
+const makeSameValueForAllRowsValidator = require('./same_value_for_all_rows');
 
 const VALIDATOR_FACTORIES = {
     // Regexp validators have a number of possible names (for ease of use)
@@ -85,6 +86,8 @@ const VALIDATOR_FACTORIES = {
 
     "date_diff": makeDateDiffValidator,
     "date_field_diff": makeDateFieldDiffValidator,
+
+    "same_value_for_all_rows": makeSameValueForAllRowsValidator,
 };
 
 
@@ -186,7 +189,7 @@ function test() {
     let validatorDict = makeValidatorListDict(config.validations);
 
     DATA.forEach(row => {
-        let results = validateRowWithListDict(validatorDict, row);
+        let results = validateRowWithListDict(validatorDict, row, {data: DATA});
         console.log("ROW: \t", row, "\n", results, "\n--------------")
     })
 
@@ -197,7 +200,7 @@ function validateDocumentWithListDict(validatorDict, document) {
     let results = document.sheets.map((sheet) => {
         let results = sheet.data.map((row) => {
             // do the actual validation
-            let results = validateRowWithListDict(validatorDict, row);
+            let results = validateRowWithListDict(validatorDict, row, sheet);
             let compactResults = Object.keys(results).reduce((memo, col) => {
                 let colResults = results[col];
                 if (colResults.length > 0) {

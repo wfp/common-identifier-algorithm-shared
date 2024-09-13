@@ -17,7 +17,7 @@ class DateFieldDiffValidator extends ValidatorBase {
         return `must be in the date range compared to '${this.targetField}': ${_value} ${_key}`;
     }
 
-    validate(value, row) {
+    validate(value, {row}) {
 
         let otherFieldValue = row[this.targetField];
         // if there is no other field value fail
