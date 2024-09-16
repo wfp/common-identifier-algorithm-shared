@@ -208,10 +208,10 @@ function validateDocumentWithListDict(validatorDict, document) {
                 }
                 return memo;
             }, []);
-            // to know if the whole row is valid check every column in the results
-            let ok = Object.keys(results).reduce((memo, col) => {
-                return memo && results[col].length === 0;
-            }, true);
+            // // to know if the whole row is valid check every column in the results
+            // let ok = Object.keys(results).reduce((memo, col) => {
+            //     return memo && results[col].length === 0;
+            // }, true);
             // package it up
             return { row, ok: compactResults.length === 0, errors: compactResults };
         });
