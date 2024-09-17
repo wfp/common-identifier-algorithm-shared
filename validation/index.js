@@ -56,6 +56,7 @@ function validateRowWithListDict(validatorListDict, row, sheet) {
 const regexpValidatorFactory = require('./regexp');
 const optionsValidatorFactory = require('./options');
 
+const makeMinFieldLengthValidator = require('./min_field_length');
 const makeMaxFieldLengthValidator = require('./max_field_length');
 const makeFieldTypeValidator = require('./field_type');
 const makeLanguageCheckValidator = require('./language_check');
@@ -75,6 +76,7 @@ const VALIDATOR_FACTORIES = {
 
     "options": optionsValidatorFactory,
 
+    "min_field_length": makeMinFieldLengthValidator,
     "max_field_length": makeMaxFieldLengthValidator,
 
     "field_type": makeFieldTypeValidator,
@@ -242,9 +244,7 @@ function makeValidationResultDocument(sourceConfig, results) {
 
                 // find the column name
                 let columnHumanName = fieldNameMapping[error.column] || error.column;
-                return error.errors.map((err) => {
-                    return `${columnHumanName} ${err.msg}`
-                }).join(", ")
+                return `${columnHumanName} ${error.errors.map(({msg}) => msg).join(",\n  ")}`;
             });
 
 

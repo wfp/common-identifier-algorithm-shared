@@ -10,7 +10,7 @@ class SameValueForAllRowsValidator extends ValidatorBase {
 
     // the default message
     defaultMessage() {
-        return `Every row must have the same value`;
+        return `must be identical for all items in the file`;
     }
 
     validate(value, {row, sheet, column}) {
@@ -23,7 +23,8 @@ class SameValueForAllRowsValidator extends ValidatorBase {
         const targetValue = sheet.data[0][column];
 
         // check if it matches the current value
-        return value == targetValue ? this.success() : this.failWith(`expected '${targetValue}' found '${value}'`)
+        // return value == targetValue ? this.success() : this.failWith(`must be '${targetValue}'`)
+        return value == targetValue ? this.success() : this.fail();
     }
 
 }

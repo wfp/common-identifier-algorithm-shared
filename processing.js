@@ -108,7 +108,7 @@ function isMappingOnlySheet(algorithmConfig, sheet) {
     const sheetColumns = (sheet.data.length > 0) ? Object.keys(sheet.data[0]) : [];
 
     const isMappingDocument = areSetsEqual(new Set(mappingDocumentColumns), new Set(sheetColumns));
-    console.log("MAPPING: ======>>>> ", {mappingDocumentColumns, sheetColumns, isMappingDocument});
+    // console.log("MAPPING: ======>>>> ", {mappingDocumentColumns, sheetColumns, isMappingDocument});
 
     return isMappingDocument;
 
@@ -184,8 +184,6 @@ async function preprocessFile(config, inputFilePath, limit) {
 
     // do the actual validation
     let validationResult = validation.validateDocumentWithListDict(validatorDict, decoded);
-
-    console.log("VALIDATOR:", validatorDict)
 
     let validationErrorsOutputFile;
     let validationResultDocument;
