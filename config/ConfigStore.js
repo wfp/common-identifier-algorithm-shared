@@ -51,6 +51,7 @@ function saveConfig(configData, outputPath) {
     console.log("[CONFIG] Written config data to ", outputPath);
 }
 
+
 class ConfigStore {
     constructor() {
 
@@ -72,16 +73,25 @@ class ConfigStore {
     getConfig() { return this.data; }
 
 
+    // Returns the path of the user config file
+    getConfigFilePath() { return CONFIG_FILE_PATH; }
+
+
+    // Returns the path of the application config file
+    getAppConfigFilePath() { return APP_CONFIG_FILE_PATH; }
+
+    // Returns true if the current config is a backup configuration
+    isCurrentConfigBackup() { return this.data && this.data.isBackup; }
 
     // On boot we try to load the user config from AppData
     // or fall back to a backup config
     boot() {
 
         // attempt to load the application configuration
-        this.appConfig = loadAppConfig(APP_CONFIG_FILE_PATH);
+        this.appConfig = loadAppConfig(this.getAppConfigFilePath());
 
         // attempt to load the default app config
-        const userConfigLoad = loadConfig(CONFIG_FILE_PATH);
+        const userConfigLoad = loadConfig(this.getConfigFilePath());
 
         // if the load succesds we have a valid config -- use it as a
         // user-provided one
@@ -147,6 +157,45 @@ class ConfigStore {
         this.useUserConfig(userConfig, new Date());
     }
 
+    // Attempts to fall back to the default configuration shipped with the application.
+    // Returns nothing if successful, an error message string if failed.
+    //
+    // This method does not save the backup as the user config, only deletes the user config file
+    removeUserConfig() {
+        // attempt to load the backup config
+        console.log("[CONFIG] [removeUserConfig] Attempting to remove user configuration and replace with backup.")
+
+
+        // if the current config is already a backup config don't do anything
+        if (this.isCurrentConfigBackup()) {
+            console.log("[CONFIG] [removeUserConfig] Already using a backup config -- bailing")
+            // this is not an error - we're already using the backup
+            return;
+        }
+
+        console.log("[CONFIG] [removeUserConfig] Trying to load backup config file")
+        const backupConfigLoad = loadConfig(BACKUP_CONFIG_FILE_PATH);
+
+        // if failed return the error message (do not delete the user config yet)
+        if (!backupConfigLoad.success) {
+            console.log("[CONFIG] Backup config validation failed -- returning error and keeping existing user config:", backupConfigLoad.error);
+            // save the error
+            this.loadError = backupConfigLoad.error;
+            // and return it
+            return backupConfigLoad.error;
+        }
+
+        // if successful use the loaded backup configuration
+        console.log("[CONFIG] [removeUserConfig] Backup config validation success - using it as config")
+        backupConfigLoad.config.isBackup = true;
+        this.useBackupConfig(backupConfigLoad.config);
+
+        // delete the existing user config file to disable it
+        this._deleteUserConfigFile();
+
+        // do not return anything if successful
+    }
+
     // use a backup config and store its 'backupness'
     useBackupConfig(configData) {
         this.isUsingBackupConfig = true;
@@ -175,6 +224,12 @@ class ConfigStore {
         this.isValid = true;
     }
 
+    // deletes the user configuration file
+    _deleteUserConfigFile() {
+        const configPath = this.getConfigFilePath();
+        console.log("[CONFIG] Deleting config file: ", configPath);
+        fs.unlinkSync(configPath);
+    }
 
     // Overwrites the existing configuration file with the new data
     saveNewConfigData(configData) {
@@ -182,15 +237,16 @@ class ConfigStore {
         ensureAppDirectoryExists();
         // TODO: maybe do a rename w/ timestamp for backup
         // save the config to the output path
-        saveConfig(configData, CONFIG_FILE_PATH);
+        saveConfig(configData, this.getConfigFilePath());
     }
 
     // Overwrites the application configuration with the current
     // appConfig value.
     _saveAppConfig() {
         ensureAppDirectoryExists();
-        saveAppConfig(this.appConfig, APP_CONFIG_FILE_PATH);
+        saveAppConfig(this.appConfig, this.getAppConfigFilePath());
     }
+
 
     _currentSignature() {
         if (this.data && this.data.signature && this.data.signature.config_signature) {
