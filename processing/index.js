@@ -1,16 +1,18 @@
 const path = require('node:path');
 const os = require('node:os');
 
-const { Sheet, Document } = require('./document');
+const { Sheet, Document } = require('../document');
 
 // inject used algo here
-let {makeHasher} = require('../active_algorithm');
+let {makeHasher} = require('../../active_algorithm');
 
-const {encoderForFile} = require('./encoding');
-const {decoderForFile, fileTypeOf} = require('./decoding');
-const validation = require("./validation");
+const {encoderForFile} = require('../encoding');
+const {decoderForFile, fileTypeOf} = require('../decoding');
+const validation = require("../validation");
 
-const {extractAlgoColumnsFromObject} = require('./hashing/utils');
+const {extractAlgoColumnsFromObject} = require('../hashing/utils');
+
+const mappingRequiredColumns = require('./mappingRequiredColumns');
 
 
 // HASH-GENERATION
@@ -76,34 +78,18 @@ function baseFileName(filePath) {
 // MAPPING-DOCUMENT-RELATED
 // ------------------------
 
-// Returns a list of columns that are used for the hashing (according to the configuration provided)
-// this can be used to figure out if an input document is an assistance document or a mapping document
-function algorithmRequiredColumns(algorithmConfig) {
-    const columnsConfig = algorithmConfig.columns;
-    // TODO: is this erorr handling even needed here?
-    if (typeof columnsConfig !== 'object') {
-        console.log("[PROCESSING] Unable to find column configuration for algorithm.")
-        return [];
-    }
-    // We simply concat the input columns from the config (or use an empty list as default)
-    return [].concat(
-        (columnsConfig.to_translate || []),
-        (columnsConfig.static || []),
-        (columnsConfig.reference || []),
-    )
-}
-
 
 // Returns true if the sheet is containing only the hash input columns
 // in which case its a mapping-only sheet, and we need to treat it differently
-function isMappingOnlySheet(algorithmConfig, sheet) {
+function isMappingOnlySheet(config, sheet) {
 
     // returns true if two sets are equal
     function areSetsEqual(xs,ys) {
         return xs.size === ys.size && [...xs].every((x) => ys.has(x));
     }
 
-    const mappingDocumentColumns = algorithmRequiredColumns(algorithmConfig);
+    // const mappingDocumentColumns = algorithmRequiredColumns(algorithmConfig);
+    const mappingDocumentColumns = mappingRequiredColumns(config);
     // here we've already checked to have only one sheet
     const sheetColumns = (sheet.data.length > 0) ? Object.keys(sheet.data[0]) : [];
 
@@ -117,15 +103,15 @@ function isMappingOnlySheet(algorithmConfig, sheet) {
 
 // Returns a new validator dictionary, keeps only the columns needed by the
 // algorithm (so only columns relevant for mapping files are checked)
-function keepValidatorsForColumns(algorithmConfig, validatorDict) {
-    const keepColumnList = algorithmRequiredColumns(algorithmConfig);
+function keepValidatorsForColumns(config, validatorDict) {
+    const keepColumnList = mappingRequiredColumns(config);
     return keepColumnList.reduce((memo, col) => Object.assign(memo, { [col]: validatorDict[col]}), {})
 }
 
 // Returns a new output configuration with only the columns needed by the
 // algorithm (so the validation result of a mapping document only has the mapping columns present)
-function keepOutputColumns(algorithmConfig, outputConfig) {
-    const keepColumnSet = new Set(algorithmRequiredColumns(algorithmConfig));
+function keepOutputColumns(config, outputConfig) {
+    const keepColumnSet = new Set(mappingRequiredColumns(config));
 
     return Object.assign({}, outputConfig, {
         columns: outputConfig.columns.filter(({alias}) => keepColumnSet.has(alias))
@@ -176,10 +162,10 @@ async function preprocessFile(config, inputFilePath, limit) {
     let validatorDict = validation.makeValidatorListDict(config.validations);
 
     // Figure out if this is a mapping document or an assistance document
-    const isMappingDocument = isMappingOnlySheet(config.algorithm, decoded.sheets[0])
+    const isMappingDocument = isMappingOnlySheet(config, decoded.sheets[0])
     // if this is a mapping document leave only the validators for the algorithm columns
     if (isMappingDocument) {
-        validatorDict = keepValidatorsForColumns(config.algorithm, validatorDict);
+        validatorDict = keepValidatorsForColumns(config, validatorDict);
     }
 
     // do the actual validation
@@ -195,7 +181,7 @@ async function preprocessFile(config, inputFilePath, limit) {
 
         // but if this is a mapping document we only show the mapping columns in the validation output document
         if (isMappingDocument) {
-            validationResultBaseConfig = keepOutputColumns(config.algorithm, validationResultBaseConfig);
+            validationResultBaseConfig = keepOutputColumns(config, validationResultBaseConfig);
         }
 
         // check if validation is ok -- if yes write the file out
@@ -266,7 +252,7 @@ async function processFile(config, ouputPath, inputFilePath, limit, format) {
     }
 
     // Figure out if this is a mapping document or an assistance document
-    const isMappingDocument = isMappingOnlySheet(config.algorithm, decoded.sheets[0])
+    const isMappingDocument = isMappingOnlySheet(config, decoded.sheets[0])
 
     // HASHING
     // =======
