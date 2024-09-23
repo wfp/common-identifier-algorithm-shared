@@ -17,16 +17,16 @@ const {extractAlgoColumnsFromObject} = require('./hashing/utils');
 // ---------------
 
 // Generate the hash columns from the row object
-function generateHashForRow(algorithmConfig, uscadi, rowObject) {
+function generateHashForRow(algorithmConfig, hasher, rowObject) {
     let extractedObj = extractAlgoColumnsFromObject(algorithmConfig.columns, rowObject);
-    let res = uscadi.generateHashForExtractedObject(extractedObj);
+    let res = hasher.generateHashForExtractedObject(extractedObj);
     return res;
 }
 
-function generateHashesForSheet(algorithmConfig, uscadi, sheet) {
+function generateHashesForSheet(algorithmConfig, hasher, sheet) {
     // generate for all rows
     let rows = sheet.data.map((row) => {
-        let generatedHashes = generateHashForRow(algorithmConfig, uscadi, row);
+        let generatedHashes = generateHashForRow(algorithmConfig, hasher, row);
 
         return Object.assign({}, row, generatedHashes);
     });
@@ -35,10 +35,10 @@ function generateHashesForSheet(algorithmConfig, uscadi, sheet) {
 }
 
 
-function generateHashesForDocument(algorithmConfig, uscadi, document) {
+function generateHashesForDocument(algorithmConfig, hasher, document) {
     // generate for all rows
     let sheets = document.sheets.map((sheet) => {
-        return generateHashesForSheet(algorithmConfig, uscadi, sheet);
+        return generateHashesForSheet(algorithmConfig, hasher, sheet);
     });
 
     return new Document(sheets);
