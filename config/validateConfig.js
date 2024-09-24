@@ -71,6 +71,9 @@ function validateConfig(config) {
     // ----
 
     function checkMeta(meta) {
+        if (typeof meta !== 'object') {
+            return `[meta] must be present`
+        }
         // check if this is the correct region
         if (meta.region != REGION) {
             return `meta.region is not '${REGION}'`

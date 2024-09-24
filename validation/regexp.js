@@ -21,8 +21,14 @@ class RegexpValidator extends ValidatorBase {
 
     // the core validation function that takes a field and returns nothing / a validationError
     validate(value) {
+        // null and undefined cannot be converted to string, so fail here
+        if (typeof value === 'undefined' || value === null) {
+            return this.failWith("must not be empty");
+        }
+        // Convert the value to string
+        const stringValue = value.toString();
         // check if the regexp matches
-        if (this.rx.test(value)) {
+        if (this.rx.test(stringValue)) {
             return this.success();
         }
 
