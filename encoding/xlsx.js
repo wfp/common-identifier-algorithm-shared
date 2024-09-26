@@ -4,6 +4,19 @@ const fs = require('node:fs');
 
 const EncoderBase = require('./base');
 
+// The longest allowed sheet name length
+const MAX_EXCEL_SHEET_NAME_LENGTH = 31;
+
+// Takes a string and returns a valid Excel sheet name (up to 31 characters,
+// trimming dashes)
+function toValidSheetName(s) {
+    // remove dashes
+    return s.replace(/^[\s\-]*/g, '').replace(/[\s\-]*$/g,'')
+        // trim to size
+        .substring(0, MAX_EXCEL_SHEET_NAME_LENGTH);
+}
+
+
 class XlsxEncoder extends EncoderBase {
     constructor(mapping, options) {
         super(mapping)
@@ -48,7 +61,6 @@ class XlsxEncoder extends EncoderBase {
         // add the current file to the list of outputs
         this.outputPaths.push(fileOutputPath);
         // otherwise we'll return
-        // TODO: this is where metadata injection (writing a summary text file next to the output files) can happen
         return;
     }
 
@@ -63,6 +75,7 @@ class XlsxEncoder extends EncoderBase {
         // SheetJS needs the objects to have only the properties we output
         // so we filter them here
         let fullData = this._filterDataBasedOnConfig(sheet.data); //[this._generateHeaderRow()].concat( sheet.data);
+
         // generate a list of headers in the right order
         let headers = this.mapping.columns.reduce((memo, {alias, name}) => {
             memo.aliases.push(alias);
@@ -81,9 +94,10 @@ class XlsxEncoder extends EncoderBase {
         // Add human names to the headers
         XLSX.utils.sheet_add_aoa(worksheet, [headers.names], { origin: "A1" });
 
-
+        // the output sheet name has to be the mapping mostfix, formatted
+        const sheetName = toValidSheetName(this._getOutputNameFor(''));
         // add the sheet to the output document
-        XLSX.utils.book_append_sheet(this.workbook, worksheet, sheet.name);
+        XLSX.utils.book_append_sheet(this.workbook, worksheet, sheetName);
 
         return;
     }
@@ -110,7 +124,6 @@ class XlsxEncoder extends EncoderBase {
 
 // Factory function for the xlsx encoder
 function makeXlsxEncoder(mapping, options) {
-    // TODO: validate encoder config here.
     return new XlsxEncoder(mapping, options);
 }
 

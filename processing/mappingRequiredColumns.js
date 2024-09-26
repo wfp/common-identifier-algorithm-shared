@@ -4,7 +4,6 @@
 // this can be used to figure out if an input document is an assistance document or a mapping document
 function algorithmRequiredColumns(algorithmConfig) {
     const columnsConfig = algorithmConfig.columns;
-    // TODO: is this erorr handling even needed here?
     if (typeof columnsConfig !== 'object') {
         console.log("[PROCESSING] Unable to find column configuration for algorithm.")
         return [];

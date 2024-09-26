@@ -4,7 +4,6 @@ let fs = require("node:fs/promises");
 const DecoderBase = require('./base');
 const {Sheet, Document} = require('../document');
 
-
 // A decoder for CSVs
 class XlsxDecoder extends DecoderBase {
 
@@ -20,7 +19,12 @@ class XlsxDecoder extends DecoderBase {
         let sheets = workbook.SheetNames.map((sheetName) => {
             const worksheet = workbook.Sheets[sheetName];
             // load the data from the sheet
-            const data = XLSX.utils.sheet_to_json(worksheet, {})
+            const data = XLSX.utils.sheet_to_json(worksheet, {
+                // ensure that all data is retrieved as formatted strings, not raw data
+                // (necessary for ID numbers with too many bits, that are not
+                // representable by JS numbers)
+                raw: false,
+            })
             // convert the human names to aliases
             const dataWithAliases = this.renameColumnsToAliases(data)
 
@@ -38,6 +42,7 @@ class XlsxDecoder extends DecoderBase {
         return data.map((row) => {
 
             return keyList.reduce((memo, {name, alias}) => {
+                return Object.assign(memo, {[alias]: row[name] || row[alias]});
                 return Object.assign(memo, {[alias]: row[name] || row[alias]});
             }, {})
         });

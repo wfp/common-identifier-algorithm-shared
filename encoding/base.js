@@ -71,7 +71,7 @@ class EncoderBase {
 
 
     // Writes a Sheet to the pre-determined output
-    writeSheet(sheet, config) {
+    writeSheet(sheet, config, { current, length}) {
         throw new Error("not implemented");
     }
 

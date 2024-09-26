@@ -276,7 +276,6 @@ async function processFile(config, ouputPath, inputFilePath, limit, format) {
 
         return encoder.encodeDocument(document, basePath);
     }
-    // console.log(JSON.stringify(result, null, "    "))
 
     // output the base document
     let mainOutputFiles = isMappingDocument ? [] : outputDocumentWithConfig(config.destination, result);

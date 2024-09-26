@@ -31,9 +31,32 @@ function isValidDateDiff(dateDiffString) {
 }
 
 function attemptToParseDate(value) {
+    // check for emptyness / falseness
+    if (!value) {
+        return;
+    }
+    // numbers need to be converted to string for more success
+    if (typeof value !== 'string') {
+        value = value.toString();
+    }
     return dateFns.parse(value, DEFAULT_FORMAT_STR, new Date() );
     // TODO: implement me
     return new Date();
+}
+
+function formatDateWithDefaultFormat(v) {
+    // empty values get empty strings
+    if (!v) {
+        return '';
+    }
+
+    // check if v is a date object
+    if (typeof v.getMonth !== 'function') {
+        return '';
+    }
+
+    return dateFns.formatDate(v, DEFAULT_FORMAT_STR);
+
 }
 
 function isDateInRange(diff, value, originDate=new Date()) {
@@ -55,5 +78,6 @@ module.exports = {
     parseDateDiff,
     isValidDateDiff,
     attemptToParseDate,
+    formatDateWithDefaultFormat,
     isDateInRange,
 }
