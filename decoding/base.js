@@ -21,6 +21,7 @@ class DecoderBase {
             // if the sheet is empty the output is empty
             return [];
         }
+
         // take the first row
         let firstRow = this.mapColumnNamesToIds(sheetData[0]);
         let objectRows = sheetData.slice(1).map((row)=> {
@@ -29,16 +30,45 @@ class DecoderBase {
             // go through all columns
             row.forEach((col, i) => {
                 // columns with empty names should be ignored
-                let colName = firstRow[i];
+                // .trim() is needed because the first column can have BOM and other markers
+                // around it, and that would mess with the column naming
+                let colName = firstRow[i].trim();
                 if (typeof colName !== 'string' || colName === '') {
                     return;
                 }
                 // assign the value to the column
                 outputObject[colName] = col;
             });
-            return outputObject;
+
+
+            const transformed = this.prepareSingleObject(outputObject);
+            return transformed;
         });
         return objectRows;
+    }
+
+
+    // Takes a single object pre-converted and re-maps names to aliases + adds defaults
+    prepareSingleObject(row) {
+        return this.sourceConfig.columns.reduce((memo, column) => {
+            const {name, alias} = column;
+            // fetch the value
+            let value = row[name] || row[alias];
+
+            // if undefined use default or don't add to the object
+            if (typeof value === 'undefined') {
+                const defaultValue = column.default;
+
+                // check if there is a default value for the config
+                if (typeof defaultValue === 'undefined') {
+                    return memo;
+                }
+
+                // use the default value
+                value = defaultValue;
+            }
+            return Object.assign(memo, {[alias]: value});
+        }, {})
     }
 
     // converts a list of column names to a list of column ids based on the

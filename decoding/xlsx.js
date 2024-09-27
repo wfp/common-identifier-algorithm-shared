@@ -37,14 +37,8 @@ class XlsxDecoder extends DecoderBase {
 
     // Renames the incoming columns from their hunan names to their aliases
     renameColumnsToAliases(data) {
-        let keyList = this.sourceConfig.columns;
-        // console.log("SOURCECONFGIG=>", this.sourceConfig)
         return data.map((row) => {
-
-            return keyList.reduce((memo, {name, alias}) => {
-                return Object.assign(memo, {[alias]: row[name] || row[alias]});
-                return Object.assign(memo, {[alias]: row[name] || row[alias]});
-            }, {})
+            return this.prepareSingleObject(row);
         });
     }
 }
