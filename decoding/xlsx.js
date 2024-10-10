@@ -3,6 +3,7 @@ let fs = require("node:fs/promises");
 
 const DecoderBase = require('./base');
 const {Sheet, Document} = require('../document');
+const log = require('debug')('CID:XLSXDecoder')
 
 // A decoder for CSVs
 class XlsxDecoder extends DecoderBase {
@@ -25,9 +26,12 @@ class XlsxDecoder extends DecoderBase {
                 // representable by JS numbers)
                 raw: false,
             })
+            log("RAW:", data[0])
+
             // convert the human names to aliases
             const dataWithAliases = this.renameColumnsToAliases(data)
 
+            log("DECODED:", dataWithAliases[0])
             return new Sheet(sheetName, dataWithAliases);
         })
 

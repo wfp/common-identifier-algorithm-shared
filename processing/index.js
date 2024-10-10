@@ -13,6 +13,7 @@ const validation = require("../validation");
 const {extractAlgoColumnsFromObject} = require('../hashing/utils');
 
 const mappingRequiredColumns = require('./mappingRequiredColumns');
+const log = require('debug')('CID:Processing')
 
 
 // HASH-GENERATION
@@ -94,7 +95,7 @@ function isMappingOnlySheet(config, sheet) {
     const sheetColumns = (sheet.data.length > 0) ? Object.keys(sheet.data[0]) : [];
 
     const isMappingDocument = areSetsEqual(new Set(mappingDocumentColumns), new Set(sheetColumns));
-    // console.log("MAPPING: ======>>>> ", {mappingDocumentColumns, sheetColumns, isMappingDocument});
+    // log("MAPPING: ======>>>> ", {mappingDocumentColumns, sheetColumns, isMappingDocument});
 
     return isMappingDocument;
 
@@ -123,7 +124,7 @@ function keepOutputColumns(config, outputConfig) {
 // --------------
 
 async function preprocessFile(config, inputFilePath, limit) {
-    console.log("[PROCESSING] ------------ preprocessFile -----------------")
+    log("------------ preprocessFile -----------------")
 
     // the input file path
     // let inputFilePath = program.args[0];
@@ -150,7 +151,7 @@ async function preprocessFile(config, inputFilePath, limit) {
 
     // apply limiting if needed
     if (limit) {
-        console.log("[PROCESSING] [LOAD] Using input row limit: ",  limit);
+        log("[LOAD] Using input row limit: ",  limit);
         decoded.sheets[0].data = decoded.sheets[0].data.slice(0, limit);
     }
 
@@ -211,8 +212,8 @@ async function preprocessFile(config, inputFilePath, limit) {
 // PROCESSING
 // ----------
 
-async function processFile(config, ouputPath, inputFilePath, limit, format) {
-    console.log("[PROCESSING] ------------ preprocessFile -----------------")
+async function processFile(config, ouputPath, inputFilePath, limit, format, hasherFactory=makeHasher) {
+    log("------------ preprocessFile -----------------")
 
 
 
@@ -236,7 +237,7 @@ async function processFile(config, ouputPath, inputFilePath, limit, format) {
 
     // apply limiting if needed
     if (limit) {
-        console.log("[PROCESSING] [LOAD] Using input row limit: ",  limit);
+        log("[LOAD] Using input row limit: ",  limit);
         decoded.sheets[0].data = decoded.sheets[0].data.slice(0, limit);
     }
 
@@ -256,7 +257,7 @@ async function processFile(config, ouputPath, inputFilePath, limit, format) {
 
     // HASHING
     // =======
-    let hasher = makeHasher(config.algorithm);
+    let hasher = hasherFactory(config.algorithm);
     let result = generateHashesForDocument(config.algorithm, hasher, decoded)
 
 

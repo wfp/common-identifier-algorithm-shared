@@ -1,3 +1,4 @@
+const log = require('debug')('CID:Processing::mappingRequiredColumns')
 
 
 // Returns a list of columns that are used for the hashing (according to the configuration provided)
@@ -5,7 +6,7 @@
 function algorithmRequiredColumns(algorithmConfig) {
     const columnsConfig = algorithmConfig.columns;
     if (typeof columnsConfig !== 'object') {
-        console.log("[PROCESSING] Unable to find column configuration for algorithm.")
+        log("Unable to find column configuration for algorithm.")
         return [];
     }
     // We simply concat the input columns from the config (or use an empty list as default)

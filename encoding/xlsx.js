@@ -1,6 +1,7 @@
 
 let XLSX = require("xlsx");
 const fs = require('node:fs');
+const log = require('debug')('CID:XLSXEncoder')
 
 const EncoderBase = require('./base');
 
@@ -55,7 +56,7 @@ class XlsxEncoder extends EncoderBase {
         this._withTemporaryFile(fileOutputPath, (temporaryFilePath) => {
             XLSX.writeFile(this.workbook, temporaryFilePath, { compression: true });
 
-            console.log("[XLSX] Written ", temporaryFilePath);
+            log("[XLSX] Written ", temporaryFilePath);
         })
 
         // add the current file to the list of outputs

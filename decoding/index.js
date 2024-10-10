@@ -27,7 +27,7 @@ function decoderForFile(fileType) {
         case FILE_CSV:
             return makeCsvDecoder;
         default:
-            throw new Error(`Unknown file type: '${filePath}'`)
+            throw new Error(`Unknown file type: '${fileType}'`)
     }
 }
 

@@ -1,4 +1,5 @@
 const { Sheet, Document } = require('../document');
+const log = require('debug')('CID:Decoder')
 
 class DecoderBase {
     constructor(sourceConfig) {
@@ -44,6 +45,8 @@ class DecoderBase {
             const transformed = this.prepareSingleObject(outputObject);
             return transformed;
         });
+
+        log("AFTER:", objectRows[0])
         return objectRows;
     }
 

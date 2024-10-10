@@ -2,6 +2,7 @@ const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
 const { lightFormat } = require("date-fns");
+const log = require('debug')('CID:Encoding')
 
 // Name formatting via Date-Fns lightformat.
 // TOKEN GUIDE: https://date-fns.org/v3.6.0/docs/lightFormat
@@ -23,6 +24,8 @@ function moveFile(oldPath, newPath) {
     } catch (err) {
         // error may indicate that the paths are on different file systems
         // so check for that and copy as a fallback
+        // as this is hard to test on CI / random dev machine, ignore for coverage
+        /* istanbul ignore next */
         if (err.code === 'EXDEV') {
             // Copy the file
             fs.copyFileSync(oldPath, newPath);
@@ -119,7 +122,7 @@ class EncoderBase {
 
         // move to the final output location
         moveFile(temporaryFilePath, outputPath);
-        console.log("[ENCODING] Moved output to final location:", outputPath);
+        log("Moved output to final location:", outputPath);
 
     }
 
