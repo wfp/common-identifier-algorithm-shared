@@ -39,11 +39,15 @@ const CONFIG = {
         postfix: "_ERRORS",
     },
     destination_map: {
-        columns: [],
+        columns: [ {name: "A", alias: "col_a"}, { name: "Test", alias: "test"}],
         postfix: "_MAPPING",
     }
 };
 
+test("preprocessFile invalid", async () => {
+    const fn = async () => await processFile( CONFIG, path.join(os.tmpdir(), "out"), 'NO SUCH FILE NO EXTENSION', 10, FILE_CSV )
+    await expect(fn).rejects.toThrow()
+})
 
 test("preprocessFile", async () => {
     const filePath = path.join(__dirname, "input_ok.csv");
@@ -87,8 +91,24 @@ test("preprocessFile mapping", async () => {
 
 })
 
+test("preprocessFile mapping invalid", async () => {
+    const filePath = path.join(__dirname, "input_mapping_ok.csv");
+
+    const newConfig = JSON.parse(JSON.stringify(CONFIG))
+    newConfig.validations.col_a.push({ op: "options", value: ["NO", "WAY"]})
+
+    const results = await preprocessFile(newConfig, filePath, 10);
+
+
+    expect(results.isMappingDocument).toEqual(true);
+    expect(results.validationResult[0].ok).toEqual(false);
+
+
+})
+
 test("preprocessFile invalid", async () => {
     const filePath = path.join(__dirname, "input_invalid.csv");
+
     const results = await preprocessFile(CONFIG, filePath, 10);
 
 
@@ -157,10 +177,6 @@ test("processFile", async () => {
     expect(row1.test).toEqual("TEST A0")
     expect(row2.col_a).toEqual("A1")
     expect(row2.test).toEqual("TEST A1")
-    // expect(results.outputData.sheets[0].data[1]).toEqual({col_a: "A1", test: "TEST A1"})
-    // expect(results.outputData.sheets[0].data[0]).toEqual({col_a: "A0", test: "TEST A0"})
-    // expect(results.outputData.sheets[0].data[1]).toEqual({col_a: "A1", test: "TEST A1"})
-
 
     const csvData = csv.parse(fs.readFileSync(`${outputBasePath}_OUTPUT.csv`, 'utf-8'));
 
@@ -171,21 +187,39 @@ test("processFile", async () => {
     ])
 
 
-    // expect(results.isMappingDocument).toEqual(false);
-    // expect(results.inputData.sheets.length).toEqual(1);
-    // expect(results.inputData.sheets[0].data[0]).toEqual({
-    //     col_a: "A0", col_b: "B0"
-    // });
+})
+
+test("processMappingFile", async () => {
+    const filePath = path.join(__dirname, "input_ok.csv");
+    const outputBasePath = path.join(os.tmpdir(), "output_test");
+
+    // add col_b to the static columns, so the input becomes a mapping file
+    const newConfig = JSON.parse(JSON.stringify(CONFIG))
+    newConfig.algorithm.columns.static = ["col_a", "col_b"];
+
+    const results = await processFile(newConfig, outputBasePath, filePath, 10, FILE_CSV, makeTestHasher );
+
+    // expect(results.outputFilePaths).toEqual([`${outputBasePath}_OUTPUT.csv`]);
+    expect(results.mappingFilePaths).toEqual([`${outputBasePath}_MAPPING.csv`]);
+    expect(results.allOutputPaths).toEqual([
+        `${outputBasePath}_MAPPING.csv`
+    ])
+
+    expect(results.outputData.sheets.length).toEqual(1)
+    const [row1, row2] = results.outputData.sheets[0].data;
+
+    expect(row1.col_a).toEqual("A0")
+    expect(row1.test).toEqual("TEST A0 B0")
+    expect(row2.col_a).toEqual("A1")
+    expect(row2.test).toEqual("TEST A1 B1")
+
+    const csvData = csv.parse(fs.readFileSync(`${outputBasePath}_MAPPING.csv`, 'utf-8'));
+
+    expect(csvData).toEqual([
+        ["A", "Test"],
+        ["A0", "TEST A0 B0"],
+        ["A1", "TEST A1 B1"],
+    ])
 
 
-    // expect(results.validationResult.length).toEqual(1);
-    // expect(results.validationResult[0].sheet).toEqual("Sheet 1");
-    // expect(results.validationResult[0].ok).toEqual(true);
-
-
-    // for (const rowResult of results.validationResult[0].results) {
-    //     expect(rowResult.ok).toEqual(true)
-    //     expect(rowResult.errors).toEqual([])
-
-    // }
 })

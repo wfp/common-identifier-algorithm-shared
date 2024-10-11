@@ -247,6 +247,7 @@ async function processFile(config, ouputPath, inputFilePath, limit, format, hash
     // ==========
 
     // Validation is currently not done in this step -- the input document is assumed to be valid
+    /* istanbul ignore next */
     if (false) {
         let validatorDict = validation.makeValidatorListDict(config.validations);
         let validationResult = validation.validateDocumentWithListDict(validatorDict, decoded);
