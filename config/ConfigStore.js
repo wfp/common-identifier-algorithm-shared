@@ -1,6 +1,7 @@
 const path = require('node:path');
 const fs = require('node:fs');
 
+const log = require('debug')('CID:ConfigStore')
 
 const { loadConfig, CONFIG_FILE_ENCODING }= require('./loadConfig');
 
@@ -11,7 +12,7 @@ const { REGION } = require('../../active_algorithm');
 
 const {appDataLocation} = require('./utils');
 
-const APP_DIR_NAME = "CommonIDTool";
+const APP_DIR_NAME = "commonid-tool";
 const CONFIG_FILE_NAME = `config.${REGION}.json`;
 const APP_CONFIG_FILE_NAME = `appconfig.${REGION}.json`;
 
@@ -30,11 +31,9 @@ const BACKUP_CONFIG_FILE_PATH = path.join(__dirname, "..", "..", "config.backup.
 
 
 // Ensure the application's config file directory exists
-// TODO: export this bad boy to also use in the UI's logging path
-function ensureAppDirectoryExists(appDir=APP_DIR_PATH) {
+function ensureAppDirectoryExists(appDir) {
     if (!fs.existsSync(appDir)) {
-        console.log("[CONFIG] Application directory '", appDir, "' does not exits -- creating it");
-        // TODO: is doing this recursively worth it (the app dir should always be 1 level bellow a system directory)
+        log("Application directory '", appDir, "' does not exits -- creating it");
         fs.mkdirSync(appDir /*, { recursive: true } */);
     }
 }
@@ -48,12 +47,19 @@ function saveConfig(configData, outputPath) {
     // update the config hash on import to account for the
     const outputData = JSON.stringify(configData, null, "    ");
     fs.writeFileSync(outputPath, outputData, CONFIG_FILE_ENCODING );
-    console.log("[CONFIG] Written config data to ", outputPath);
+    log("Written config data to ", outputPath);
 }
 
+// Default configuration for the store
+const DEFAULT_CONFIG_STORE_CONFIG = {
+    configFilePath: CONFIG_FILE_PATH,
+    appConfigFilePath: APP_CONFIG_FILE_PATH,
+    backupConfigFilePath: BACKUP_CONFIG_FILE_PATH,
+    region: REGION,
+}
 
 class ConfigStore {
-    constructor() {
+    constructor(storeConfig) {
 
         this.data = {};
         this.validationResult = {};
@@ -66,19 +72,25 @@ class ConfigStore {
         this.isUsingBackupConfig = false;
 
         this.appConfig = DEFAULT_APP_CONFIG;
+        this.storeConfig = storeConfig;
 
     }
 
 
     getConfig() { return this.data; }
 
+    // Returns the region of the store
+    getRegion() { return this.storeConfig.region; }
 
     // Returns the path of the user config file
-    getConfigFilePath() { return CONFIG_FILE_PATH; }
+    getConfigFilePath() { return this.storeConfig.configFilePath; }
+
+    // Returns the path of the backup config file
+    getBackupConfigFilePath() { return this.storeConfig.backupConfigFilePath; }
 
 
     // Returns the path of the application config file
-    getAppConfigFilePath() { return APP_CONFIG_FILE_PATH; }
+    getAppConfigFilePath() { return this.storeConfig.appConfigFilePath; }
 
     // Returns true if the current config is a backup configuration
     isCurrentConfigBackup() { return this.data && this.data.isBackup; }
@@ -91,25 +103,25 @@ class ConfigStore {
         this.appConfig = loadAppConfig(this.getAppConfigFilePath());
 
         // attempt to load the default app config
-        const userConfigLoad = loadConfig(this.getConfigFilePath());
+        const userConfigLoad = loadConfig(this.getConfigFilePath(), this.getRegion());
 
         // if the load succesds we have a valid config -- use it as a
         // user-provided one
         if (userConfigLoad.success) {
-            console.log("[CONFIG] User config validation success - using it as config")
+            log("User config validation success - using it as config")
             this.useUserConfig(userConfigLoad.config, userConfigLoad.lastUpdated);
             return;
         }
 
-        console.log("[CONFIG] User config validation not successful - attempting to load backup config")
+        log("User config validation not successful - attempting to load backup config")
         // if the default config load failed use the backup default
         // from the app distribution
-        const backupConfigLoad = loadConfig(BACKUP_CONFIG_FILE_PATH);
+        const backupConfigLoad = loadConfig(this.getBackupConfigFilePath(), this.getRegion());
 
         // if the load succesds we have a valid config -- use it as
         // a config-from-backup
         if (backupConfigLoad.success) {
-            console.log("[CONFIG] Backup config validation success - using it as config")
+            log("Backup config validation success - using it as config")
             backupConfigLoad.config.isBackup = true;
             this.useBackupConfig(backupConfigLoad.config);
             return;
@@ -119,7 +131,7 @@ class ConfigStore {
         this.loadError = backupConfigLoad.error;
 
         // if the backup config fails to load we are screwed
-        console.log("[CONFIG] Backup config load failed - the application should alert the user: ", backupConfigLoad.error)
+        log("Backup config load failed - the application should alert the user: ", backupConfigLoad.error)
 
         // if there is a salt file error store the config, but act like it's invalid
         // (this is needed to pick up error messages from the config file)
@@ -140,12 +152,11 @@ class ConfigStore {
     // The config data used by the application is updated after the save
     updateUserConfig(userConfigFilePath) {
         // attempt to load & validate the config data
-        const userConfigLoad = loadConfig(userConfigFilePath);
+        const userConfigLoad = loadConfig(userConfigFilePath, this.getRegion());
 
         // if failed return the error message
         if (!userConfigLoad.success) {
             this.loadError = userConfigLoad.error;
-            // TODO: what about salt errors?
             return userConfigLoad.error;
         }
 
@@ -163,22 +174,22 @@ class ConfigStore {
     // This method does not save the backup as the user config, only deletes the user config file
     removeUserConfig() {
         // attempt to load the backup config
-        console.log("[CONFIG] [removeUserConfig] Attempting to remove user configuration and replace with backup.")
+        log("[removeUserConfig] Attempting to remove user configuration and replace with backup.")
 
 
         // if the current config is already a backup config don't do anything
         if (this.isCurrentConfigBackup()) {
-            console.log("[CONFIG] [removeUserConfig] Already using a backup config -- bailing")
+            log("[removeUserConfig] Already using a backup config -- bailing")
             // this is not an error - we're already using the backup
             return;
         }
 
-        console.log("[CONFIG] [removeUserConfig] Trying to load backup config file")
-        const backupConfigLoad = loadConfig(BACKUP_CONFIG_FILE_PATH);
+        log("[removeUserConfig] Trying to load backup config file")
+        const backupConfigLoad = loadConfig(this.getBackupConfigFilePath(), this.getRegion());
 
         // if failed return the error message (do not delete the user config yet)
         if (!backupConfigLoad.success) {
-            console.log("[CONFIG] Backup config validation failed -- returning error and keeping existing user config:", backupConfigLoad.error);
+            log("Backup config validation failed -- returning error and keeping existing user config:", backupConfigLoad.error);
             // save the error
             this.loadError = backupConfigLoad.error;
             // and return it
@@ -186,7 +197,7 @@ class ConfigStore {
         }
 
         // if successful use the loaded backup configuration
-        console.log("[CONFIG] [removeUserConfig] Backup config validation success - using it as config")
+        log("[removeUserConfig] Backup config validation success - using it as config")
         backupConfigLoad.config.isBackup = true;
         this.useBackupConfig(backupConfigLoad.config);
 
@@ -227,14 +238,14 @@ class ConfigStore {
     // deletes the user configuration file
     _deleteUserConfigFile() {
         const configPath = this.getConfigFilePath();
-        console.log("[CONFIG] Deleting config file: ", configPath);
+        log("Deleting config file: ", configPath);
         fs.unlinkSync(configPath);
     }
 
     // Overwrites the existing configuration file with the new data
     saveNewConfigData(configData) {
         // before saving ensure that we can save the configuration
-        ensureAppDirectoryExists();
+        ensureAppDirectoryExists(path.dirname(this.getConfigFilePath()));
         // TODO: maybe do a rename w/ timestamp for backup
         // save the config to the output path
         saveConfig(configData, this.getConfigFilePath());
@@ -243,7 +254,7 @@ class ConfigStore {
     // Overwrites the application configuration with the current
     // appConfig value.
     _saveAppConfig() {
-        ensureAppDirectoryExists();
+        ensureAppDirectoryExists(path.dirname(this.getAppConfigFilePath()));
         saveAppConfig(this.appConfig, this.getAppConfigFilePath());
     }
 
@@ -271,8 +282,8 @@ class ConfigStore {
 
 }
 
-function makeConfigStore() {
-    return new ConfigStore();
+function makeConfigStore(storeConfig=DEFAULT_CONFIG_STORE_CONFIG) {
+    return new ConfigStore(storeConfig);
 }
 
 

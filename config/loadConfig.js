@@ -5,6 +5,7 @@ const loadSaltFile = require('./loadSaltFile');
 const generateConfigHash = require('./generateConfigHash');
 
 const { getSaltFilePath, attemptToReadTOMLData } = require('./utils');
+const log = require('debug')('CID:loadConfig')
 
 
 // The encoding used by the config file
@@ -18,8 +19,8 @@ const CONFIG_FILE_ENCODING = "utf-8";
 // - { success: false, error: "string" } if there are errors
 // - { success: false, isSaltFileError: true, error: "string"}
 //     if there is something wrong with the salt file
-function loadConfig(configPath) {
-    console.log("[CONFIG] Loading config from", configPath);
+function loadConfig(configPath, region) {
+    log("Loading config from", configPath);
 
 
     // attempt to read the file
@@ -37,7 +38,7 @@ function loadConfig(configPath) {
     const lastUpdateDate = new Date(fs.statSync(configPath).mtime);
 
     // validate the config
-    const validationResult = validateConfig(configData);
+    const validationResult = validateConfig(configData, region);
 
     // if the config is not valid return false
     if (validationResult) {
@@ -49,7 +50,7 @@ function loadConfig(configPath) {
 
     // TODO: check sinature validity before salt injection
     const configHash = generateConfigHash(configData);
-    console.log("[CONFIG] CONFIG HASH:", configHash);
+    log("CONFIG HASH:", configHash);
 
     // fail if the signature is not OK
     if (configHash !== configData.signature.config_signature) {
@@ -81,7 +82,7 @@ function loadConfig(configPath) {
 
     // if the salt file load failed, we have failed
     if (!saltData) {
-        console.log("[CONFIG] [SALT] Error while loading the salt file!")
+        log("[SALT] Error while loading the salt file!")
         return {
             success: false,
             isSaltFileError: true,

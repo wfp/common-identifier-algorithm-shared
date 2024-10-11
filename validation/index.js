@@ -160,43 +160,6 @@ function makeValidatorListDict(validationOpts) {
 
 //////////////////////////////////////////////////////////////////////
 
-function test() {
-    var fs = require('fs');
-
-    let config = toml.parse(fs.readFileSync("config.toml", 'utf-8'));
-
-    let DATA = [
-        {
-            dob_year: 1970,
-            category: "CASH-MPA",
-            amount: 2500,
-        },
-        {
-            dob_year: 1972,
-            category: "CASH-RENT",
-            amount: 15000,
-        },
-        {
-            dob_year: 12,
-            category: "ASDASODHU",
-            amount: 129313,
-        },
-        {
-            dob_year: 2025,
-            category: 12345,
-            amount: 1,
-        },
-    ];
-
-    let validatorDict = makeValidatorListDict(config.validations);
-
-    DATA.forEach(row => {
-        let results = validateRowWithListDict(validatorDict, row, {data: DATA});
-        console.log("ROW: \t", row, "\n", results, "\n--------------")
-    })
-
-}
-
 // Validates a full document with the pre-generated validator list dict
 function validateDocumentWithListDict(validatorDict, document) {
     let results = document.sheets.map((sheet) => {

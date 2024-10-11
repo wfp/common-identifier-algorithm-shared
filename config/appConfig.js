@@ -1,5 +1,6 @@
 const fs = require('node:fs');
 const { attemptToReadTOMLData } = require('./utils');
+const log = require('debug')('CID:appConfig')
 
 const APP_CONFIG_ENCODING = 'utf-8';
 
@@ -15,7 +16,7 @@ const DEFAULT_APP_CONFIG = {
 }
 
 function loadAppConfig(configPath) {
-    console.log("[CONFIG] [APPCONFIG] Loading Application config from", configPath);
+    log("Loading Application config from", configPath);
 
 
     // attempt to read the file
@@ -23,7 +24,7 @@ function loadAppConfig(configPath) {
 
     // if cannot be read we assume default application configuration
     if (!configData) {
-        console.log("[CONFIG] [APPCONFIG] Cannot find Application config file -- using the default");
+        log("Cannot find Application config file -- using the default");
         return DEFAULT_APP_CONFIG;
     }
 
@@ -33,7 +34,7 @@ function loadAppConfig(configPath) {
         typeof configData.window.width !== 'number' ||
         typeof configData.window.height !== 'number'
     ) {
-        console.log("[CONFIG] [APPCONFIG] Application config file is not valid -- using the default");
+        log("Application config file is not valid -- using the default");
         return DEFAULT_APP_CONFIG
     }
 
@@ -46,7 +47,7 @@ function saveAppConfig(configData, outputPath) {
     // update the config hash on import to account for the
     const outputData = JSON.stringify(configData, null, "    ");
     fs.writeFileSync(outputPath, outputData, APP_CONFIG_ENCODING );
-    console.log("[CONFIG] [APPCONFIG] Written Application config data to ", outputPath);
+    log("Written Application config data to ", outputPath);
 }
 
 

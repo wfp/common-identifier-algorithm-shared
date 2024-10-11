@@ -39,9 +39,13 @@ function attemptToParseDate(value) {
     if (typeof value !== 'string') {
         value = value.toString();
     }
-    return dateFns.parse(value, DEFAULT_FORMAT_STR, new Date() );
-    // TODO: implement me
-    return new Date();
+    const parsedDate = dateFns.parse(value, DEFAULT_FORMAT_STR, new Date() );
+
+    if (dateFns.isValid(parsedDate)) {
+        return parsedDate;
+    }
+
+    return null;
 }
 
 function formatDateWithDefaultFormat(v) {
@@ -62,16 +66,26 @@ function formatDateWithDefaultFormat(v) {
 function isDateInRange(diff, value, originDate=new Date()) {
 
     const targetDate = dateFns.add(originDate, diff);
-    const compareResult = dateFns.compareAsc(targetDate, value);
+    const offsetCompareResult = dateFns.compareAsc(targetDate, value);
+    const originCompareResult = dateFns.compareAsc(originDate, value);
 
-    // if the diff is positive the value must be before now + diff
+    // diff positive, offset origin later than value
     if (diff.isPositive) {
-        // returns 1 if LEFT is after RIGHT
-        return compareResult >= 0;
+        // diff positive, offset origin earlier then value => out of range
+        if (offsetCompareResult < 0) return false;
+
+        // -- origin earlier then value => in range
+        // -- origin later then value  => out of range
+        return (originCompareResult <= 0)
     } else {
-        // returns 1 if LEFT is after RIGHT
-        return compareResult <= 0;
+        // diff positive, offset origin earlier then value => out of range
+        if (offsetCompareResult > 0) return false;
+
+        // -- origin earlier then value => in range
+        // -- origin later then value  => out of range
+        return (originCompareResult >= 0)
     }
+
 }
 
 module.exports = {

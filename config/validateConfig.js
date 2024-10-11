@@ -1,12 +1,10 @@
-const { REGION } = require('../../active_algorithm');
-
 // enums with the validation result
 const CONFIG_IS_VALID = "ConfigIsValid";
 const CONFIG_IS_INVALID = "ConfigIsInvalid";
 const CONFIG_SALT_FILE_IS_INVALID = "ConfigSaltFileIsInvalid";
 
 
-function validateConfig(config) {
+function validateConfig(config, region) {
 
     function isObject(label, v) {
         if (typeof v !== "object") return `Missing ${label}`;
@@ -75,8 +73,8 @@ function validateConfig(config) {
             return `[meta] must be present`
         }
         // check if this is the correct region
-        if (meta.region != REGION) {
-            return `meta.region is not '${REGION}'`
+        if (meta.region != region) {
+            return `meta.region is not '${region}'`
         }
 
         return isObject("meta", meta) ||

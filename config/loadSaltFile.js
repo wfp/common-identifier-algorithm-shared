@@ -1,4 +1,5 @@
 const path = require('node:path');
+const log = require('debug')('CID:loadSaltFile')
 
 const { getSaltFilePath, attemptToReadFileData } = require('./utils');
 
@@ -14,22 +15,22 @@ function loadSaltFile(saltFilePath, validatorRegexp=DEFAULT_VALIDATOR_REGEXP) {
     // resolve the salt file path from the config & platform
     const fullSaltFilePath = getSaltFilePath(saltFilePath);
 
-    console.log("[CONFIG] [SALT] Attempting to load salt file from ", path.resolve(fullSaltFilePath))
+    log("Attempting to load salt file from ", path.resolve(fullSaltFilePath))
     // return null;
     // TODO: potentially clean up line endings and whitespace here
     const saltData = attemptToReadFileData(fullSaltFilePath, SALT_FILE_ENCODING);
-    if (!saltData) return;
+    if (!saltData) return null;
 
     // check if the structure is correct for the file
     // /-----BEGIN PGP PUBLIC KEY BLOCK-----[A-Za-z0-9+/=\s]+-----END PGP PUBLIC KEY BLOCK-----/
     const CHECK_RX = new RegExp(validatorRegexp);
 
     if (!CHECK_RX.test(saltData)) {
-        console.log("[CONFIG] [SALT] SALT FILE Regexp error")
+        log("SALT FILE Regexp error")
         return null;
     }
 
-    console.log("[CONFIG] [SALT] SALT FILE looks OK")
+    log("SALT FILE looks OK")
     return saltData;
 }
 
