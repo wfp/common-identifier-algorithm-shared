@@ -29,7 +29,7 @@ const { REGION } = require('../../active_algorithm');
 
 const {appDataLocation} = require('./utils');
 
-const APP_DIR_NAME = "commonid-tool";
+const APP_DIR_NAME = `commonid-tool-${REGION.toLowerCase()}`;
 const CONFIG_FILE_NAME = `config.${REGION}.json`;
 const APP_CONFIG_FILE_NAME = `appconfig.${REGION}.json`;
 
