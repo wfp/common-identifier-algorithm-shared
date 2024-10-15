@@ -78,7 +78,7 @@ class LanguageCheckValidator extends ValidatorBase {
 
     // the default message
     defaultMessage() {
-        return `Only readable ${this.language} characters are supported.`;
+        return `only readable ${this.language} characters are supported.`;
         // return `must be in the language '${this.language}'`;
     }
 
