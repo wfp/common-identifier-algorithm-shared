@@ -20,6 +20,7 @@ const makeDateDiffValidator = require('../../validation/date_diff')
 const dateFns = require('date-fns')
 
 test("DateDiffValidator", () => {
+    // just for success and failiure
     const v = makeDateDiffValidator({ value: "3M"})
 
     function toDateStr(offset) {
@@ -30,6 +31,11 @@ test("DateDiffValidator", () => {
 
 
     [
+        // to allow composition of asymetric positive and negative ranges
+        // allow values on the other side of the origin
+        [toDateStr({ days: -100}), v.success()],
+        [toDateStr({ months: -100}), v.success()],
+
         [toDateStr({ days: 10}), v.success()],
         [toDateStr({ days: 100}), v.fail()],
 

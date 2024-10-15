@@ -84,12 +84,13 @@ function isDateInRange(diff, value, originDate=new Date()) {
 
     const targetDate = dateFns.add(originDate, diff);
     const offsetCompareResult = dateFns.compareAsc(targetDate, value);
-    const originCompareResult = dateFns.compareAsc(originDate, value);
+    // const originCompareResult = dateFns.compareAsc(originDate, value);
 
     // diff positive, offset origin later than value
     if (diff.isPositive) {
         // diff positive, offset origin earlier then value => out of range
         if (offsetCompareResult < 0) return false;
+        return true;
 
         // -- origin earlier then value => in range
         // -- origin later then value  => out of range
@@ -97,6 +98,7 @@ function isDateInRange(diff, value, originDate=new Date()) {
     } else {
         // diff positive, offset origin earlier then value => out of range
         if (offsetCompareResult > 0) return false;
+        return true;
 
         // -- origin earlier then value => in range
         // -- origin later then value  => out of range

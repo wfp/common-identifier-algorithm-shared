@@ -29,7 +29,8 @@ test("DateFieldDiffValidator", () => {
         ["19910102", v.success()],
         ["19910202", v.success()],
 
-        ["19900202", v.fail()],
+        // the other side of the edge => valid
+        ["19900202", v.success()],
         ["19920406", v.fail()],
     ].forEach(([input, expected]) => {
         expect(v.validate(input, { row: TEST_ROW })).toEqual(expected)

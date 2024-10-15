@@ -72,16 +72,23 @@ test("formatDateWithDefaultFormat", () => {
 })
 
 test("isDateInRange", () => {
+    // if the target date is on the other side of the edge accept it
     expect(isDateInRange(
         { months: 3, isPositive: true, _key: 'months', _value: 3 },
         new Date("1990-12-31T23:00:00.000Z"),
         new Date("1992-04-05T22:00:00.000Z"),
-    )).toEqual(false)
+    )).toEqual(true)
 
     expect(isDateInRange(
         { months: 3, isPositive: true, _key: 'months', _value: 3 },
         new Date("1991-01-01T23:00:00.000Z"),
         new Date("1990-12-31T23:00:00.000Z"),
+    )).toEqual(true)
+
+    expect(isDateInRange(
+        { months: 2, isPositive: true, _key: 'months', _value: 2 },
+        new Date("2024-11-01T23:00:00.000Z"),
+        new Date("2024-10-15T23:00:00.000Z"),
     )).toEqual(true)
 
 
