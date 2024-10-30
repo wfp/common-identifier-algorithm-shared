@@ -21,7 +21,7 @@ import os from 'node:os';
 import { Sheet, CidDocument, SUPPORTED_FILE_TYPES } from '../document.js';
 
 // inject used algo here
-import algo from "../../active_algorithm.js";
+import { REGION, makeHasher } from "../../active_algorithm.js";
 
 import { encoderForFile } from '../encoding/index.js';
 import { decoderForFile, fileTypeOf } from '../decoding/index.js';
@@ -229,7 +229,7 @@ export async function preprocessFile(config: Config.Options, inputFilePath: stri
 // PROCESSING
 // ----------
 
-export async function processFile(config: Config.Options, ouputPath:string, inputFilePath: string, limit: number, format: SUPPORTED_FILE_TYPES | null, hasherFactory: makeHasherFunction=algo.makeHasher) {
+export async function processFile(config: Config.Options, ouputPath:string, inputFilePath: string, limit: number, format: SUPPORTED_FILE_TYPES | null, hasherFactory: makeHasherFunction=makeHasher) {
     log("------------ preprocessFile -----------------")
 
     // the input file path

@@ -26,14 +26,14 @@ import { loadAppConfig, saveAppConfig, DEFAULT_APP_CONFIG } from './appConfig.js
 import {appDataLocation} from './utils.js';
 
 // The current region name comes from the active algorithm
-import algo from '../../active_algorithm.js';
+import { REGION, makeHasher } from '../../active_algorithm.js';
 import { AppConfigData, Config } from './Config.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-const APP_DIR_NAME = `commonid-tool-${algo.REGION.toLowerCase()}`;
-const CONFIG_FILE_NAME = `config.${algo.REGION}.json`;
-const APP_CONFIG_FILE_NAME = `appconfig.${algo.REGION}.json`;
+const APP_DIR_NAME = `commonid-tool-${REGION.toLowerCase()}`;
+const CONFIG_FILE_NAME = `config.${REGION}.json`;
+const APP_CONFIG_FILE_NAME = `appconfig.${REGION}.json`;
 
 // the path of the application's data files
 const APP_DIR_PATH = join(appDataLocation(), APP_DIR_NAME);
@@ -81,7 +81,7 @@ const DEFAULT_CONFIG_STORE_CONFIG: ConfigStorePaths = {
     configFilePath: CONFIG_FILE_PATH,
     appConfigFilePath: APP_CONFIG_FILE_PATH,
     backupConfigFilePath: BACKUP_CONFIG_FILE_PATH,
-    region: algo.REGION,
+    region: REGION,
 }
 
 class ConfigStore {
