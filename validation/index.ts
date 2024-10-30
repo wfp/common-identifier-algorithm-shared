@@ -1,0 +1,245 @@
+/*
+ * This file is part of Building Blocks CommonID Tool
+ * Copyright (c) 2024 WFP
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 3.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+import { SUPPORTED_VALIDATORS, Validation, ValidationError } from "./Validation.js";
+import { CidDocument, Sheet } from "../document.js";
+
+// MAIN VALIDATION
+// ---------------
+
+// Validates a single value with a list of validators.
+// The row is passed to allow for cross-column checks
+function validateValueWithList(validatorList: Validation.Function[], value: any, {row, sheet, column}: Validation.Data) {
+    return validatorList.reduce((memo, validator) => {
+        // check if the validator says OK
+        let result = validator.validate(value, {row, sheet, column});
+        // if failed add to the list of errors
+        if (result) {
+            memo.push({ kind: result.kind, msg: result.msg });
+        }
+        return memo;
+    }, [] as ValidationError[])
+}
+
+export function validateRowWithListDict(
+        validatorListDict: Validation.FuncMap,
+        row: Validation.Data["row"],
+        sheet: Validation.Data["sheet"]
+    ) : Validation.ErrorMap
+    {
+    // check if all expected columns are present
+    let missingColumns = Object.keys(validatorListDict).map((k) => (typeof row[k] === 'undefined') ? k : null).filter(v => v);
+
+    // Fail if there are missing columns
+    if (missingColumns.length > 0) {
+        return missingColumns.reduce((memo, c) => {
+            if (!c) return memo;
+            return Object.assign(memo, {[c]: [new ValidationError("FIELD_NAME", 'is missing')]})
+        }, {});
+    }
+
+    // TODO: should all columns in the validatorListDict checked or base it on the row?
+    return Object.keys(row).reduce((memo, fieldName) => {
+        // check if there is a validatorList for the field
+        let validatorList = validatorListDict[fieldName];
+        // if not skip this column
+        if (!Array.isArray(validatorList)) {
+            return memo;
+        }
+
+        let fieldValue = row[fieldName];
+
+        // use the validators
+        memo[fieldName] = validateValueWithList(validatorList, fieldValue, {row, sheet, column: fieldName});
+
+        return memo;
+    }, {} as Validation.ErrorMap)
+}
+
+// VALIDATOR FACTORY
+// ------------------
+
+import { makeRegexpValidator } from './regexp.js';
+import { makeOptionsValidator } from './options.js';
+
+import { makeMinFieldLengthValidator } from './min_field_length.js';
+import { makeMaxFieldLengthValidator } from './max_field_length.js';
+import { makeFieldTypeValidator } from './field_type.js';
+import { makeLanguageCheckValidator } from './language_check.js';
+
+import { makeMinValueValidator } from './min_value.js';
+import { makeMaxValueValidator } from './max_value.js';
+
+import { makeDateDiffValidator } from './date_diff.js';
+import { makeDateFieldDiffValidator } from './date_field_diff.js';
+import { makeSameValueForAllRowsValidator } from './same_value_for_all_rows.js';
+import { Config } from "../config/Config.js";
+
+const VALIDATOR_FACTORIES = {
+    // Regexp validators have a number of possible names (for ease of use)
+    "regex": makeRegexpValidator,
+    "regexp": makeRegexpValidator,
+    "regex_match": makeRegexpValidator,
+
+    "options": makeOptionsValidator,
+
+    "min_field_length": makeMinFieldLengthValidator,
+    "max_field_length": makeMaxFieldLengthValidator,
+
+    "field_type": makeFieldTypeValidator,
+
+    "language_check": makeLanguageCheckValidator,
+
+    "min_value": makeMinValueValidator,
+    "max_value": makeMaxValueValidator,
+
+    "date_diff": makeDateDiffValidator,
+    "date_field_diff": makeDateFieldDiffValidator,
+
+    "same_value_for_all_rows": makeSameValueForAllRowsValidator,
+};
+
+
+// Factory function to create a validator from an options object.
+//
+// Uses the 'op' value in the object to match the type based on the
+// VALIDATOR_FACTORIES dictionnary
+function makeValidator(opts: Config.ColumnValidation) {
+    // check if there is an 'op' in the object
+    let op = opts.op as keyof typeof VALIDATOR_FACTORIES;
+    if (typeof op !== 'string') {
+        throw new Error(`Validator configuration is missing the 'op' field: ${JSON.stringify(opts)}`);
+    }
+
+    // check if there is a value for the key in the factory object
+    let validatorFactory = VALIDATOR_FACTORIES[op];
+    if (typeof validatorFactory !== 'function') {
+        throw new Error(`Cannot find validator for type: '${op}'`);
+    }
+
+    // if yes use the factory function
+    return validatorFactory(opts);
+}
+
+// Takes a list of validator options and creates a list of validators from it
+function makeValidatorList(optsList: Config.ColumnValidation[]) {
+    return optsList.map(makeValidator);
+}
+
+// Takes a dict of <field name> => <list of validator option dicts> Dict and
+// returns a map of <field name> => <validator list>.
+//
+// This function merges the "*" field validations into each field's validator list
+export function makeValidatorListDict(validationOpts: Config.Options["validations"]) {
+    // the "*" field denotes validators targeting all fields
+    let allFieldValidators = validationOpts["*"];
+
+    // TODO: check if this covers all cases of missing "*" validators list
+    if (!Array.isArray(allFieldValidators)) {
+        allFieldValidators = [];
+    }
+
+    //
+    return Object.keys(validationOpts).reduce((memo, field) => {
+        // if the field is the "*" skip this bit
+        if (field === "*") {
+            return memo;
+        }
+
+        // check if the validator options are an array for the current field
+        let fieldValidatorOpts = validationOpts[field];
+        if (!Array.isArray(fieldValidatorOpts)) {
+            throw new Error(`Expected a list of validator options for the field '${field}' -- got: ${JSON.stringify(fieldValidatorOpts)}`);
+        }
+
+        // construct the list of validators for the field from the current
+        // and the "*" validator options
+        let fullValidatorOptions = fieldValidatorOpts.concat(allFieldValidators);
+        let validatorList = makeValidatorList(fullValidatorOptions);
+
+        // assign it to the object
+        memo[field] = validatorList;
+
+
+        return memo;
+    }, {} as { [key: string]: any[]})
+}
+
+//////////////////////////////////////////////////////////////////////
+
+// Validates a full document with the pre-generated validator list dict
+export function validateDocumentWithListDict(validatorDict: Validation.FuncMap, document: CidDocument): Validation.SheetResult[] {
+    let results = document.sheets.map((sheet) => {
+        let results = sheet.data.map((row) => {
+            // do the actual validation
+            let results = validateRowWithListDict(validatorDict, row, sheet);
+            let compactResults = Object.keys(results).reduce((memo, col) => {
+                let colResults = results[col];
+                if (colResults.length > 0) {
+                    memo.push({ column: col, errors: colResults });
+                }
+                return memo;
+            }, [] as Validation.ColumnResult[]);
+
+            // // to know if the whole row is valid check every column in the results
+            // let ok = Object.keys(results).reduce((memo, col) => {
+            //     return memo && results[col].length === 0;
+            // }, true);
+            // package it up
+            return { row, ok: compactResults.length === 0, errors: compactResults };
+        }) as Validation.RowResult[];
+        return {
+            sheet: sheet.name,
+            ok: !results.some((res) => !res.ok),
+            results
+        };
+    });
+
+    return results;
+}
+
+// Generates a document for output based on the validation results.
+// sourceConfig is required to map the original column names in the error messages
+export function makeValidationResultDocument(sourceConfig: Config.Options["source"], results: Validation.SheetResult[]) {
+
+    let fieldNameMapping = sourceConfig.columns.reduce((memo, col) => {
+        return Object.assign(memo, {[col.alias]: col.name})
+    }, {} as {[key: string]: string});
+
+
+    return new CidDocument(results.map((sheetResult) => {;
+
+        return new Sheet(sheetResult.sheet, sheetResult.results.map((rowResult, rowIdx) => {
+            // build an error message
+            let errorList = rowResult.errors.map((error) => {
+
+                // find the column name
+                let columnHumanName = fieldNameMapping[error.column] || error.column;
+                return `${columnHumanName} ${error.errors.map(({msg}) => msg).join(",\n  ")}`;
+            });
+
+
+            // combine with the row onject
+            return Object.assign({
+                // The row number should match the row number in the input document (row index 0 is row# 2)
+                row_number: rowIdx + 2,
+                // The error list should be an empty string (so that it'll be hidden if no errors are present)
+                // NOTE: the line-ending can be tricky
+                errors: errorList.join(";     \n"),
+            }, rowResult.row)
+        }));
+    }));
+}
