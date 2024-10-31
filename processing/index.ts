@@ -143,7 +143,15 @@ function keepOutputColumns(config: Config.Options, outputConfig: Config.ColumnMa
 // PRE-PROCESSING
 // --------------
 
-export async function preprocessFile(config: Config.Options, inputFilePath: string, limit: number) {
+export interface PreprocessFileResult {
+    inputData: CidDocument;
+    validationResultDocument: CidDocument | undefined;
+    validationResult: Validation.SheetResult[];
+    validationErrorsOutputFile: string[] | string;
+    isMappingDocument: boolean;
+}
+
+export async function preprocessFile(config: Config.Options, inputFilePath: string, limit: number = Infinity): Promise<PreprocessFileResult> {
     log("------------ preprocessFile -----------------")
 
     // the input file path
@@ -189,7 +197,7 @@ export async function preprocessFile(config: Config.Options, inputFilePath: stri
     // do the actual validation
     let validationResult = validateDocumentWithListDict(validatorDict, decoded);
 
-    let validationErrorsOutputFile;
+    let validationErrorsOutputFile: string[] | string = "";
     let validationResultDocument;
 
     if (!isDocumentValid(validationResult)) {
@@ -219,7 +227,7 @@ export async function preprocessFile(config: Config.Options, inputFilePath: stri
         inputData: decoded,
         validationResultDocument,
         validationResult,
-        validationErrorsOutputFile: validationErrorsOutputFile,
+        validationErrorsOutputFile,
         isMappingDocument,
     };
 
@@ -229,7 +237,14 @@ export async function preprocessFile(config: Config.Options, inputFilePath: stri
 // PROCESSING
 // ----------
 
-export async function processFile(config: Config.Options, ouputPath:string, inputFilePath: string, limit: number, format: SUPPORTED_FILE_TYPES | null, hasherFactory: makeHasherFunction=makeHasher) {
+export interface ProcessFileResult {
+    outputData: CidDocument;
+    outputFilePaths: string[];
+    mappingFilePaths: string[];
+    allOutputPaths: string[];
+}
+
+export async function processFile(config: Config.Options, ouputPath:string, inputFilePath: string, limit: number, format: SUPPORTED_FILE_TYPES | null, hasherFactory: makeHasherFunction=makeHasher): Promise<ProcessFileResult> {
     log("------------ preprocessFile -----------------")
 
     // the input file path
