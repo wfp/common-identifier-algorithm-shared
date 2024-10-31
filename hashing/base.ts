@@ -42,12 +42,12 @@ export class BaseHasher {
 
     // Generates a hash based on the configuration from an already concatenated string
     // TODO: pass full algo config if SCRYPT or other more parameterized hash is used
-    generateHash(stringValue: string, algorithm: string ='sha256') {
+    generateHashForValue(stringValue: string, algorithm: string ='sha256') {
         let hashDigest = crypto.createHash(algorithm).update(this.saltValue as string).update(stringValue).digest();
         return base32.encode(hashDigest);
     }
 
-    generateHashForExtractedObject(extractedObj: Validation.Data["row"]): { [key: string]: string } {
+    generateHashForObject(columnConfig: Config.AlgorithmColumns, obj: Validation.Data["row"]): { [key: string]: string } {
         throw new Error("Hasher::generateHashForExtractedObject(obj) not implemented!")
     }
 }

@@ -26,6 +26,7 @@ import { SUPPORTED_FILE_TYPES } from '../../document.js';
 import { BaseHasher, makeHasherFunction } from '../../hashing/base.js';
 import { Config } from '../../config/Config.js';
 import { Validation } from '../../validation/Validation.js';
+import { extractAlgoColumnsFromObject } from '../../hashing/utils.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -166,7 +167,8 @@ class TestHasher extends BaseHasher {
     }
 
     // Builds the hash columns from the extracted row object
-    generateHashForExtractedObject(extractedObj: Validation.Data["row"]) {
+    generateHashForObject(columnConfig: Config.AlgorithmColumns, obj: Validation.Data["row"]) {
+        const extractedObj = extractAlgoColumnsFromObject(columnConfig, obj)
         return {
             test: `TEST ${extractedObj.static.join(' ')}`,
         }

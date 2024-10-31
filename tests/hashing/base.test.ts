@@ -32,7 +32,7 @@ test("BaseHasher::generateHashForExtractedObject", () => {
 
     const h = makeBaseHasher();
 
-    expect(() => { h.generateHashForExtractedObject(BASE_CFG["columns"]) }).toThrow()
+    expect(() => { h.generateHashForObject(BASE_CFG["columns"], {})}).toThrow()
 
 })
 
@@ -40,6 +40,6 @@ test("BaseHasher::generateHash", () => {
 
     const h = makeBaseHasher();
 
-    expect(h.generateHash("TEST123")).toEqual("3RYYVQ6SB2UT5NKYHRBKLRBZUR6WHXXEUCV5LPATTYAQEFCZWLSA====")
+    expect(h.generateHashForValue("TEST123")).toEqual("3RYYVQ6SB2UT5NKYHRBKLRBZUR6WHXXEUCV5LPATTYAQEFCZWLSA====")
 
 })

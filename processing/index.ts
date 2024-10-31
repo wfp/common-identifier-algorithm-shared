@@ -28,8 +28,6 @@ import { decoderForFile, fileTypeOf } from '../decoding/index.js';
 
 import { makeValidationResultDocument, makeValidatorListDict, validateDocumentWithListDict } from '../validation/index.js';
 
-import { extractAlgoColumnsFromObject } from '../hashing/utils.js';
-
 import { mapRequiredColumns } from './mapRequiredColumns.js';
 import { Config } from '../config/Config.js';
 import { BaseHasher, makeHasherFunction } from '../hashing/base.js';
@@ -41,26 +39,17 @@ const log = Debug('CID:Processing')
 
 // HASH-GENERATION
 // ---------------
-
-// Generate the hash columns from the row object
-function generateHashForRow(algorithmConfig: Config.Options["algorithm"], hasher: BaseHasher, rowObject: Validation.Data["row"]) {
-    let extractedObj = extractAlgoColumnsFromObject(algorithmConfig.columns, rowObject);
-    let res = hasher.generateHashForExtractedObject(extractedObj);
-    return res;
-}
-
-function generateHashesForSheet(algorithmConfig: Config.Options["algorithm"], hasher: BaseHasher, sheet: Sheet) {
+function generateHashesForSheet(algorithmConfig: Config.AlgorithmColumns, hasher: BaseHasher, sheet: Sheet) {
     // generate for all rows
     let rows = sheet.data.map((row) => {
-        let generatedHashes = generateHashForRow(algorithmConfig, hasher, row);
+        const generatedHashes = hasher.generateHashForObject(algorithmConfig, row);
         return Object.assign({}, row, generatedHashes);
     });
 
     return new Sheet(sheet.name, rows);
 }
 
-
-function generateHashesForDocument(algorithmConfig: Config.Options["algorithm"], hasher: BaseHasher, document: CidDocument) {
+function generateHashesForDocument(algorithmConfig: Config.AlgorithmColumns, hasher: BaseHasher, document: CidDocument) {
     // generate for all rows
     let sheets = document.sheets.map((sheet) => {
         return generateHashesForSheet(algorithmConfig, hasher, sheet);
@@ -151,7 +140,7 @@ export interface PreprocessFileResult {
     isMappingDocument: boolean;
 }
 
-export async function preprocessFile(config: Config.Options, inputFilePath: string, limit: number = Infinity): Promise<PreprocessFileResult> {
+export async function preprocessFile(config: Config.Options, inputFilePath: string, limit: number | undefined = undefined): Promise<PreprocessFileResult> {
     log("------------ preprocessFile -----------------")
 
     // the input file path
@@ -244,7 +233,14 @@ export interface ProcessFileResult {
     allOutputPaths: string[];
 }
 
-export async function processFile(config: Config.Options, ouputPath:string, inputFilePath: string, limit: number, format: SUPPORTED_FILE_TYPES | null, hasherFactory: makeHasherFunction=makeHasher): Promise<ProcessFileResult> {
+export async function processFile(
+        config: Config.Options,
+        ouputPath:string,
+        inputFilePath: string,
+        limit: number|undefined = undefined,
+        format: SUPPORTED_FILE_TYPES | null,
+        hasherFactory: makeHasherFunction=makeHasher
+    ): Promise<ProcessFileResult> {
     log("------------ preprocessFile -----------------")
 
     // the input file path
@@ -289,7 +285,7 @@ export async function processFile(config: Config.Options, ouputPath:string, inpu
     // HASHING
     // =======
     let hasher = hasherFactory(config.algorithm);
-    let result = generateHashesForDocument(config.algorithm, hasher, decoded)
+    let result = generateHashesForDocument(config.algorithm.columns, hasher, decoded)
 
 
     // OUTPUT
