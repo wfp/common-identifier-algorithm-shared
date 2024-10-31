@@ -30,12 +30,15 @@ import type { Config } from "../config/Config.js";
 
 // A decoder for CSVs
 class XlsxDecoder extends DecoderBase {
-    constructor(sourceConfig: Config.Options["source"]) {
+    decodeOptions: XLSX.ParsingOptions = {};
+
+    constructor(sourceConfig: Config.Options["source"], limit?: number) {
         super(sourceConfig);
+        if (limit) this.decodeOptions.sheetRows = limit + 1; // n+1 since header is included
     }
 
     async decodeFile(path: string) {
-        const workbook = XLSX.readFile(path)
+        const workbook = XLSX.readFile(path, this.decodeOptions);
     
         let sheets = workbook.SheetNames.map((sheetName: string) => {
             const worksheet = workbook.Sheets[sheetName];
@@ -69,6 +72,6 @@ class XlsxDecoder extends DecoderBase {
 
 
 // Factory function for the CSV decoder
-export function makeXlsxDecoder(sourceConfig: Config.Options["source"]) {
-    return new XlsxDecoder(sourceConfig);
+export function makeXlsxDecoder(sourceConfig: Config.Options["source"], limit?: number) {
+    return new XlsxDecoder(sourceConfig, limit);
 }

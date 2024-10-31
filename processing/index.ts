@@ -156,7 +156,7 @@ export async function preprocessFile(config: Config.Options, inputFilePath: stri
 
     // find a decoder
     let decoderFactoryFn = decoderForFile(inputFileType);
-    let decoder = decoderFactoryFn(config.source);
+    let decoder = decoderFactoryFn(config.source, limit);
 
     // decode the data
     let decoded = await decoder.decodeFile(inputFilePath);
@@ -166,11 +166,6 @@ export async function preprocessFile(config: Config.Options, inputFilePath: stri
         throw new Error("Input files must have only one sheet")
     }
 
-    // apply limiting if needed
-    if (limit) {
-        log("[LOAD] Using input row limit: ",  limit);
-        decoded.sheets[0].data = decoded.sheets[0].data.slice(0, limit);
-    }
     // VALIDATION
     // ==========
     // prepare the validators
@@ -255,18 +250,10 @@ export async function processFile(
 
     // find a decoder
     let decoderFactoryFn = decoderForFile(inputFileType);
-    let decoder = decoderFactoryFn(config.source);
+    let decoder = decoderFactoryFn(config.source, limit);
 
     // decode the data
     let decoded = await decoder.decodeFile(inputFilePath);
-
-
-    // apply limiting if needed
-    if (limit) {
-        log("[LOAD] Using input row limit: ",  limit);
-        decoded.sheets[0].data = decoded.sheets[0].data.slice(0, limit);
-    }
-
 
 
     // VALIDATION
@@ -318,6 +305,4 @@ export async function processFile(
         // provide a complete list of output files
         allOutputPaths: mainOutputFiles.concat(mappingFilePaths),
     };
-
-
 }

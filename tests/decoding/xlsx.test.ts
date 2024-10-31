@@ -29,18 +29,22 @@ const BASE_CFG = {
     ]
 }
 
-const TEST_DATA_OUT = [
-    { col_a: "A0", col_b: "B0" },
-    { col_a: "A1", col_b: "B1" },
-    { col_a: "A2", col_b: "" },
-    { col_a: "", col_b: "B3" },
-];
-
 test("XLSXDecoder", async () => {
     const d = makeXlsxDecoder(BASE_CFG);
     const decoded = await d.decodeFile(join(__dirname, "files", "test.xlsx"))
 
     expect(decoded.sheets.length).toEqual(1);
+    expect(decoded.sheets[0].data[0]).toEqual({ y: "1994", o: "ORG1" })
+    expect(decoded.sheets[0].data[1]).toEqual({ y: "1982", o: "ORG1" })
+})
+
+test("XLSXDecoder::with limit", async () => {
+    const limit = 8;
+    const d = makeXlsxDecoder(BASE_CFG, limit);
+    const decoded = await d.decodeFile(join(__dirname, "files", "test.xlsx"))
+
+    expect(decoded.sheets.length).toEqual(1);
+    expect(decoded.sheets[0].data.length).toEqual(limit);
     expect(decoded.sheets[0].data[0]).toEqual({ y: "1994", o: "ORG1" })
     expect(decoded.sheets[0].data[1]).toEqual({ y: "1982", o: "ORG1" })
 })

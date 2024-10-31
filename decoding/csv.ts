@@ -25,11 +25,11 @@ import type { Config } from '../config/Config.js';
 
 // A decoder for CSVs
 class CsvDecoder extends DecoderBase {
-    csvOptions: CsvOptions;
+    csvOptions: CsvOptions = {};
 
-    constructor(sourceConfig: Config.Options["source"], csvOptions: CsvOptions={}) {
+    constructor(sourceConfig: Config.Options["source"], limit?: number) {
         super(sourceConfig)
-        this.csvOptions = csvOptions;
+        if (limit) this.csvOptions.to = limit + 1; // n+1 since header is included
     }
 
     decodeFile(path: string, fileEncoding: fs.EncodingOption='utf-8') {
@@ -41,6 +41,6 @@ class CsvDecoder extends DecoderBase {
     }
 }
 
-export function makeCsvDecoder(sourceConfig: Config.Options["source"]) {
-    return new CsvDecoder(sourceConfig);
+export function makeCsvDecoder(sourceConfig: Config.Options["source"], limit?: number) {
+    return new CsvDecoder(sourceConfig, limit);
 }
