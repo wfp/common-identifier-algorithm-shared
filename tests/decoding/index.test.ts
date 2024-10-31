@@ -23,7 +23,8 @@ import { makeXlsxDecoder } from '../../decoding/xlsx.js';
 test("decoderForFile", () => {
     expect(decoderForFile(SUPPORTED_FILE_TYPES.CSV)).toEqual(makeCsvDecoder);
     expect(decoderForFile(SUPPORTED_FILE_TYPES.XLSX)).toEqual(makeXlsxDecoder);
-    // expect(() => { decoderForFile("OTHER") }).toThrow();
+    // @ts-ignore
+    expect(() => { decoderForFile("OTHER") }).toThrow();
 })
 
 test("fileTypeOf", () => {
