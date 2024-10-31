@@ -32,7 +32,7 @@ test("BaseHasher::generateHashForExtractedObject", () => {
 
     const h = makeBaseHasher();
 
-    expect(() => { h.generateHashForObject(BASE_CFG["columns"], {})}).toThrow()
+    expect(() => { h.generateHashForObject({})}).toThrow()
 
 })
 

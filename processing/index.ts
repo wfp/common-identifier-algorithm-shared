@@ -39,20 +39,20 @@ const log = Debug('CID:Processing')
 
 // HASH-GENERATION
 // ---------------
-function generateHashesForSheet(algorithmConfig: Config.AlgorithmColumns, hasher: BaseHasher, sheet: Sheet) {
+function generateHashesForSheet(hasher: BaseHasher, sheet: Sheet) {
     // generate for all rows
     let rows = sheet.data.map((row) => {
-        const generatedHashes = hasher.generateHashForObject(algorithmConfig, row);
+        const generatedHashes = hasher.generateHashForObject(row);
         return Object.assign({}, row, generatedHashes);
     });
 
     return new Sheet(sheet.name, rows);
 }
 
-function generateHashesForDocument(algorithmConfig: Config.AlgorithmColumns, hasher: BaseHasher, document: CidDocument) {
+function generateHashesForDocument(hasher: BaseHasher, document: CidDocument) {
     // generate for all rows
     let sheets = document.sheets.map((sheet) => {
-        return generateHashesForSheet(algorithmConfig, hasher, sheet);
+        return generateHashesForSheet(hasher, sheet);
     });
 
     return new CidDocument(sheets);
@@ -285,7 +285,7 @@ export async function processFile(
     // HASHING
     // =======
     let hasher = hasherFactory(config.algorithm);
-    let result = generateHashesForDocument(config.algorithm.columns, hasher, decoded)
+    let result = generateHashesForDocument(hasher, decoded)
 
 
     // OUTPUT

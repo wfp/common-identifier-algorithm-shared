@@ -47,7 +47,7 @@ export class BaseHasher {
         return base32.encode(hashDigest);
     }
 
-    generateHashForObject(columnConfig: Config.AlgorithmColumns, obj: Validation.Data["row"]): { [key: string]: string } {
+    generateHashForObject(obj: Validation.Data["row"]): { [key: string]: string } {
         throw new Error("Hasher::generateHashForExtractedObject(obj) not implemented!")
     }
 }

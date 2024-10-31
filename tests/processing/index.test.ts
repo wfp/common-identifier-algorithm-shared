@@ -167,8 +167,8 @@ class TestHasher extends BaseHasher {
     }
 
     // Builds the hash columns from the extracted row object
-    generateHashForObject(columnConfig: Config.AlgorithmColumns, obj: Validation.Data["row"]) {
-        const extractedObj = extractAlgoColumnsFromObject(columnConfig, obj)
+    generateHashForObject(obj: Validation.Data["row"]) {
+        const extractedObj = extractAlgoColumnsFromObject(this.config.columns, obj)
         return {
             test: `TEST ${extractedObj.static.join(' ')}`,
         }
