@@ -84,7 +84,7 @@ const DEFAULT_CONFIG_STORE_CONFIG: ConfigStorePaths = {
     region: REGION,
 }
 
-class ConfigStore {
+export class ConfigStore {
     data: any = {};
     validationResult = {};
     hasConfigLoaded: Boolean = false;
