@@ -202,7 +202,6 @@ test("processFile", async () => {
     expect(row2.test).toEqual("TEST A1")
 
     const csvData = parse(readFileSync(`${outputBasePath}_OUTPUT.csv`, 'utf-8'));
-    console.log(csvData)
 
     expect(csvData).toEqual([
         ["A", "Test"],

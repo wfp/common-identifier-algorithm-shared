@@ -28,7 +28,7 @@ import { decoderForFile, fileTypeOf } from '../decoding/index.js';
 
 import { makeValidationResultDocument, makeValidatorListDict, validateDocumentWithListDict } from '../validation/index.js';
 
-import { mapRequiredColumns } from './mapRequiredColumns.js';
+import { keepOutputColumns, isMappingOnlySheet, keepValidatorsForColumns } from './mapping.js';
 import { Config } from '../config/Config.js';
 import { BaseHasher, makeHasherFunction } from '../hashing/base.js';
 import { Validation } from '../validation/Validation.js';
@@ -37,97 +37,49 @@ import Debug from 'debug';
 const log = Debug('CID:Processing')
 
 
-// HASH-GENERATION
-// ---------------
-function generateHashesForSheet(hasher: BaseHasher, sheet: Sheet) {
-    // generate for all rows
-    let rows = sheet.data.map((row) => {
-        const generatedHashes = hasher.generateHashForObject(row);
-        return Object.assign({}, row, generatedHashes);
-    });
+export async function readFile(fileType: SUPPORTED_FILE_TYPES, columnConfig: Config.ColumnMap, filePath: string, limit?: number|undefined): Promise<CidDocument> {
+    let decoderFactoryFn = decoderForFile(fileType);
+    let decoder = decoderFactoryFn(columnConfig, limit);
 
-    return new Sheet(sheet.name, rows);
+    // decode the data
+    let decoded = await decoder.decodeFile(filePath);
+
+    if (decoded.sheets.length > 1) throw new Error("Input files must have only one sheet");
+    return decoded
 }
 
-function generateHashesForDocument(hasher: BaseHasher, document: CidDocument) {
+export function validateDocument(config: Config.Options, decoded: CidDocument, isMapping: boolean = false): Validation.SheetResult[] {
+    let validatorDict = makeValidatorListDict(config.validations);
+
+    // if this is a mapping document leave only the validators for the algorithm columns
+    if (isMapping) validatorDict = keepValidatorsForColumns(config, validatorDict);
+
+    // do the actual validation
+    return validateDocumentWithListDict(validatorDict, decoded);
+}
+
+export function generateHashesForDocument(hasher: BaseHasher, document: CidDocument) {
     // generate for all rows
     let sheets = document.sheets.map((sheet) => {
-        return generateHashesForSheet(hasher, sheet);
+        // generate for all rows
+        let rows = sheet.data.map((row) => {
+            const generatedHashes = hasher.generateHashForObject(row);
+            return Object.assign({}, row, generatedHashes);
+        });
+
+        return new Sheet(sheet.name, rows);
     });
 
     return new CidDocument(sheets);
 }
 
+// helper to output a document with a specific config
+export function writeFileWithConfig(fileType: SUPPORTED_FILE_TYPES, columnConfig: Config.ColumnMap, document: CidDocument, filePath: string) {
+    let encoderFactoryFn = encoderForFile(fileType);
+    let encoder = encoderFactoryFn(columnConfig);
 
-// SAVING DOCUMENTS
-// ----------------
-
-// Helper that saves a document with the prefered config
-function outputDocumentWithConfig(basePath: string, outputFileType: SUPPORTED_FILE_TYPES, destinationConfig: Config.ColumnMap, document: CidDocument) {
-    let encoderFactoryFn = encoderForFile(outputFileType);
-    let encoder = encoderFactoryFn(destinationConfig);
-
-    return encoder.encodeDocument(document, basePath);
+    return encoder.encodeDocument(document, filePath);
 }
-
-
-// UTILITIES
-// ---------
-
-// return true if the validation was successful
-function isDocumentValid(validationResult: Validation.SheetResult[]) {
-    return !validationResult.some(sheet => !sheet.ok);
-}
-
-// Returns the "base name" (the plain file name, the last component of the path, without any directories)
-function baseFileName(filePath: string) {
-    const splitName = filePath.split(/[\\/]/);
-    const lastComponent = splitName[splitName.length - 1].split(/\.+/);
-    return lastComponent.slice(0,-1).join('.')
-}
-
-// MAPPING-DOCUMENT-RELATED
-// ------------------------
-
-
-// Returns true if the sheet is containing only the hash input columns
-// in which case its a mapping-only sheet, and we need to treat it differently
-function isMappingOnlySheet(config: Config.Options, sheet: Sheet) {
-
-    // returns true if two sets are equal
-    function areSetsEqual(xs: Set<string>,ys: Set<string>) {
-        return xs.size === ys.size && [...xs].every((x) => ys.has(x));
-    }
-
-    const mappingDocumentColumns = mapRequiredColumns(config.algorithm["columns"], config.source, config.destination_map);
-    // here we've already checked to have only one sheet
-    const sheetColumns = (sheet.data.length > 0) ? Object.keys(sheet.data[0]) : [];
-
-    const isMappingDocument = areSetsEqual(new Set(mappingDocumentColumns), new Set(sheetColumns));
-    // log("MAPPING: ======>>>> ", {mappingDocumentColumns, sheetColumns, isMappingDocument});
-
-    return isMappingDocument;
-
-}
-
-
-// Returns a new validator dictionary, keeps only the columns needed by the
-// algorithm (so only columns relevant for mapping files are checked)
-function keepValidatorsForColumns(config: Config.Options, validatorDict: { [key: string]: any[] }) {
-    const keepColumnList = mapRequiredColumns(config.algorithm["columns"], config.source, config.destination_map);
-    return keepColumnList.reduce((memo, col) => Object.assign(memo, { [col]: validatorDict[col]}), {})
-}
-
-// Returns a new output configuration with only the columns needed by the
-// algorithm (so the validation result of a mapping document only has the mapping columns present)
-function keepOutputColumns(config: Config.Options, outputConfig: Config.ColumnMap) {
-    const keepColumnSet = new Set(mapRequiredColumns(config.algorithm["columns"], config.source, config.destination_map));
-
-    return Object.assign({}, outputConfig, {
-        columns: outputConfig.columns.filter(({alias}) => keepColumnSet.has(alias))
-    })
-}
-
 
 // PRE-PROCESSING
 // --------------
@@ -140,71 +92,45 @@ export interface PreprocessFileResult {
     isMappingDocument: boolean;
 }
 
-export async function preprocessFile(config: Config.Options, inputFilePath: string, limit: number | undefined = undefined): Promise<PreprocessFileResult> {
+
+export async function preprocessFile(config: Config.Options, inputFilePath: string, limit: number|undefined = undefined): Promise<PreprocessFileResult> {
     log("------------ preprocessFile -----------------")
 
-    // the input file path
-    // let inputFilePath = program.args[0];
     let inputFileType = fileTypeOf(inputFilePath);
-
-    if (!inputFileType) {
-        throw new Error("Unknown input file type");
-    }
 
     // DECODE
     // ======
-
-    // find a decoder
-    let decoderFactoryFn = decoderForFile(inputFileType);
-    let decoder = decoderFactoryFn(config.source, limit);
-
-    // decode the data
-    let decoded = await decoder.decodeFile(inputFilePath);
-
-    // check if there is more then one sheets in the input and throw an error
-    if (decoded.sheets.length > 1) {
-        throw new Error("Input files must have only one sheet")
-    }
-
+    const decoded = await readFile(inputFileType, config.source, inputFilePath, limit);
+    
     // VALIDATION
     // ==========
-    // prepare the validators
-    let validatorDict = makeValidatorListDict(config.validations);
-
-    // Figure out if this is a mapping document or an assistance document
-    const isMappingDocument = isMappingOnlySheet(config, decoded.sheets[0])
-    // if this is a mapping document leave only the validators for the algorithm columns
-    if (isMappingDocument) {
-        validatorDict = keepValidatorsForColumns(config, validatorDict);
-    }
-
-    // do the actual validation
-    let validationResult = validateDocumentWithListDict(validatorDict, decoded);
-
+    const isMappingDocument = isMappingOnlySheet(
+        config.algorithm.columns,
+        config.source,
+        config.destination_map,
+        decoded.sheets[0])
+    const validationResult = validateDocument(config, decoded, isMappingDocument);
+    
     let validationErrorsOutputFile: string[] | string = "";
     let validationResultDocument;
 
-    if (!isDocumentValid(validationResult)) {
+    // if any sheets contain errors, create an error file
+    if (!validationResult.some(sheet => sheet.ok)){
 
         // by default the validation results show the "source" section columns
         let validationResultBaseConfig = config.source;
 
         // but if this is a mapping document we only show the mapping columns in the validation output document
-        if (isMappingDocument) {
-            validationResultBaseConfig = keepOutputColumns(config, validationResultBaseConfig);
-        }
+        if (isMappingDocument) validationResultBaseConfig = keepOutputColumns(config, validationResultBaseConfig);
 
-        // check if validation is ok -- if yes write the file out
         validationResultDocument = makeValidationResultDocument(validationResultBaseConfig, validationResult);
 
         // The error file is output to the OS's temporary directory
-        const errorOutputBasePath = path.join(os.tmpdir(), baseFileName(inputFilePath));
+        const errorOutputBasePath = path.join(os.tmpdir(), path.basename(inputFilePath));
 
-        validationErrorsOutputFile = outputDocumentWithConfig(errorOutputBasePath, inputFileType, config.destination_errors, validationResultDocument);
+        validationErrorsOutputFile = writeFileWithConfig(inputFileType, config.destination_errors, validationResultDocument, errorOutputBasePath);
         // ensure that we only return a single value
-        if (validationErrorsOutputFile.length > 0) {
-            validationErrorsOutputFile = validationErrorsOutputFile[0];
-        }
+        if (validationErrorsOutputFile.length > 0) validationErrorsOutputFile = validationErrorsOutputFile[0];
     }
 
     return {
@@ -236,66 +162,34 @@ export async function processFile(
         format: SUPPORTED_FILE_TYPES | null,
         hasherFactory: makeHasherFunction=makeHasher
     ): Promise<ProcessFileResult> {
-    log("------------ preprocessFile -----------------")
+    log("------------ processFile -----------------")
 
-    // the input file path
-    let inputFileType = fileTypeOf(inputFilePath);
-
-    if (!inputFileType) {
-        throw new Error("Unknown input file type");
-    }
+    const inputFileType = fileTypeOf(inputFilePath);
 
     // DECODE
     // ======
-
-    // find a decoder
-    let decoderFactoryFn = decoderForFile(inputFileType);
-    let decoder = decoderFactoryFn(config.source, limit);
-
-    // decode the data
-    let decoded = await decoder.decodeFile(inputFilePath);
-
-
-    // VALIDATION
-    // ==========
-
-    // Validation is currently not done in this step -- the input document is assumed to be valid
-    /* istanbul ignore next */
-    if (false) {
-        let validatorDict = makeValidatorListDict(config.validations);
-        let validationResult = validateDocumentWithListDict(validatorDict, decoded);
-    }
-
-    // Figure out if this is a mapping document or an assistance document
-    const isMappingDocument = isMappingOnlySheet(config, decoded.sheets[0])
+    const decoded = await readFile(inputFileType, config.source, inputFilePath, limit);
 
     // HASHING
     // =======
-    let hasher = hasherFactory(config.algorithm);
-    let result = generateHashesForDocument(hasher, decoded)
-
-
+    const hasher = hasherFactory(config.algorithm);
+    const result = generateHashesForDocument(hasher, decoded);
+    
     // OUTPUT
     // ------
-
+    
     // if the user specified a format use that, otherwise use the input format
     const outputFileType = format || inputFileType;
-
-    // helper to output a document with a specific config
-    function outputDocumentWithConfig(destinationConfig: Config.ColumnMap, document: CidDocument) {
-
-        let basePath = ouputPath;
-
-        let encoderFactoryFn = encoderForFile(outputFileType);
-        let encoder = encoderFactoryFn(destinationConfig);
-
-        return encoder.encodeDocument(document, basePath);
-    }
-
+    
+    const isMappingDocument = isMappingOnlySheet(
+        config.algorithm.columns,
+        config.source,
+        config.destination_map,
+        decoded.sheets[0])
     // output the base document
-    let mainOutputFiles = isMappingDocument ? [] : outputDocumentWithConfig(config.destination, result);
+    const mainOutputFiles = isMappingDocument ? [] : writeFileWithConfig(outputFileType, config.destination, result, ouputPath);
     // output the mapping document
-    let mappingFilePaths = outputDocumentWithConfig(config.destination_map, result);
+    const mappingFilePaths = writeFileWithConfig(outputFileType, config.destination_map, result, ouputPath);
 
     return {
         // inputData: decoded,
