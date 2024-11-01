@@ -20,14 +20,23 @@ import { SUPPORTED_VALIDATORS } from "./Validation.js";
 import { makeValueValidator } from "./value_base.js";
 
 export function makeMaxValueValidator(opts: Config.ColumnValidation) {
-    let maxValue = opts.value;
+    enum DATE_OPTS { YEAR = "{{currentYear}}", MONTH = "{{currentMonth}}" }
+    
+    let maxValue: unknown = opts.value;
+    let message = `must be at most ${maxValue}`
 
-    // check if there is a regexp value
-    if (typeof maxValue !== 'number') {
-        throw new Error(`MinValue validator must have a 'value' with a number -- ${JSON.stringify(opts)}`)
+    if (Object.values(DATE_OPTS).includes(maxValue as DATE_OPTS)) {
+        switch(maxValue) {
+            case DATE_OPTS.YEAR: maxValue = new Date().getUTCFullYear(); break;
+            case DATE_OPTS.MONTH: maxValue = new Date().getUTCMonth() + 1; break; // +1 since getUTCMonth is zero-indexed
+        }
     }
 
-    return makeValueValidator(SUPPORTED_VALIDATORS.MAX_VALUE, `must be at most ${maxValue}`, (v: string) => {
+    if (typeof maxValue !== 'number') {
+        throw new Error(`MaxValue validator must have a 'value' with a number or a valid date string -- ${JSON.stringify(opts)}`)
+    }
+
+    return makeValueValidator(SUPPORTED_VALIDATORS.MAX_VALUE, message, (v: string) => {
         // attempt to convert to a number
         let numericValue = parseFloat(v);
         // not a number is a failed validation

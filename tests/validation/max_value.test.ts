@@ -41,6 +41,36 @@ test("MaxValueValidator", () => {
     expect(v.validate("ab")).toEqual(v.fail())
 })
 
+test("MaxValueValidator::dateString [year]", () => {
+    const v = makeMaxValueValidator({ op: "max_value", value: "{{currentYear}}"})
+
+    expect(v.validate("1")).toEqual(v.success())
+    expect(v.validate("10")).toEqual(v.success())
+    expect(v.validate("100")).toEqual(v.success())
+    expect(v.validate("3000")).toEqual(v.fail())
+
+    expect(v.validate(1)).toEqual(v.success())
+    expect(v.validate(10)).toEqual(v.success())
+    expect(v.validate(100)).toEqual(v.success())
+    expect(v.validate(3000)).toEqual(v.fail())
+
+    expect(v.validate("AAB")).toEqual(v.fail())
+    expect(v.validate(" ")).toEqual(v.fail())
+    expect(v.validate("ab")).toEqual(v.fail())
+})
+
+test("MaxValueValidator::dateString [month]", () => {
+    const v = makeMaxValueValidator({ op: "max_value", value: "{{currentMonth}}"})
+
+    const month = new Date().getUTCMonth();
+
+    expect(v.validate(month-2)).toEqual(v.success())
+    expect(v.validate(month-1)).toEqual(v.success())
+    expect(v.validate(month)).toEqual(v.success())
+    expect(v.validate(month+1)).toEqual(v.success())
+    expect(v.validate(month+2)).toEqual(v.fail())
+})
+
 test("MaxValueValidator fails for invalid options", () => {
     expect(() => makeMaxValueValidator({ op: "max_value", value: "[[[" })).toThrow()
 })
