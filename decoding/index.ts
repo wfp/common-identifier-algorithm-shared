@@ -26,14 +26,10 @@ export function fileTypeOf(filePath: string) {
     if (filePath.endsWith(".xlsx")) {
         return SUPPORTED_FILE_TYPES.XLSX
     }
-
     if (filePath.endsWith(".csv")) {
         return SUPPORTED_FILE_TYPES.CSV
     }
-
-
-    // unknown type
-    return null;
+    throw new Error("Unknown file type");
 }
 
 // Returns an appropriate decoder for a file

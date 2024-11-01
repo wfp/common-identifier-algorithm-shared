@@ -30,5 +30,5 @@ test("decoderForFile", () => {
 test("fileTypeOf", () => {
     expect(fileTypeOf("file.xlsx")).toEqual(SUPPORTED_FILE_TYPES.XLSX);
     expect(fileTypeOf("file.csv")).toEqual(SUPPORTED_FILE_TYPES.CSV);
-    expect(fileTypeOf("file")).toEqual(null);
+    expect(() => fileTypeOf("file")).toThrow("Unknown file type");
 })
