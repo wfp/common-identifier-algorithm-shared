@@ -225,7 +225,7 @@ test("makeValidationResultDocument", () => {
     ]
 
     const doc = makeValidationResultDocument(TEST_CONFIG, TEST_RESULT);
-    const ERR_STR = 'A must be one of: "A", "A0";     \ncol_b must be one of: "B", "B0"';
+    const ERR_STR = 'A must be one of: "A", "A0";\ncol_b must be one of: "B", "B0";';
 
     expect(doc.sheets.length).toEqual(2)
     expect(doc.sheets[0].name).toEqual("Sheet 1");
