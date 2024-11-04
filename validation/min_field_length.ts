@@ -28,7 +28,7 @@ class MinFieldLengthValidator extends ValidatorBase {
 
     // the default message
     defaultMessage() {
-        return `must be longer than ${this.minLen} digits / characters`;
+        return `must be longer than ${this.minLen} characters`;
     }
 
     validate(value: string | number) {

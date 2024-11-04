@@ -32,9 +32,9 @@ class DateDiffValidator extends ValidatorBase {
 
     // the default message
     defaultMessage() {
-        if (!this.parsedDateDiff) return `No date diff specified in configuration.`
+        if (!this.parsedDateDiff) return `: no date diff specified in configuration`
         const { _key, _value } = this.parsedDateDiff;
-        return `must be in the date range: ${_value} ${_key}`;
+        return `must be within ${_value} ${_key} of today`;
     }
 
     validate(value: any) {

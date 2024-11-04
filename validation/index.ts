@@ -228,7 +228,7 @@ export function makeValidationResultDocument(sourceConfig: Config.Options["sourc
 
                 // find the column name
                 let columnHumanName = fieldNameMapping[error.column] || error.column;
-                return `${columnHumanName} ${error.errors.map(({msg}) => msg).join(",\n  ")}`;
+                return error.errors.map(({ msg }) => `${columnHumanName} ${msg};`).join("\n");
             });
 
 
@@ -238,7 +238,7 @@ export function makeValidationResultDocument(sourceConfig: Config.Options["sourc
                 row_number: rowIdx + 2,
                 // The error list should be an empty string (so that it'll be hidden if no errors are present)
                 // NOTE: the line-ending can be tricky
-                errors: errorList.join(";     \n"),
+                errors: errorList.join("\n"),
             }, rowResult.row)
         }));
     }));

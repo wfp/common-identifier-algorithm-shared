@@ -26,7 +26,7 @@ class SameValueForAllRowsValidator extends ValidatorBase {
 
     // the default message
     defaultMessage() {
-        return `must be identical for all items in the file`;
+        return "must have identical values in the column";
     }
 
     validate(value: any, { sheet, column }: Validation.Data) {

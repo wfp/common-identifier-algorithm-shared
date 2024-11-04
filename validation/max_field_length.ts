@@ -28,7 +28,7 @@ class MaxFieldLengthValidator extends ValidatorBase {
 
     // the default message
     defaultMessage() {
-        return `must be shorter than ${this.maxLen} digits / characters`;
+        return `must be shorter than ${this.maxLen} characters`;
     }
 
     validate(value: any) {
