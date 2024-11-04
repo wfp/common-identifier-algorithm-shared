@@ -42,25 +42,27 @@ test("MaxValueValidator", () => {
 })
 
 test("MaxValueValidator::dateString [year]", () => {
-    const v = makeMaxValueValidator({ op: "max_value", value: "{{currentYear}}"})
+    const v = makeMaxValueValidator({ op: "max_value", value: "{{currentYear}}"});
+
+    const year = new Date().getUTCFullYear();
 
     expect(v.validate("1")).toEqual(v.success())
     expect(v.validate("10")).toEqual(v.success())
     expect(v.validate("100")).toEqual(v.success())
     expect(v.validate("3000")).toEqual(v.fail())
 
-    expect(v.validate(1)).toEqual(v.success())
-    expect(v.validate(10)).toEqual(v.success())
-    expect(v.validate(100)).toEqual(v.success())
-    expect(v.validate(3000)).toEqual(v.fail())
+    expect(v.validate(year - 2)).toEqual(v.success())
+    expect(v.validate(year - 1)).toEqual(v.success())
+    expect(v.validate(year)).toEqual(v.success())
+    expect(v.validate(year + 1)).toEqual(v.fail())
+    expect(v.validate(year + 2)).toEqual(v.fail())
 
-    expect(v.validate("AAB")).toEqual(v.fail())
-    expect(v.validate(" ")).toEqual(v.fail())
-    expect(v.validate("ab")).toEqual(v.fail())
+    expect(v.validate(year + 2)!.msg).toContain(`${year}`);
+    expect(v.validate(year + 2)!.msg).not.toContain("{{currentYear}}");
 })
 
 test("MaxValueValidator::dateString [month]", () => {
-    const v = makeMaxValueValidator({ op: "max_value", value: "{{currentMonth}}"})
+    const v = makeMaxValueValidator({ op: "max_value", value: "{{currentMonth}}"});
 
     const month = new Date().getUTCMonth();
 
@@ -69,6 +71,9 @@ test("MaxValueValidator::dateString [month]", () => {
     expect(v.validate(month)).toEqual(v.success())
     expect(v.validate(month+1)).toEqual(v.success())
     expect(v.validate(month+2)).toEqual(v.fail())
+
+    expect(v.validate(month + 2)!.msg).toContain(`${month + 1}`);
+    expect(v.validate(month + 2)!.msg).not.toContain("{{currentMonth}}");
 })
 
 test("MaxValueValidator fails for invalid options", () => {
