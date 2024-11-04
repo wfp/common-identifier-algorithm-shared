@@ -23,15 +23,15 @@ export function makeMaxValueValidator(opts: Config.ColumnValidation) {
     enum DATE_OPTS { YEAR = "{{currentYear}}", MONTH = "{{currentMonth}}" }
     
     let maxValue: unknown = opts.value;
-    let message = `must be at most ${maxValue}`
-
+    
     if (Object.values(DATE_OPTS).includes(maxValue as DATE_OPTS)) {
         switch(maxValue) {
             case DATE_OPTS.YEAR: maxValue = new Date().getUTCFullYear(); break;
             case DATE_OPTS.MONTH: maxValue = new Date().getUTCMonth() + 1; break; // +1 since getUTCMonth is zero-indexed
         }
     }
-
+    let message = `must be at most ${maxValue}`
+    
     if (typeof maxValue !== 'number') {
         throw new Error(`MaxValue validator must have a 'value' with a number or a valid date string -- ${JSON.stringify(opts)}`)
     }
