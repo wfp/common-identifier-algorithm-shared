@@ -15,7 +15,6 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import { Config } from "../config/Config.js";
-import { MappedData } from "../document.js";
 import { ValidatorBase } from "./base.js";
 
 import { parseDateDiff, isValidDateDiff, attemptToParseDate, isDateInRange, ParsedDateDiff } from './date_shared.js';

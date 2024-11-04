@@ -40,12 +40,12 @@ export class ValidatorBase {
     // helper that returns a validation error suited for this
     // validator
     fail() {
-        return new ValidationError(this.kind, this.message() || "");
+        return new ValidationError(this.kind as keyof typeof SUPPORTED_VALIDATORS, this.message() || "");
     }
 
     // helper that returns a validation error with the user provided error message
     failWith(msg: string) {
-        return new ValidationError(this.kind, msg);
+        return new ValidationError(this.kind as keyof typeof SUPPORTED_VALIDATORS, msg);
     }
 
     // helper to return a value that is actually valid

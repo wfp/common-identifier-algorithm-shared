@@ -30,6 +30,7 @@ export enum SUPPORTED_VALIDATORS {
     DATE_DIFF = "DATE_DIFF",
     DATE_FIELD_DIFF = "DATE_FIELD_DIFF",
     SHEET_ROWS_ARE_EQUAL = "SHEET_ROWS_ARE_EQUAL",
+    LINKED_FIELD = "LINKED FIELD",
 }
 
 export class ValidationError {

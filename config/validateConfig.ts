@@ -123,10 +123,13 @@ export function validateConfig(config: Config.Options, region: string) {
                 isString(".op", v.op) ||
                 // value is either a number or a string
                 // or v.op is 'same_value_for_all_rows'
-                (isString(".value", v.value) &&
+                (
+                    isString(".value", v.value) &&
                     isNumber(".value", v.value) &&
                     isStringList(".value", v.value) &&
-                    isTrue('same_value_for_all_rows', v.op === 'same_value_for_all_rows'))
+                    isTrue('same_value_for_all_rows', v.op === 'same_value_for_all_rows') &&
+                    isTrue('linked_field', v.op === "linked_field")
+                )
             ),validations[k])
         }, "")
 

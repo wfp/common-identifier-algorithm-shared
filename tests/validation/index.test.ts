@@ -18,7 +18,7 @@
 import { Config } from '../../config/Config.js';
 import { makeValidatorListDict, validateDocumentWithListDict, makeValidationResultDocument } from '../../validation/index.js';
 import { makeOptionsValidator } from '../../validation/options.js';
-import { SUPPORTED_VALIDATORS } from '../../validation/Validation.js';
+import { SUPPORTED_VALIDATORS, Validation } from '../../validation/Validation.js';
 
 // get the class name
 const className = (obj: object) => obj.constructor.name;
@@ -182,7 +182,7 @@ test("validateDocumentWithListDict ERROR", () => {
 test("makeValidationResultDocument", () => {
     const TEST_CONFIG = { columns: [ { name: "A", alias: "col_a" } ]};
 
-    const TEST_RESULT = [
+    const TEST_RESULT: Validation.SheetResult[] = [
         {
             sheet: 'Sheet 1',
             ok: true,

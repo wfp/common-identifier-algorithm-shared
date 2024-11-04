@@ -86,6 +86,7 @@ import { makeMaxValueValidator } from './max_value.js';
 import { makeDateDiffValidator } from './date_diff.js';
 import { makeDateFieldDiffValidator } from './date_field_diff.js';
 import { makeSameValueForAllRowsValidator } from './same_value_for_all_rows.js';
+import { makeLinkedFieldValidator } from './linked_field.js';
 import { Config } from "../config/Config.js";
 
 const VALIDATOR_FACTORIES = {
@@ -110,6 +111,7 @@ const VALIDATOR_FACTORIES = {
     "date_field_diff": makeDateFieldDiffValidator,
 
     "same_value_for_all_rows": makeSameValueForAllRowsValidator,
+    "linked_field": makeLinkedFieldValidator
 };
 
 
