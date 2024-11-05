@@ -18,26 +18,32 @@
 import { ValidationError } from '../../validation/Validation.js';
 import { makeDateFieldDiffValidator } from '../../validation/date_field_diff.js';
 
-const TEST_CONFIG = { op: "", target: "col_a", value: "-3M" };
 const TEST_ROW = { col_a: "19910101" };
 const TEST_SHEET_PARAMS = { sheet: { name: "", data: [] }, column: "" };
 
 test("DateFieldDiffValidator", () => {
+    const TEST_CONFIG = { op: "", target: "col_a", value: "-3M:0M" };
     const v = makeDateFieldDiffValidator(TEST_CONFIG);
-    [
-        ["19910102", v.success()],
-        ["19910202", v.success()],
+    expect(v.validate("19910102", { row: TEST_ROW, ...TEST_SHEET_PARAMS})).toEqual(v.fail());
+    expect(v.validate("19910202", { row: TEST_ROW, ...TEST_SHEET_PARAMS})).toEqual(v.fail());
 
-        // the other side of the edge => valid
-        ["19900202", v.success()],
-        ["19920406", v.fail()],
-    ].forEach(([input, expected]) => {
-        expect(v.validate(input, { row: TEST_ROW, ...TEST_SHEET_PARAMS })).toEqual(expected)
-    })
+    // the other side of the edge => valid
+    expect(v.validate("19901201", { row: TEST_ROW, ...TEST_SHEET_PARAMS})).toEqual(v.success());
+    expect(v.validate("19901001", { row: TEST_ROW, ...TEST_SHEET_PARAMS})).toEqual(v.success());
+    expect(v.validate("19920406", { row: TEST_ROW, ...TEST_SHEET_PARAMS})).toEqual(v.fail());
+})
 
+test("DateFieldDiffValidator::positive", () => {
+    let testRow = { col_a: "20241001" }
+    const TEST_CONFIG = { op: "", target: "col_a", value: ":+12M" };
+    const v = makeDateFieldDiffValidator(TEST_CONFIG);
+    expect(v.validate("20241101", { row: testRow, ...TEST_SHEET_PARAMS})).toEqual(v.success());
+    expect(v.validate("20251001", { row: testRow, ...TEST_SHEET_PARAMS})).toEqual(v.success());
+    expect(v.validate("20240930", { row: testRow, ...TEST_SHEET_PARAMS})).toEqual(v.fail());
 })
 
 test("DateFieldDiffValidator fails for invalid values", () => {
+    const TEST_CONFIG = { op: "", target: "col_a", value: "-3M:0M" };
     const v = makeDateFieldDiffValidator(TEST_CONFIG)
 
     expect(v.validate(123, { row: TEST_ROW, ...TEST_SHEET_PARAMS })).toBeInstanceOf(ValidationError)

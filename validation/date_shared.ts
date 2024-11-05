@@ -20,8 +20,12 @@ import {
     add as date_add,
     compareAsc as date_compareAsc,
     isValid as date_isValid,
-    formatDate
+    formatDate,
+    isWithinInterval,
+    format,
+    parseISO
 } from "date-fns";
+import { utc, UTCDate } from '@date-fns/utc';
 
 export interface ParsedDateDiff {
     isPositive: boolean;
@@ -33,22 +37,34 @@ export interface ParsedDateDiff {
 // the default format string
 const DEFAULT_FORMAT_STR = "yyyyMMdd"
 
-export function parseDateDiff(dateDiffStr: string): ParsedDateDiff | null {
+export function parseDateDiff(dateDiffStr: string): ParsedDateDiff[] | null {
+    // opts.value expected format "<past value>:<future value>"
+    if (!dateDiffStr.includes(":")) return null;
 
-    // figure out the range type
-    let key = null;
+    // split past / future components
+    const [left, right] = dateDiffStr.split(":", 2).map(range => {
+        let unit = null;
+        if (range.endsWith('M')) unit = 'months';
+        if (range.endsWith('Y')) unit = 'years';
+        if (range.endsWith('d')) unit = 'days';
 
-    if (dateDiffStr.endsWith('M')) key = 'months';
-    if (dateDiffStr.endsWith('Y')) key = 'years';
-    if (dateDiffStr.endsWith('d')) key = 'days';
+        if (!unit) { unit = 'days'; range = "0"; }
+        return { range: range, unit: unit}
+    })
 
-    if (!key) return null;
+    // if there is a range parse the integer count and sort ranges into ascending order
+    const lInt = parseInt(left.range);
+    const rInt = parseInt(right.range);
 
-    // if there is a range parse the integer count
-    const parsedInt = parseInt(dateDiffStr.substring(0, dateDiffStr.length - 1));
+    // if both ranges are zero, return and raise error
+    if (lInt === 0 && rInt === 0) return null;
 
     // combine into a date-fn.sub() compatible format
-    return { [key]: parsedInt, isPositive: (parsedInt >= 0), _key: key, _value: parsedInt }
+    // TODO: fix the sorting to account for units rather than just value
+    return [
+        { [left.unit]: lInt, isPositive: (lInt >= 0), _key: left.unit, _value: lInt },
+        { [right.unit]: rInt, isPositive: (rInt >= 0), _key: right.unit, _value: rInt }
+    ].sort((a, b) => a._value - b._value)
 
 }
 
@@ -57,7 +73,7 @@ export function isValidDateDiff(dateDiffString: string) {
     return dateDiff;
 }
 
-export function attemptToParseDate(value: unknown): Date | null | undefined {
+export function attemptToParseDate(value: unknown): UTCDate | Date | null | undefined {
     // check for emptyness / falseness
     if (!value) {
         return;
@@ -66,7 +82,8 @@ export function attemptToParseDate(value: unknown): Date | null | undefined {
     if (typeof value !== 'string') {
         value = value.toString();
     }
-    const parsedDate = date_parse(value as string, DEFAULT_FORMAT_STR, new Date() );
+    const parsedDate = date_parse(value as string, DEFAULT_FORMAT_STR, new UTCDate(), { in: utc });
+
     if (date_isValid(parsedDate)) return parsedDate;
 
     return null;
@@ -74,40 +91,22 @@ export function attemptToParseDate(value: unknown): Date | null | undefined {
 
 export function formatDateWithDefaultFormat(v: unknown) {
     // empty values get empty strings
-    if (!v || (v instanceof Date === false)) {
-        return '';
-    }
-
-    // check if v is a date object
-    if (typeof v.getMonth !== 'function') {
-        return '';
-    }
+    if (!v || (v instanceof Date === false)) return '';
+    if (typeof v.getMonth !== 'function') return '';
     return formatDate(v, DEFAULT_FORMAT_STR);
 }
 
-export function isDateInRange(diff: ParsedDateDiff, value: any, originDate=new Date()) {
+export function isDateInRange(diff: ParsedDateDiff[], value: UTCDate | Date, originDate: Date | UTCDate=new UTCDate()) {
+    const offsetLeft  = date_add(originDate, diff[0] as Duration, { in: utc });
+    const offsetRight = date_add(originDate, diff[1] as Duration, { in: utc });
 
-    const targetDate = date_add(originDate, diff as Duration);
-    const offsetCompareResult = date_compareAsc(targetDate, value);
-    const originCompareResult = date_compareAsc(originDate, value);
-
-    // diff positive, offset origin later than value
-    if (diff.isPositive) {
-        // diff positive, offset origin earlier then value => out of range
-        if (offsetCompareResult < 0) return false;
-        return true;
-
-        // -- origin earlier then value => in range
-        // -- origin later then value  => out of range
-        return (originCompareResult <= 0)
-    } else {
-        // diff positive, offset origin earlier then value => out of range
-        if (offsetCompareResult > 0) return false;
-        return true;
-
-        // -- origin earlier then value => in range
-        // -- origin later then value  => out of range
-        return (originCompareResult >= 0)
-    }
-
+    const inRange = isWithinInterval(value, { start: offsetLeft, end: offsetRight }, { in: utc });
+    console.log(
+        "DIFF", diff, "\n",
+        "LEFT: ", offsetLeft, "\n",
+        "RIGHT: ", offsetRight, "\n",
+        "TO_CHECK: ", value, "\n",
+        "IN_RANGE: ", inRange
+    );
+    return inRange;
 }

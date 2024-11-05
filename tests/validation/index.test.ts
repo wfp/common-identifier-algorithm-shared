@@ -32,8 +32,8 @@ const className = (obj: object) => obj.constructor.name;
 test("makeValidatorListDict types", () => {
     const TEST_CONFIG: Config.Options["validations"] = {
         "col_a": [
-            { op: "date_diff", value: "3M" },
-            { op: "date_field_diff", target: "col_b", value: "1M" },
+            { op: "date_diff", value: ":3M" },
+            { op: "date_field_diff", target: "col_b", value: ":1M" },
             { op: "field_type", value: "str" },
             { op: "language_check", value: "arabic" },
             { op: "max_field_length", value: 10 },

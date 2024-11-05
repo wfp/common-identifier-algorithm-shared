@@ -23,7 +23,7 @@ import { SUPPORTED_VALIDATORS, Validation } from "./Validation.js";
 class DateFieldDiffValidator extends ValidatorBase {
     targetField: string;
     dateDiff: string;
-    parsedDateDiff: ParsedDateDiff | null;
+    parsedDateDiff: ParsedDateDiff[] | null;
 
     constructor(dateDiff: string, targetField: string, opts: Config.ColumnValidation) {
         super(SUPPORTED_VALIDATORS.DATE_FIELD_DIFF, opts)
@@ -36,8 +36,12 @@ class DateFieldDiffValidator extends ValidatorBase {
     defaultMessage() {
         if (!this.parsedDateDiff) return `No date diff field specified in configuration.`
 
-        const { _key, _value } = this.parsedDateDiff;
-        return `must be in the date range compared to '${this.targetField}': ${_value} ${_key}`;
+        const left = this.parsedDateDiff[0];
+        const right = this.parsedDateDiff[1];
+
+        if (left._value === 0) return `must be within ${this.targetField} and ${right._value} ${right._key}`;
+        if (right._value === 0) return `must be within ${left._value} ${left._key} and ${this.targetField}`;
+        return `must be within ${left._value} ${left._key} and ${right._value} ${right._key} of ${this.targetField}`;
     }
 
     validate(value: any, { row }: Validation.Data) {
@@ -60,7 +64,7 @@ class DateFieldDiffValidator extends ValidatorBase {
             return this.failWith("must be a date: " + value);
         }
 
-        if (!isDateInRange(this.parsedDateDiff!, originDate, currentFieldDate)) {
+        if (!isDateInRange(this.parsedDateDiff!, currentFieldDate, originDate)) {
             return this.fail();
         }
 

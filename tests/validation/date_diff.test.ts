@@ -18,37 +18,58 @@
 import { ValidationError } from '../../validation/Validation.js';
 import { makeDateDiffValidator } from '../../validation/date_diff.js';
 import * as dateFns from 'date-fns';
+import { parseDateDiff } from '../../validation/date_shared.js';
 
-test("DateDiffValidator", () => {
-    // just for success and failiure
-    const v = makeDateDiffValidator({ op: "date_diff", value: "3M"})
+function toDateStr(offset: dateFns.Duration) {
+    const d = dateFns.add(new Date(), offset);
+    const leadingZero = (v: number) => `${v < 10 ? '0' : ''}${v}`;
+    return `${d.getFullYear()}${leadingZero(d.getMonth() + 1)}${leadingZero(d.getDate())}`
+}
 
-    function toDateStr(offset: dateFns.Duration) {
-        const d = dateFns.add(new Date(), offset);
-        const leadingZero = (v: number) => `${v < 10 ? '0' : ''}${v}`;
-        return `${d.getFullYear()}${leadingZero(d.getMonth() + 1)}${leadingZero(d.getDate())}`
-    }
+test("DateDiffValidator::future case", () => {
+    // const v = makeDateDiffValidator({ op: "date_diff", value: "-3M"});
+    let v = makeDateDiffValidator({ op: "date_diff", value: ":3M"});
 
+    expect(v.validate(toDateStr({ months: -10}))).toEqual(v.fail()); // 10 months in the past
+    expect(v.validate(toDateStr({ months: -1}))).toEqual(v.fail());  // 1 month in the past
+    expect(v.validate(toDateStr({ months: 2}))).toEqual(v.success());   // 2 months in the future
+    expect(v.validate(toDateStr({ months: 3}))).toEqual(v.success());   // 3 months in the future
+    expect(v.validate(toDateStr({ months: 4}))).toEqual(v.fail());      // 4 months in the future
+})
 
-    [
-        // to allow composition of asymetric positive and negative ranges
-        // allow values on the other side of the origin
-        [toDateStr({ days: -100}), v.success()],
-        [toDateStr({ months: -100}), v.success()],
+test("DateDiffValidator::past case", () => {
+    let v = makeDateDiffValidator({ op: "date_diff", value: "-3M:"}); 
 
-        [toDateStr({ days: 10}), v.success()],
-        [toDateStr({ days: 100}), v.fail()],
+    expect(v.validate(toDateStr({ months: -10}))).toEqual(v.fail());    // 10 months in the past
+    expect(v.validate(toDateStr({ months: -4 }))).toEqual(v.fail());    // 4 months in the past
+    expect(v.validate(toDateStr({ months: -3 }))).toEqual(v.fail());    // 3 months in the past
+    expect(v.validate(toDateStr({ months: -2, days: 31}))).toEqual(v.success());    // 3 months in the past
+    expect(v.validate(toDateStr({ months: -2 }))).toEqual(v.success()); // 2 months in the past
+    expect(v.validate(toDateStr({ months:  0 }))).toEqual(v.success()); // 1 month in the future
+    expect(v.validate(toDateStr({ months:  1 }))).toEqual(v.fail()); // 1 month in the future
+    expect(v.validate(toDateStr({ months: 10 }))).toEqual(v.fail()); // 10 months in the future
+})
 
-        [toDateStr({ months: 1}), v.success()],
-        [toDateStr({ months: 3}), v.success()],
-        [toDateStr({ months: 3, days: 1}), v.fail()],
+test("DateDiffValidator::inRange", () => {
+    let a = makeDateDiffValidator({ op: "date_diff", value: "-12M:+2M"});
 
-    ].forEach(([input, expected]) => {
-        expect(v.validate(input)).toEqual(expected)
-    })
+    let left = toDateStr({ months: 2 });
+    expect(a.validate(left)).toBeNull()
+    
+    left = toDateStr({ months: -1 });
+    expect(a.validate(left)).toBeNull()
+    
+    left = toDateStr({ months: 3 });
+    expect(a.validate(left)).not.toBeNull()
 
-    expect(v.validate(null)).toBeInstanceOf(ValidationError)
+    left = toDateStr({ months: -12 });
+    expect(a.validate(left)).not.toBeNull()
 
+    left = toDateStr({ months: 1 });
+    expect(a.validate(left)).toBeNull()
+
+    left = toDateStr({ months: 0 });
+    expect(a.validate(left)).toBeNull()
 })
 
 test("DateDiffValidator fails for invalid options", () => {

@@ -23,7 +23,7 @@ import { SUPPORTED_VALIDATORS } from "./Validation.js";
 
 class DateDiffValidator extends ValidatorBase {
     dateDiff: string;
-    parsedDateDiff: ParsedDateDiff | null;
+    parsedDateDiff: ParsedDateDiff[] | null;
     constructor(dateDiff: string, opts: Config.ColumnValidation) {
         super(SUPPORTED_VALIDATORS.DATE_DIFF, opts)
         this.dateDiff = dateDiff;
@@ -33,12 +33,18 @@ class DateDiffValidator extends ValidatorBase {
     // the default message
     defaultMessage() {
         if (!this.parsedDateDiff) return `: no date diff specified in configuration`
-        const { _key, _value } = this.parsedDateDiff;
-        return `must be within ${_value} ${_key} of today`;
+        const left = this.parsedDateDiff[0];
+        const right = this.parsedDateDiff[1];
+        
+        if (left._value === 0) return `must be between today and ${right._value} ${right._key}`;
+        if (right._value === 0) return `must be between ${left._value} ${left._key} and today`;
+        return `must be within ${left._value} ${left._key} and ${right._value} ${right._key} of today`;
     }
 
     validate(value: any) {
+        console.log("VALUE: ", value);
         let parsedDate = attemptToParseDate(value);
+        console.log("PARSED: ", parsedDate);
 
         if (!parsedDate) {
             return this.failWith("must be a date: " + value);
@@ -55,6 +61,8 @@ class DateDiffValidator extends ValidatorBase {
 
 // Factory function for the DateDiffValidator
 export function makeDateDiffValidator(opts: Config.ColumnValidation) {
+    // opts.value expected format "<past value>:<future value>"
+    // e.g. "-12M:2M" to check if value is within 1 year past and 2 months future
     let dateDiff = opts.value;
 
     // check if there is a regexp value
