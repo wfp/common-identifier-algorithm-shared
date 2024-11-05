@@ -101,12 +101,5 @@ export function isDateInRange(diff: ParsedDateDiff[], value: UTCDate | Date, ori
     const offsetRight = date_add(originDate, diff[1] as Duration, { in: utc });
 
     const inRange = isWithinInterval(value, { start: offsetLeft, end: offsetRight }, { in: utc });
-    console.log(
-        "DIFF", diff, "\n",
-        "LEFT: ", offsetLeft, "\n",
-        "RIGHT: ", offsetRight, "\n",
-        "TO_CHECK: ", value, "\n",
-        "IN_RANGE: ", inRange
-    );
     return inRange;
 }

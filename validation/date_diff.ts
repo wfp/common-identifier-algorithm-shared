@@ -42,9 +42,7 @@ class DateDiffValidator extends ValidatorBase {
     }
 
     validate(value: any) {
-        console.log("VALUE: ", value);
         let parsedDate = attemptToParseDate(value);
-        console.log("PARSED: ", parsedDate);
 
         if (!parsedDate) {
             return this.failWith("must be a date: " + value);

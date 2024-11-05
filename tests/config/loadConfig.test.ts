@@ -30,8 +30,6 @@ test("loadConfig ok", ()=>{
     const TEST_FILE_PATH = join(FILES_PATH, "test-config.json");
     const loadResult = loadConfig(TEST_FILE_PATH, REGION);
 
-    console.log(loadResult);
-
     expect(loadResult.success).toEqual(true)
     if (!loadResult.success) throw new TypeError();
     expect(loadResult.lastUpdated).toEqual(new Date(statSync(TEST_FILE_PATH).mtime))
