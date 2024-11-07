@@ -152,7 +152,8 @@ export async function preprocessFile({ config, inputFilePath, errorFileOutputPat
 export interface ProcessFileResult {
     isMappingDocument: boolean;
     data: CidDocument;
-    outputPaths: string[]
+    outputFilePath?: string;
+    mappingFilePath: string;
 }
 
 interface ProcessFileInput { 
@@ -190,13 +191,14 @@ export async function processFile({config, outputPath, inputFilePath, hasherFact
         config.destination_map,
         decoded.sheets[0])
     // output the base document
-    const mainOutputFile = isMappingDocument ? "" : writeFileWithConfig(outputFileType, config.destination, result, outputPath);
+    const mainOutputFile = isMappingDocument ? undefined : writeFileWithConfig(outputFileType, config.destination, result, outputPath);
     // output the mapping document
     const mappingFilePath = writeFileWithConfig(outputFileType, config.destination_map, result, outputPath);
 
     return {
         isMappingDocument,
         data: result,
-        outputPaths: isMappingDocument ? [ mappingFilePath ] : [ mainOutputFile, mappingFilePath ]
+        outputFilePath: mainOutputFile,
+        mappingFilePath: mappingFilePath
     };
 }
