@@ -92,8 +92,13 @@ export interface PreprocessFileResult {
     isMappingDocument: boolean;
 }
 
+interface PreProcessFileInput {
+    config: Config.Options;
+    inputFilePath: string;
+    limit?: number;
+}
 
-export async function preprocessFile(config: Config.Options, inputFilePath: string, limit: number|undefined = undefined): Promise<PreprocessFileResult> {
+export async function preprocessFile({ config, inputFilePath, limit=undefined }: PreProcessFileInput): Promise<PreprocessFileResult> {
     log("------------ preprocessFile -----------------")
 
     let inputFileType = fileTypeOf(inputFilePath);
@@ -154,14 +159,16 @@ export interface ProcessFileResult {
     allOutputPaths: string[];
 }
 
-export async function processFile(
-        config: Config.Options,
-        ouputPath:string,
-        inputFilePath: string,
-        limit: number|undefined = undefined,
-        format: SUPPORTED_FILE_TYPES | null,
-        hasherFactory: makeHasherFunction=makeHasher
-    ): Promise<ProcessFileResult> {
+interface ProcessFileInput { 
+    config: Config.Options,
+    outputPath:string,
+    inputFilePath: string,
+    hasherFactory?: makeHasherFunction,
+    format?: SUPPORTED_FILE_TYPES,
+    limit?: number,
+}
+
+export async function processFile({config, outputPath, inputFilePath, hasherFactory=makeHasher, format=undefined, limit=undefined, }: ProcessFileInput): Promise<ProcessFileResult> {
     log("------------ processFile -----------------")
 
     const inputFileType = fileTypeOf(inputFilePath);
@@ -187,9 +194,9 @@ export async function processFile(
         config.destination_map,
         decoded.sheets[0])
     // output the base document
-    const mainOutputFiles = isMappingDocument ? [] : writeFileWithConfig(outputFileType, config.destination, result, ouputPath);
+    const mainOutputFiles = isMappingDocument ? [] : writeFileWithConfig(outputFileType, config.destination, result, outputPath);
     // output the mapping document
-    const mappingFilePaths = writeFileWithConfig(outputFileType, config.destination_map, result, ouputPath);
+    const mappingFilePaths = writeFileWithConfig(outputFileType, config.destination_map, result, outputPath);
 
     return {
         // inputData: decoded,

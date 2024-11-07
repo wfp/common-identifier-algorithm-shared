@@ -66,13 +66,14 @@ const CONFIG: Config.Options = {
 };
 
 test("preprocessFile invalid", async () => {
-    const fn = async () => await processFile( CONFIG, join(tmpdir(), "out"), 'NO SUCH FILE NO EXTENSION', 10, SUPPORTED_FILE_TYPES.CSV )
+    // @ts-ignore
+    const fn = async () => await processFile({ config: CONFIG, inputFilePath: "", outputPath: "", format: null, limit: 10 })
     await expect(fn).rejects.toThrow()
 })
 
 test("preprocessFile", async () => {
     const filePath = join(__dirname, "files", "input_ok.csv");
-    const results = await preprocessFile(CONFIG, filePath, 10);
+    const results = await preprocessFile({ config: CONFIG, inputFilePath: filePath, limit: 10 });
 
     expect(results.isMappingDocument).toEqual(false);
     expect(results.inputData.sheets.length).toEqual(1);
@@ -93,11 +94,23 @@ test("preprocessFile", async () => {
     }
 })
 
+test("preprocessFile::args", async () => {
+    const filePath = join(__dirname, "files", "input_ok.csv");
+    let results = await preprocessFile({ config: CONFIG, inputFilePath: filePath, limit: 1 });
+    
+    expect(results.inputData.sheets.length).toEqual(1);
+    expect(results.inputData.sheets[0].data.length).toEqual(1);
+    
+    results = await preprocessFile({ config: CONFIG, inputFilePath: filePath });
+    expect(results.inputData.sheets.length).toEqual(1);
+    expect(results.inputData.sheets[0].data.length).toEqual(2);
+})
+
 
 
 test("preprocessFile mapping", async () => {
     const filePath = join(__dirname, "files", "input_mapping_ok.csv");
-    const results = await preprocessFile(CONFIG, filePath, 10);
+    const results = await preprocessFile({ config: CONFIG, inputFilePath: filePath, limit: 10 });
 
     expect(results.isMappingDocument).toEqual(true);
     expect(results.inputData.sheets.length).toEqual(1);
@@ -118,7 +131,7 @@ test("preprocessFile mapping invalid", async () => {
     const newConfig = JSON.parse(JSON.stringify(CONFIG))
     newConfig.validations.col_a.push({ op: "options", value: ["NO", "WAY"]})
 
-    const results = await preprocessFile(newConfig, filePath, 10);
+    const results = await preprocessFile({ config: newConfig, inputFilePath: filePath, limit: 10});
 
 
     expect(results.isMappingDocument).toEqual(true);
@@ -130,7 +143,7 @@ test("preprocessFile mapping invalid", async () => {
 test("preprocessFile invalid", async () => {
     const filePath = join(__dirname, "files", "input_invalid.csv");
 
-    const results = await preprocessFile(CONFIG, filePath, 10);
+    const results = await preprocessFile({ config: CONFIG, inputFilePath: filePath, limit: 10});
 
 
     expect(results.isMappingDocument).toEqual(false);
@@ -185,7 +198,13 @@ test("processFile", async () => {
     const filePath = join(__dirname, "files", "input_ok.csv");
     const outputBasePath = join(tmpdir(), "output_test");
 
-    const results = await processFile(CONFIG, outputBasePath, filePath, 10, SUPPORTED_FILE_TYPES.CSV, makeTestHasher );
+    const results = await processFile({
+        config: CONFIG,
+        outputPath: outputBasePath,
+        inputFilePath: filePath,
+        hasherFactory: makeTestHasher,
+        format: SUPPORTED_FILE_TYPES.CSV,
+    });
 
     expect(results.outputFilePaths).toEqual([`${outputBasePath}_OUTPUT.csv`]);
     expect(results.mappingFilePaths).toEqual([`${outputBasePath}_MAPPING.csv`]);
@@ -210,7 +229,7 @@ test("processFile", async () => {
     ])
 
 
-})
+});
 
 test("processMappingFile", async () => {
     const filePath = join(__dirname, "files", "input_ok.csv");
@@ -220,7 +239,7 @@ test("processMappingFile", async () => {
     const newConfig = JSON.parse(JSON.stringify(CONFIG))
     newConfig.algorithm.columns.static = ["col_a", "col_b"];
 
-    const results = await processFile(newConfig, outputBasePath, filePath, 10, SUPPORTED_FILE_TYPES.CSV, makeTestHasher );
+    const results = await processFile({ config: newConfig, outputPath: outputBasePath, inputFilePath: filePath, hasherFactory: makeTestHasher, format: SUPPORTED_FILE_TYPES.CSV, limit: 10});
 
     // expect(results.outputFilePaths).toEqual([`${outputBasePath}_OUTPUT.csv`]);
     expect(results.mappingFilePaths).toEqual([`${outputBasePath}_MAPPING.csv`]);
