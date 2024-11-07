@@ -95,10 +95,11 @@ export interface PreprocessFileResult {
 interface PreProcessFileInput {
     config: Config.Options;
     inputFilePath: string;
+    errorFileOutputPath?: string;
     limit?: number;
 }
 
-export async function preprocessFile({ config, inputFilePath, limit=undefined }: PreProcessFileInput): Promise<PreprocessFileResult> {
+export async function preprocessFile({ config, inputFilePath, errorFileOutputPath=undefined, limit=undefined }: PreProcessFileInput): Promise<PreprocessFileResult> {
     log("------------ preprocessFile -----------------")
 
     let inputFileType = fileTypeOf(inputFilePath);
@@ -131,9 +132,9 @@ export async function preprocessFile({ config, inputFilePath, limit=undefined }:
         validationResultDocument = makeValidationResultDocument(validationResultBaseConfig, validationResult);
 
         // The error file is output to the OS's temporary directory
-        const errorOutputBasePath = path.join(os.tmpdir(), path.basename(inputFilePath));
+        if (!errorFileOutputPath) errorFileOutputPath = path.join(os.tmpdir(), path.basename(inputFilePath));
 
-        validationErrorsOutputFile = writeFileWithConfig(inputFileType, config.destination_errors, validationResultDocument, errorOutputBasePath);
+        validationErrorsOutputFile = writeFileWithConfig(inputFileType, config.destination_errors, validationResultDocument, errorFileOutputPath);
         // ensure that we only return a single value
         if (validationErrorsOutputFile.length > 0) validationErrorsOutputFile = validationErrorsOutputFile[0];
     }
