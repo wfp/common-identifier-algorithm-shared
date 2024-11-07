@@ -153,7 +153,6 @@ export function validateDocumentWithListDict(validatorDict: Validation.FuncMap, 
         let results = sheet.data.map((row) => {
             // do the actual validation
             let results = validateRowWithListDict(validatorDict, row, sheet);
-            console.dir(results, { depth: Infinity })
             let compactResults = Object.keys(results).reduce((memo, col) => {
                 let colResults = results[col];
                 if (colResults.length > 0) {
