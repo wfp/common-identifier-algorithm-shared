@@ -71,9 +71,7 @@ class XlsxEncoder extends EncoderBase {
             log("[XLSX] Written ", temporaryFilePath);
         })
 
-        // add the current file to the list of outputs
-        this.outputPaths.push(fileOutputPath);
-        // otherwise we'll return
+        this.outputPath = fileOutputPath;
         return;
     }
 

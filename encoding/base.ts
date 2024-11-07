@@ -61,7 +61,7 @@ function moveFile(oldPath: string, newPath: string): void {
 
 export class EncoderBase {
     mapping: Config.ColumnMap;
-    outputPaths: string[] = []; // add every file path the encoder has written to this array
+    outputPath: string = ""; // add every file path the encoder has written to this array
     basePath: string = "";
 
     constructor(mapping: Config.ColumnMap) {
@@ -114,7 +114,7 @@ export class EncoderBase {
         // end the document
         this.endDocument(document);
 
-        return this.outputPaths;
+        return this.outputPath;
     }
 
 

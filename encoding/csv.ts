@@ -77,7 +77,7 @@ class CsvEncoder extends EncoderBase {
         });
 
         // add the current file to the list of outputs
-        this.outputPaths.push(outputPath);
+        this.outputPath = outputPath;
 
         log("[CSV] Written", outputPath);
     }

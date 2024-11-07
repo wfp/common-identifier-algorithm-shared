@@ -82,11 +82,11 @@ export function writeFileWithConfig(fileType: SUPPORTED_FILE_TYPES, columnConfig
 // --------------
 
 export interface PreprocessFileResult {
-    inputData: CidDocument;
-    validationResultDocument: CidDocument | undefined;
-    validationResult: Validation.SheetResult[];
-    validationErrorsOutputFile: string[] | string;
+    isValid: boolean;
     isMappingDocument: boolean;
+    data: CidDocument;
+    inputFilePath: string;
+    errorFilePath?: string;
 }
 
 interface PreProcessFileInput {
@@ -114,11 +114,12 @@ export async function preprocessFile({ config, inputFilePath, errorFileOutputPat
         decoded.sheets[0])
     const validationResult = validateDocument(config, decoded, isMappingDocument);
     
-    let validationErrorsOutputFile: string[] | string = "";
-    let validationResultDocument;
+    let isValid: boolean = validationResult.some(sheet => sheet.ok);
+    let validationErrorsOutputFile: string = "";
+    let validationResultDocument: CidDocument | undefined;
 
     // if any sheets contain errors, create an error file
-    if (!validationResult.some(sheet => sheet.ok)){
+    if (!isValid){
 
         // by default the validation results show the "source" section columns
         let validationResultBaseConfig = config.source;
@@ -132,16 +133,14 @@ export async function preprocessFile({ config, inputFilePath, errorFileOutputPat
         if (!errorFileOutputPath) errorFileOutputPath = path.join(os.tmpdir(), path.basename(inputFilePath));
 
         validationErrorsOutputFile = writeFileWithConfig(inputFileType, config.destination_errors, validationResultDocument, errorFileOutputPath);
-        // ensure that we only return a single value
-        if (validationErrorsOutputFile.length > 0) validationErrorsOutputFile = validationErrorsOutputFile[0];
     }
 
     return {
-        inputData: decoded,
-        validationResultDocument,
-        validationResult,
-        validationErrorsOutputFile,
+        isValid,
         isMappingDocument,
+        data: validationResultDocument ? validationResultDocument : decoded,
+        inputFilePath: inputFilePath,
+        errorFilePath: validationErrorsOutputFile
     };
 
 }
