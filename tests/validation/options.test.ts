@@ -15,24 +15,29 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ValidationError } from '../../validation/Validation.js';
-import { makeOptionsValidator } from "../../validation/options.js";
+import { OptionsValidator } from "../../validation/validators/options.js";
 
 test("OptionsValidator", () => {
-    const v = makeOptionsValidator({ op: "options", value: ["A", "B", "AB" ]})
+    const v = new OptionsValidator({ op: "options", value: ["A", "B", "AB" ]})
+    expect(v.validate("")).toEqual({ ok: false, kind: "options", message: 'must be one of: "A", "B", "AB"' });
 
-    expect(v.validate(null)).toBeInstanceOf(ValidationError)
+    expect(v.validate("A")).toEqual({ ok: true, kind: "options" })
+    expect(v.validate("B")).toEqual({ ok: true, kind: "options" })
+    expect(v.validate("AB")).toEqual({ ok: true, kind: "options" })
 
-    expect(v.validate("")).toEqual(v.fail())
-    expect(v.validate("A")).toEqual(v.success())
-    expect(v.validate("B")).toEqual(v.success())
-    expect(v.validate("AB")).toEqual(v.success())
-    expect(v.validate("AAB")).toEqual(v.fail())
-    expect(v.validate(" ")).toEqual(v.fail())
-    expect(v.validate("ab")).toEqual(v.fail())
-})
+    expect(v.validate("AAB")).toEqual({ ok: false, kind: "options", message: 'must be one of: "A", "B", "AB"' })
+    expect(v.validate(" ")).toEqual({ ok: false, kind: "options", message: 'must be one of: "A", "B", "AB"' })
+    expect(v.validate("ab")).toEqual({ ok: false, kind: "options", message: 'must be one of: "A", "B", "AB"' })
+    
+    expect(v.validate(null)).toEqual({ ok: false, kind: "options", message: 'values must be either a number or a string' })
+    expect(v.validate(new Date())).toEqual({ ok: false, kind: "options", message: 'values must be either a number or a string' })
+});
 
 test("OptionsValidator fails for invalid options", () => {
-    expect(() => makeOptionsValidator({ op: "options", value: 123 })).toThrow()
-    expect(() => makeOptionsValidator({ op: "options", value: "[[[" })).toThrow()
+    // @ts-ignore
+    expect(() => new OptionsValidator({ op: "options", value: 123 })).toThrow()
+    // @ts-ignore
+    expect(() => new OptionsValidator({ op: "options", value: "[[[" })).toThrow()
+    // @ts-ignore
+    expect(() => new OptionsValidator({ op: "options", value: [ null, "qwerty", new Date() ]})).toThrow()
 })

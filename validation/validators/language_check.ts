@@ -14,10 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-import { Config } from '../config/Config.js';
-import { ValidatorBase } from './base.js';
-import { SUPPORTED_VALIDATORS } from './Validation.js';
+import { SUPPORTED_VALIDATORS, Validator } from "../Validation.js";
 
 function checkArabicUtf8(v: string) {
     // As of Unicode 15.1, the Arabic script is contained in the following blocks:[3]
@@ -61,56 +58,45 @@ function checkArabicUtf8(v: string) {
         // TODO: somehow add ones above 10xxx
     ];
 
-    const validatorRx = new RegExp(`^[${RX_BASE.join('')}]*$`)
-
+    const validatorRx = new RegExp(`^[${RX_BASE.join('')}]*$`);
     return validatorRx.test(v);
-
-
 }
 
-const CHECKER_FNS = {
-    "arabic": checkArabicUtf8,
-}
+const SUPPORTED_LANGUAGES = [
+    { type: "arabic", value: "Arabic", checker: (v: string) => checkArabicUtf8(v)}
+]
 
-class LanguageCheckValidator extends ValidatorBase {
-    language: keyof typeof CHECKER_FNS;
+export class LanguageCheckValidator implements Validator.Base {
+    kind = SUPPORTED_VALIDATORS.LANGUAGE_CHECK;
+    opts: Validator.Options.LanguageCheck;
+    language: string;
+    languageName: string;
 
-    constructor(language: string, opts: Config.ColumnValidation) {
-        super(SUPPORTED_VALIDATORS.LANGUAGE_CHECK, opts)
-        this.language = language.toLowerCase() as keyof typeof CHECKER_FNS;
+    constructor(opts: Validator.Options.LanguageCheck) {
+        if (typeof opts.value !== 'string') {
+            throw new Error(`LanguageCheck validator must have a 'value' with language name as string -- ${JSON.stringify(opts)}`)
+        }
+
+        // ensure compatibilty
+        const language = opts.value.toLowerCase();
+        
+        // check if there is a regexp value
+        const matched = SUPPORTED_LANGUAGES.find(t => t.type === language);
+        if (!matched) {
+            throw new Error(`LanguageCheck must use a supported language`);
+        }
+        
+        this.language = language;
+        this.languageName = matched.value;
+        this.opts = opts;
     }
 
-    // the default message
-    defaultMessage() {
-        return `only readable ${this.language} characters are supported.`;
-        // return `must be in the language '${this.language}'`;
+    message = () => this.opts.message ? this.opts.message : `only readable ${this.languageName} characters are supported`;
+
+    validate = (value: unknown): Validator.Result => {
+        if (typeof value !== "string") return { ok: false, kind: this.kind, message: "only text values are supported" }
+        if (!checkArabicUtf8(value)) return { ok: false, kind: this.kind, message: this.message() }
+
+        return { ok: true, kind: this.kind }
     }
-
-    validate(value: any) {
-        return CHECKER_FNS[this.language](value) ? this.success() : this.fail();
-    }
-
-}
-
-// Factory function for the LanguageCheckValidator
-export function makeLanguageCheckValidator(opts: Config.ColumnValidation) {
-    let language = opts.value;
-
-    // check if there is a regexp value
-    if (typeof language !== 'string') {
-        throw new Error(`LanguageCheck validator must have a 'value' with language name as string -- ${JSON.stringify(opts)}`)
-    }
-
-    // ensure compatibilty
-    language = language.toLowerCase();
-
-
-    // check if there is a regexp value
-    let matcher = CHECKER_FNS[language.toLowerCase() as keyof typeof CHECKER_FNS];
-    if (!matcher) {
-        throw new Error(`Cannot find field type: '${language}' for field_type validator`)
-    }
-
-    // return a new validator
-    return new LanguageCheckValidator(language, opts);
 }

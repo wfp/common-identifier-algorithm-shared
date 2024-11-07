@@ -14,50 +14,53 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import { DateFieldDiffValidator } from "../../validation/validators/date_field_diff.js";
 
-import { ValidationError } from '../../validation/Validation.js';
-import { makeDateFieldDiffValidator } from '../../validation/date_field_diff.js';
-
-const TEST_ROW = { col_a: "19910101" };
-const TEST_SHEET_PARAMS = { sheet: { name: "", data: [] }, column: "" };
+let TEST_SHEET_PARAMS: any = { row: { col_a: "19910101" }, sheet: { name: "", data: [] }, column: "" };
 
 test("DateFieldDiffValidator", () => {
-    const TEST_CONFIG = { op: "", target: "col_a", value: "-3M:0M" };
-    const v = makeDateFieldDiffValidator(TEST_CONFIG);
-    expect(v.validate("19910102", { row: TEST_ROW, ...TEST_SHEET_PARAMS})).toEqual(v.fail());
-    expect(v.validate("19910202", { row: TEST_ROW, ...TEST_SHEET_PARAMS})).toEqual(v.fail());
+    const v = new DateFieldDiffValidator({ op: "date_field_diff", target: "col_a", value: "-3M:0M" });
+    expect(v.validate("19910102", TEST_SHEET_PARAMS)).toEqual({ ok: false, kind: "date_field_diff", message: "must be within -3 months and col_a" });
+    expect(v.validate("19910202", TEST_SHEET_PARAMS)).toEqual({ ok: false, kind: "date_field_diff", message: "must be within -3 months and col_a" });
 
     // the other side of the edge => valid
-    expect(v.validate("19901201", { row: TEST_ROW, ...TEST_SHEET_PARAMS})).toEqual(v.success());
-    expect(v.validate("19901001", { row: TEST_ROW, ...TEST_SHEET_PARAMS})).toEqual(v.success());
-    expect(v.validate("19920406", { row: TEST_ROW, ...TEST_SHEET_PARAMS})).toEqual(v.fail());
+    expect(v.validate("19901201", TEST_SHEET_PARAMS)).toEqual({ ok: true, kind: "date_field_diff" });
+    expect(v.validate("19901001", TEST_SHEET_PARAMS)).toEqual({ ok: true, kind: "date_field_diff" });
+    expect(v.validate("19920406", TEST_SHEET_PARAMS)).toEqual({ ok: false, kind: "date_field_diff", message: "must be within -3 months and col_a" });
 })
 
 test("DateFieldDiffValidator::positive", () => {
-    let testRow = { col_a: "20241001" }
-    const TEST_CONFIG = { op: "", target: "col_a", value: ":+12M" };
-    const v = makeDateFieldDiffValidator(TEST_CONFIG);
-    expect(v.validate("20241101", { row: testRow, ...TEST_SHEET_PARAMS})).toEqual(v.success());
-    expect(v.validate("20251001", { row: testRow, ...TEST_SHEET_PARAMS})).toEqual(v.success());
-    expect(v.validate("20240930", { row: testRow, ...TEST_SHEET_PARAMS})).toEqual(v.fail());
+    TEST_SHEET_PARAMS.row.col_a = "20241001";
+    const v = new DateFieldDiffValidator({ op: "date_field_diff", target: "col_a", value: ":+12M" });
+    expect(v.validate("20241101", TEST_SHEET_PARAMS)).toEqual({ ok: true, kind: "date_field_diff" });
+    expect(v.validate("20251001", TEST_SHEET_PARAMS)).toEqual({ ok: true, kind: "date_field_diff" });
+    expect(v.validate("20240930", TEST_SHEET_PARAMS)).toEqual({ ok: false, kind: "date_field_diff", message: "must be within col_a and 12 months" });
 })
 
 test("DateFieldDiffValidator fails for invalid values", () => {
-    const TEST_CONFIG = { op: "", target: "col_a", value: "-3M:0M" };
-    const v = makeDateFieldDiffValidator(TEST_CONFIG)
+    const v = new DateFieldDiffValidator({ op: "date_field_diff", target: "col_a", value: "-3M:0M" })
 
-    expect(v.validate(123, { row: TEST_ROW, ...TEST_SHEET_PARAMS })).toBeInstanceOf(ValidationError)
-    expect(v.validate("19910101", { row: {}, ...TEST_SHEET_PARAMS })).toBeInstanceOf(ValidationError)
-    expect(v.validate("19910101", { row: { col_a: "1991/12/21" }, ...TEST_SHEET_PARAMS })).toBeInstanceOf(ValidationError)
+    expect(v.validate(123, TEST_SHEET_PARAMS)).toEqual({ ok: false, kind: "date_field_diff", message: "must be a date"});
+
+    TEST_SHEET_PARAMS.row.col_a = {};
+    expect(v.validate("19910101", TEST_SHEET_PARAMS)).toEqual({ ok: false, kind: "date_field_diff", message: "target column 'col_a' must be a date"});
+    
+    TEST_SHEET_PARAMS.row.col_a = "";
+    expect(v.validate("19910101", TEST_SHEET_PARAMS)).toEqual({ ok: false, kind: "date_field_diff", message: "target column 'col_a' is empty"});
+
+    TEST_SHEET_PARAMS.row.col_a = "1991/12/21";
+    expect(v.validate("19910101", TEST_SHEET_PARAMS)).toEqual({ ok: false, kind: "date_field_diff", message: "target column 'col_a' must be a date"});
 })
 
 test("DateFieldDiffValidator fails for invalid options", () => {
-    // expect(() => makeDateFieldDiffValidator({})).toThrow()
-    // expect(() => makeDateFieldDiffValidator({ op: "date_field_diff", value: { col_a: "A"} })).toThrow()
-    expect(() => makeDateFieldDiffValidator({ op: "date_field_diff", value: 123 })).toThrow()
-    expect(() => makeDateFieldDiffValidator({ op: "date_field_diff", value: "[[[" })).toThrow()
-
-    // expect(() => makeDateFieldDiffValidator({ op: "date_field_diff", target: 123 })).toThrow()
-    expect(() => makeDateFieldDiffValidator({ op: "date_field_diff", target: "col_a", value: 123 })).toThrow()
-    expect(() => makeDateFieldDiffValidator({ op: "date_field_diff", target: "col_a", value: "" })).toThrow()
+    // @ts-ignore
+    expect(() => new DateFieldDiffValidator({})).toThrow()
+    // @ts-ignore
+    expect(() => new DateFieldDiffValidator({ op: "date_field_diff", value: 123 })).toThrow()
+    // @ts-ignore
+    expect(() => new DateFieldDiffValidator({ op: "date_field_diff", value: "[[[" })).toThrow()
+    // @ts-ignore
+    expect(() => new DateFieldDiffValidator({ op: "date_field_diff", target: "col_a", value: 123 })).toThrow()
+    // @ts-ignore
+    expect(() => new DateFieldDiffValidator({ op: "date_field_diff", target: "col_a", value: "" })).toThrow()
 })

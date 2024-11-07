@@ -14,20 +14,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-import { makeFieldTypeValidator } from '../../validation/field_type.js';
+import { FieldTypeValidator } from "../../validation/validators/field_type.js";
 
 test("FieldTypeValidator", () => {
     {
-        let v = makeFieldTypeValidator({ op: "field_type", value: "str" });        
-        expect(v.validate(123)).toEqual(v.fail());
-        expect(v.validate("123")).toEqual(v.success());
-        expect(v.validate(123)?.toString()).toMatch(/text/);
+        let v = new FieldTypeValidator({ op: "field_type", value: "string" });        
+        expect(v.validate(123)).toEqual({ ok: false, kind: "field_type", message: "must be of type: text" });
+        expect(v.validate("123")).toEqual({ ok: true, kind: "field_type" });
     }
     {
-        const v = makeFieldTypeValidator({ op: "field_type", value: "num" })
-        expect(v.validate(123)).toEqual(v.success());
-        expect(v.validate("123")).toEqual(v.fail());
-        expect(v.validate("123")?.toString()).toMatch(/number/)
+        const v = new FieldTypeValidator({ op: "field_type", value: "number" })
+        expect(v.validate(123)).toEqual({ ok: true, kind: "field_type" });
+        expect(v.validate("123")).toEqual({ ok: false, kind: "field_type", message: "must be of type: number" });
     }
 });
+
+test("FieldTypeValidator fails for invalid option value", () => {
+    // @ts-ignore
+    expect(() => new FieldTypeValidator({ op: "field_type", value: 123 })).toThrow()
+    // @ts-ignore
+    expect(() => new FieldTypeValidator({ op: "field_type", value: "[[[" })).toThrow()
+})

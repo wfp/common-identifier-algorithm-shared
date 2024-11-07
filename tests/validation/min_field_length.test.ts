@@ -14,29 +14,29 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-
-import { ValidationError } from "../../validation/Validation.js"
-import { makeMinFieldLengthValidator } from '../../validation/min_field_length.js'
+import { MinFieldLengthValidator } from "../../validation/validators/min_field_length.js"
 
 test("MinFieldLengthValidator", () => {
-    const v = makeMinFieldLengthValidator({ op: "min_field_length", value: 2 })
+    const v = new MinFieldLengthValidator({ op: "min_field_length", value: 2 })
 
-    expect(v.validate("")).toEqual(v.fail())
-    expect(v.validate(" ")).toEqual(v.fail())
+    expect(v.validate("")).toEqual({ ok: false, kind: "min_field_length", message: "must be longer than 2 characters" })
+    expect(v.validate(" ")).toEqual({ ok: false, kind: "min_field_length", message: "must be longer than 2 characters" })
 
-    expect(v.validate("A")).toEqual(v.fail())
-    expect(v.validate("AB")).toEqual(v.success())
-    expect(v.validate("ABC")).toEqual(v.success())
-    expect(v.validate("ABCD")).toEqual(v.success())
+    expect(v.validate("A")).toEqual({ ok: false, kind: "min_field_length", message: "must be longer than 2 characters" })
+    expect(v.validate("AB")).toEqual({ ok: true, kind: "min_field_length" })
+    expect(v.validate("ABC")).toEqual({ ok: true, kind: "min_field_length" })
+    expect(v.validate("ABCD")).toEqual({ ok: true, kind: "min_field_length" })
 
-    expect(v.validate(1)).toEqual(v.fail())
-    expect(v.validate(10)).toEqual(v.success())
-    expect(v.validate(100)).toEqual(v.success())
-    expect(v.validate(1000)).toEqual(v.success())
+    expect(v.validate(1)).toEqual({ ok: false, kind: "min_field_length", message: "must be longer than 2 characters" })
+    expect(v.validate(10)).toEqual({ ok: true, kind: "min_field_length" })
+    expect(v.validate(100)).toEqual({ ok: true, kind: "min_field_length" })
+    expect(v.validate(1000)).toEqual({ ok: true, kind: "min_field_length" })
 
+    expect(v.validate(null)).toEqual({ ok: false, kind: "min_field_length", message: "must be text or a number" })
+    expect(v.validate(new Date())).toEqual({ ok: false, kind: "min_field_length", message: "must be text or a number" })
 })
 
 test("MinFieldLengthValidator fails for invalid options", () => {
-    expect(() => makeMinFieldLengthValidator({ op: "min_field_length", value: "[[[" })).toThrow()
+    // @ts-ignore
+    expect(() => new MinFieldLengthValidator({ op: "min_field_length", value: "[[[" })).toThrow()
 })

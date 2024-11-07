@@ -14,24 +14,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import { SUPPORTED_VALIDATORS, Validation, ValidationError } from "./Validation.js";
+import { DateDiffValidator, DateFieldDiffValidator, FieldTypeValidator, LanguageCheckValidator, 
+         LinkedFieldValidator, MaxFieldLengthValidator, MaxValueValidator, MinFieldLengthValidator,
+         MinValueValidator, OptionsValidator, RegexpValidator, SameValueForAllRowsValidator } from './validators/index.js';
+import { SUPPORTED_VALIDATORS, Validation, Validator } from "./Validation.js";
 import { CidDocument, Sheet } from "../document.js";
+import type { Config } from "../config/Config.js";
 
 // MAIN VALIDATION
 // ---------------
 
 // Validates a single value with a list of validators.
 // The row is passed to allow for cross-column checks
-function validateValueWithList(validatorList: Validation.Function[], value: any, {row, sheet, column}: Validation.Data) {
+function validateValueWithList(validatorList: Validator.Base[], value: any, {row, sheet, column}: Validation.Data) {
     return validatorList.reduce((memo, validator) => {
         // check if the validator says OK
         let result = validator.validate(value, {row, sheet, column});
         // if failed add to the list of errors
-        if (result) {
-            memo.push({ kind: result.kind, msg: result.msg });
-        }
+        if (!result.ok) memo.push(result);
         return memo;
-    }, [] as ValidationError[])
+    }, [] as Validator.Result[])
 }
 
 export function validateRowWithListDict(
@@ -43,11 +45,12 @@ export function validateRowWithListDict(
     // check if all expected columns are present
     let missingColumns = Object.keys(validatorListDict).map((k) => (typeof row[k] === 'undefined') ? k : null).filter(v => v);
 
+
     // Fail if there are missing columns
     if (missingColumns.length > 0) {
         return missingColumns.reduce((memo, c) => {
             if (!c) return memo;
-            return Object.assign(memo, {[c]: [new ValidationError("FIELD_NAME", 'is missing')]})
+            return Object.assign(memo, {[c]: [{ kind: SUPPORTED_VALIDATORS.FIELD_NAME, message: 'is missing'}]})
         }, {});
     }
 
@@ -72,68 +75,30 @@ export function validateRowWithListDict(
 // VALIDATOR FACTORY
 // ------------------
 
-import { makeRegexpValidator } from './regexp.js';
-import { makeOptionsValidator } from './options.js';
-
-import { makeMinFieldLengthValidator } from './min_field_length.js';
-import { makeMaxFieldLengthValidator } from './max_field_length.js';
-import { makeFieldTypeValidator } from './field_type.js';
-import { makeLanguageCheckValidator } from './language_check.js';
-
-import { makeMinValueValidator } from './min_value.js';
-import { makeMaxValueValidator } from './max_value.js';
-
-import { makeDateDiffValidator } from './date_diff.js';
-import { makeDateFieldDiffValidator } from './date_field_diff.js';
-import { makeSameValueForAllRowsValidator } from './same_value_for_all_rows.js';
-import { makeLinkedFieldValidator } from './linked_field.js';
-import { Config } from "../config/Config.js";
-
-const VALIDATOR_FACTORIES = {
-    // Regexp validators have a number of possible names (for ease of use)
-    "regex": makeRegexpValidator,
-    "regexp": makeRegexpValidator,
-    "regex_match": makeRegexpValidator,
-
-    "options": makeOptionsValidator,
-
-    "min_field_length": makeMinFieldLengthValidator,
-    "max_field_length": makeMaxFieldLengthValidator,
-
-    "field_type": makeFieldTypeValidator,
-
-    "language_check": makeLanguageCheckValidator,
-
-    "min_value": makeMinValueValidator,
-    "max_value": makeMaxValueValidator,
-
-    "date_diff": makeDateDiffValidator,
-    "date_field_diff": makeDateFieldDiffValidator,
-
-    "same_value_for_all_rows": makeSameValueForAllRowsValidator,
-    "linked_field": makeLinkedFieldValidator
-};
-
-
-// Factory function to create a validator from an options object.
-//
-// Uses the 'op' value in the object to match the type based on the
-// VALIDATOR_FACTORIES dictionnary
 function makeValidator(opts: Config.ColumnValidation) {
     // check if there is an 'op' in the object
-    let op = opts.op as keyof typeof VALIDATOR_FACTORIES;
+    let op = opts.op as SUPPORTED_VALIDATORS;
     if (typeof op !== 'string') {
         throw new Error(`Validator configuration is missing the 'op' field: ${JSON.stringify(opts)}`);
     }
+    switch(op) {
+        case ("regex_match"): return new RegexpValidator(opts as Validator.Options.RegexMatch);
+        case ("options"): return new OptionsValidator(opts as Validator.Options.Options);
+        case ("field_type"): return new FieldTypeValidator(opts as Validator.Options.FieldType);
+        case ("linked_field"): return new LinkedFieldValidator(opts as Validator.Options.LinkedField);
 
-    // check if there is a value for the key in the factory object
-    let validatorFactory = VALIDATOR_FACTORIES[op];
-    if (typeof validatorFactory !== 'function') {
-        throw new Error(`Cannot find validator for type: '${op}'`);
+        case ("language_check"): return new LanguageCheckValidator(opts as Validator.Options.LanguageCheck);
+        case ("min_field_length"): return new MinFieldLengthValidator(opts as Validator.Options.MinFieldLength);
+        case ("max_field_length"): return new MaxFieldLengthValidator(opts as Validator.Options.MaxFieldLength);
+        case ("min_value"): return new MinValueValidator(opts as Validator.Options.MinValue);
+        case ("max_value"): return new MaxValueValidator(opts as Validator.Options.MaxValue);
+
+        case ("date_diff"): return new DateDiffValidator(opts as Validator.Options.DateDiff);
+        case ("date_field_diff"): return new DateFieldDiffValidator(opts as Validator.Options.DateFieldDiff);
+
+        case ("same_value_for_all_rows"): return new SameValueForAllRowsValidator(opts as Validator.Options.SameValueForAllRows);
+        default: throw new Error(`Cannot find validator for type: '${op}'`);
     }
-
-    // if yes use the factory function
-    return validatorFactory(opts);
 }
 
 // Takes a list of validator options and creates a list of validators from it
@@ -188,6 +153,7 @@ export function validateDocumentWithListDict(validatorDict: Validation.FuncMap, 
         let results = sheet.data.map((row) => {
             // do the actual validation
             let results = validateRowWithListDict(validatorDict, row, sheet);
+            console.dir(results, { depth: Infinity })
             let compactResults = Object.keys(results).reduce((memo, col) => {
                 let colResults = results[col];
                 if (colResults.length > 0) {
@@ -230,7 +196,7 @@ export function makeValidationResultDocument(sourceConfig: Config.Options["sourc
 
                 // find the column name
                 let columnHumanName = fieldNameMapping[error.column] || error.column;
-                return error.errors.map(({ msg }) => `${columnHumanName} ${msg};`).join("\n");
+                return error.errors.map(({ message }) => `${columnHumanName} ${message};`).join("\n");
             });
 
 

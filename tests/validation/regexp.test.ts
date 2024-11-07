@@ -14,25 +14,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-import { ValidationError } from '../../validation/Validation.js'
-import { makeRegexpValidator } from '../../validation/regexp.js'
+import { RegexpValidator } from "../../validation/validators/regexp.js";
 
 test("RegexpValidator", () => {
-    const v = makeRegexpValidator({ op: "regex_match", value: "[a-eA-E0-9]*" })
+    const v = new RegexpValidator({ op: "regex_match", value: "[a-eA-E0-9]*" });
 
-    expect(v.validate(null)).toBeInstanceOf(ValidationError)
-
-    expect(v.validate("")).toEqual(v.success())
-    expect(v.validate("A")).toEqual(v.success())
-    expect(v.validate("Ac876")).toEqual(v.success())
-
-    expect(v.validate("AF876")).toEqual(v.fail())
-    expect(v.validate(" ")).toEqual(v.fail())
-    expect(v.validate("fff")).toEqual(v.fail())
+    expect(v.validate("")).toEqual({ ok: true, kind: "regex_match" });
+    expect(v.validate("A")).toEqual({ ok: true, kind: "regex_match" });
+    expect(v.validate("Ac876")).toEqual({ ok: true, kind: "regex_match" });
+    
+    expect(v.validate(undefined)).toEqual({ ok: false, kind: "regex_match", message: "must not be empty" })
+    expect(v.validate(null)).toEqual({ ok: false, kind: "regex_match", message: "must not be empty" })
+    
+    expect(v.validate("AF876")).toEqual({ ok: false, kind: "regex_match", message: "must match regular expression /^[a-eA-E0-9]*$/" })
+    expect(v.validate(" ")).toEqual({ ok: false, kind: "regex_match", message: "must match regular expression /^[a-eA-E0-9]*$/" })
+    expect(v.validate("fff")).toEqual({ ok: false, kind: "regex_match", message: "must match regular expression /^[a-eA-E0-9]*$/" })
 })
 
 test("RegexpValidator fails for invalid regexp", () => {
-    expect(() => makeRegexpValidator({ op: "regex_match", value: 123 })).toThrow()
-    expect(() => makeRegexpValidator({ op: "regex_match", value: "[[[" })).toThrow()
+    // @ts-ignore
+    expect(() => new RegexpValidator({ op: "regex_match", value: 123 })).toThrow()
+    // @ts-ignore
+    expect(() => new RegexpValidator({ op: "regex_match", value: "[[[" })).toThrow()
 })

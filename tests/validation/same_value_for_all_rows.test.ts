@@ -14,10 +14,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-import { Validation, ValidationError } from '../../validation/Validation.js'
-import { makeSameValueForAllRowsValidator } from '../../validation/same_value_for_all_rows.js';
-
+import { Validation } from "../../validation/Validation.js"
+import { SameValueForAllRowsValidator } from "../../validation/validators/same_value_for_all_rows.js"
 
 const TEST_SHEET = {
     name: "TEST",
@@ -26,19 +24,18 @@ const TEST_SHEET = {
     ]
 }
 test("SameValueForAllRowsValidator", () => {
-    const v = makeSameValueForAllRowsValidator({ op: "", value: ""})
+    const v = new SameValueForAllRowsValidator({ op: "same_value_for_all_rows", value: ""})
 
     const contextA: Validation.Data = { sheet: TEST_SHEET, column: "col_a", row: [] }
     const contextB: Validation.Data = { sheet: TEST_SHEET, column: "col_b", row: [] }
 
-    expect(v.validate("A", contextA )).toEqual(v.success());
-    expect(v.validate("B", contextA )).toEqual(v.fail());
-    expect(v.validate("A0", contextA )).toEqual(v.fail());
+    expect(v.validate("A", contextA )).toEqual({ ok: true, kind: "same_value_for_all_rows"});
+    expect(v.validate("B", contextA )).toEqual({ ok: false, kind: "same_value_for_all_rows", message: "must have identical values in the column" });
+    expect(v.validate("A0", contextA )).toEqual({ ok: false, kind: "same_value_for_all_rows", message: "must have identical values in the column" });
 
-    expect(v.validate("B", contextB )).toEqual(v.success());
-    expect(v.validate("A", contextB )).toEqual(v.fail());
-    expect(v.validate("B0", contextB )).toEqual(v.fail());
-
-    expect(v.validate(null, contextB)).toBeInstanceOf(ValidationError)
-
+    expect(v.validate("B", contextB )).toEqual({ ok: true, kind: "same_value_for_all_rows"});
+    expect(v.validate("A", contextB )).toEqual({ ok: false, kind: "same_value_for_all_rows", message: "must have identical values in the column" });
+    expect(v.validate("B0", contextB )).toEqual({ ok: false, kind: "same_value_for_all_rows", message: "must have identical values in the column" });
+    
+    expect(() => v.validate("B0")).toThrow();
 })

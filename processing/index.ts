@@ -21,7 +21,7 @@ import os from 'node:os';
 import { Sheet, CidDocument, SUPPORTED_FILE_TYPES } from '../document.js';
 
 // inject used algo here
-import { REGION, makeHasher } from "../../active_algorithm.js";
+import { makeHasher } from "../../active_algorithm.js";
 
 import { encoderForFile } from '../encoding/index.js';
 import { decoderForFile, fileTypeOf } from '../decoding/index.js';
@@ -196,7 +196,6 @@ export async function processFile(
         outputData: result,
         outputFilePaths: mainOutputFiles,
         mappingFilePaths,
-        // provide a complete list of output files
         allOutputPaths: mainOutputFiles.concat(mappingFilePaths),
     };
 }

@@ -14,30 +14,29 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-
-import { ValidationError } from '../../validation/Validation.js';
-import {makeMaxFieldLengthValidator} from '../../validation/max_field_length.js';
+import { MaxFieldLengthValidator } from "../../validation/validators/max_field_length.js"
 
 test("MaxFieldLengthValidator", () => {
-    const v = makeMaxFieldLengthValidator({ op: "max_field_length", value: 2 })
+    const v = new MaxFieldLengthValidator({ op: "max_field_length", value: 2 })
 
-    expect(v.validate(null)).toBeInstanceOf(ValidationError)
+    expect(v.validate("")).toEqual({ ok: true, kind: "max_field_length" });
+    expect(v.validate(" ")).toEqual({ ok: true, kind: "max_field_length" });
 
-    expect(v.validate("")).toEqual(v.success())
-    expect(v.validate(" ")).toEqual(v.success())
+    expect(v.validate("A")).toEqual({ ok: true, kind: "max_field_length" });
+    expect(v.validate("AB")).toEqual({ ok: true, kind: "max_field_length" });
+    expect(v.validate("ABC")).toEqual({ ok: false, kind: "max_field_length", message: "must be shorter than 2 characters" });
+    expect(v.validate("ABCD")).toEqual({ ok: false, kind: "max_field_length", message: "must be shorter than 2 characters" });
 
-    expect(v.validate("A")).toEqual(v.success())
-    expect(v.validate("AB")).toEqual(v.success())
-    expect(v.validate("ABC")).toEqual(v.fail())
-    expect(v.validate("ABCD")).toEqual(v.fail())
-
-    expect(v.validate(1)).toEqual(v.success())
-    expect(v.validate(10)).toEqual(v.success())
-    expect(v.validate(100)).toEqual(v.fail())
-    expect(v.validate(1000)).toEqual(v.fail())
+    expect(v.validate(1)).toEqual({ ok: true, kind: "max_field_length" });
+    expect(v.validate(10)).toEqual({ ok: true, kind: "max_field_length" });
+    expect(v.validate(100)).toEqual({ ok: false, kind: "max_field_length", message: "must be shorter than 2 characters" });
+    expect(v.validate(1000)).toEqual({ ok: false, kind: "max_field_length", message: "must be shorter than 2 characters" });
+    
+    expect(v.validate(null)).toEqual({ ok: false, kind: "max_field_length", message: "must be text or a number" })
+    expect(v.validate(new Date())).toEqual({ ok: false, kind: "max_field_length", message: "must be text or a number" })
 })
 
 test("MaxFieldLengthValidator fails for invalid options", () => {
-    expect(() => makeMaxFieldLengthValidator({ op: "max_field_length", value: "[[[" })).toThrow()
+    // @ts-ignore
+    expect(() => new MaxFieldLengthValidator({ op: "max_field_length", value: "[[[" })).toThrow()
 })

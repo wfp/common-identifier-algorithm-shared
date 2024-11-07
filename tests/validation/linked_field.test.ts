@@ -14,18 +14,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import { LinkedFieldValidator } from "../../validation/validators/linked_field.js";
 
-import { makeLinkedFieldValidator } from '../../validation/linked_field.js';
-
-const TEST_CONFIG = { op: "linked_field", target: "col_a"}
-const TEST_SHEET_PARAMS = { sheet: { name: "", data: [] }, column: "" };
+let TEST_SHEET_PARAMS = { row: { col_a: "b" }, sheet: { name: "", data: [] }, column: "" };
 
 test("LinkedFieldValidator", () => {
-    const v = makeLinkedFieldValidator(TEST_CONFIG);
-    let TEST_ROW = { "col_a": "b" }
-    expect(v.validate("a", { row: TEST_ROW, ...TEST_SHEET_PARAMS})).toEqual(v.success())
-    expect(v.validate("", { row: TEST_ROW, ...TEST_SHEET_PARAMS})).toEqual(v.success()) // no input value, no check
+    const v = new LinkedFieldValidator({ op: "linked_field", target: "col_a" });
 
-    TEST_ROW = { "col_a": "" }
-    expect(v.validate("a", { row: TEST_ROW, ...TEST_SHEET_PARAMS})?.msg).toEqual("is linked with field 'col_a' which cannot be empty")
+    expect(v.validate("a", TEST_SHEET_PARAMS)).toEqual({ ok: true, kind: "linked_field" })
+    expect(v.validate("", TEST_SHEET_PARAMS)).toEqual({ ok: true, kind: "linked_field" })
+
+    TEST_SHEET_PARAMS.row.col_a = ""
+    expect(v.validate("a", TEST_SHEET_PARAMS)).toEqual({ ok: false, kind: "linked_field", message: "is linked with field 'col_a' which cannot be empty"})
+
+    expect(() => v.validate("a")).toThrow()
 });
+
+test("LinkedFieldValidator fails for invalid option value", () => {
+    // @ts-ignore
+    expect(() => new FieldTypeValidator({ op: "field_type", value: 123 })).toThrow()
+})

@@ -15,7 +15,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { parseDateDiff, isValidDateDiff, attemptToParseDate, formatDateWithDefaultFormat, isDateInRange, ParsedDateDiff } from '../../validation/date_shared.js'
+import { parseDateDiff, isValidDateDiff, attemptToParseDate, formatDateWithDefaultFormat, isDateInRange, ParsedDateDiff } from '../../validation/validators/date_shared.js'
 import { UTCDate } from '@date-fns/utc';
 
 test("parseDateRangeDiff", () => {

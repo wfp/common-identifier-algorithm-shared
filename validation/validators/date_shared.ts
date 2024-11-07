@@ -18,12 +18,9 @@ import {
     Duration,
     parse as date_parse,
     add as date_add,
-    compareAsc as date_compareAsc,
     isValid as date_isValid,
     formatDate,
     isWithinInterval,
-    format,
-    parseISO
 } from "date-fns";
 import { utc, UTCDate } from '@date-fns/utc';
 
