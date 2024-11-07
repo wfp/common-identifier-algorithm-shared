@@ -20,9 +20,6 @@ import os from 'node:os';
 
 import { Sheet, CidDocument, SUPPORTED_FILE_TYPES } from '../document.js';
 
-// inject used algo here
-import { makeHasher } from "../../active_algorithm.js";
-
 import { encoderForFile } from '../encoding/index.js';
 import { decoderForFile, fileTypeOf } from '../decoding/index.js';
 
@@ -164,12 +161,12 @@ interface ProcessFileInput {
     config: Config.Options,
     outputPath:string,
     inputFilePath: string,
-    hasherFactory?: makeHasherFunction,
+    hasherFactory: makeHasherFunction,
     format?: SUPPORTED_FILE_TYPES,
     limit?: number,
 }
 
-export async function processFile({config, outputPath, inputFilePath, hasherFactory=makeHasher, format=undefined, limit=undefined, }: ProcessFileInput): Promise<ProcessFileResult> {
+export async function processFile({config, outputPath, inputFilePath, hasherFactory, format=undefined, limit=undefined, }: ProcessFileInput): Promise<ProcessFileResult> {
     log("------------ processFile -----------------")
 
     const inputFileType = fileTypeOf(inputFilePath);
