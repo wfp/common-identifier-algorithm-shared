@@ -150,10 +150,9 @@ export async function preprocessFile({ config, inputFilePath, errorFileOutputPat
 // ----------
 
 export interface ProcessFileResult {
-    outputData: CidDocument;
-    outputFilePaths: string[];
-    mappingFilePaths: string[];
-    allOutputPaths: string[];
+    isMappingDocument: boolean;
+    data: CidDocument;
+    outputPaths: string[]
 }
 
 interface ProcessFileInput { 
@@ -191,15 +190,13 @@ export async function processFile({config, outputPath, inputFilePath, hasherFact
         config.destination_map,
         decoded.sheets[0])
     // output the base document
-    const mainOutputFiles = isMappingDocument ? [] : writeFileWithConfig(outputFileType, config.destination, result, outputPath);
+    const mainOutputFile = isMappingDocument ? "" : writeFileWithConfig(outputFileType, config.destination, result, outputPath);
     // output the mapping document
-    const mappingFilePaths = writeFileWithConfig(outputFileType, config.destination_map, result, outputPath);
+    const mappingFilePath = writeFileWithConfig(outputFileType, config.destination_map, result, outputPath);
 
     return {
-        // inputData: decoded,
-        outputData: result,
-        outputFilePaths: mainOutputFiles,
-        mappingFilePaths,
-        allOutputPaths: mainOutputFiles.concat(mappingFilePaths),
+        isMappingDocument,
+        data: result,
+        outputPaths: isMappingDocument ? [ mappingFilePath ] : [ mainOutputFile, mappingFilePath ]
     };
 }
