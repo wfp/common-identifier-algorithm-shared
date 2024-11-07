@@ -115,7 +115,7 @@ export async function preprocessFile({ config, inputFilePath, errorFileOutputPat
     const validationResult = validateDocument(config, decoded, isMappingDocument);
     
     let isValid: boolean = validationResult.some(sheet => sheet.ok);
-    let validationErrorsOutputFile: string = "";
+    let validationErrorsOutputFile: string | undefined;
     let validationResultDocument: CidDocument | undefined;
 
     // if any sheets contain errors, create an error file

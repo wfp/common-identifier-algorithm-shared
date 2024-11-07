@@ -75,35 +75,24 @@ test("preprocessFile", async () => {
     const filePath = join(__dirname, "files", "input_ok.csv");
     const results = await preprocessFile({ config: CONFIG, inputFilePath: filePath, limit: 10 });
 
+    expect(results.data.sheets.length).toEqual(1);
+    expect(results.data.sheets[0].data[0]).toEqual({col_a: "A0", col_b: "B0" });
+    expect(results.isValid).toEqual(true);
     expect(results.isMappingDocument).toEqual(false);
-    expect(results.inputData.sheets.length).toEqual(1);
-    expect(results.inputData.sheets[0].data[0]).toEqual({
-        col_a: "A0", col_b: "B0"
-    });
-
-
-    expect(results.validationResult.length).toEqual(1);
-    expect(results.validationResult[0].sheet).toEqual("Sheet1");
-    expect(results.validationResult[0].ok).toEqual(true);
-
-
-    for (const rowResult of results.validationResult[0].results) {
-        expect(rowResult.ok).toEqual(true)
-        expect(rowResult.errors).toEqual([])
-
-    }
+    expect(results.inputFilePath).toEqual(filePath);
+    expect(results.errorFilePath).toEqual(undefined);
 })
 
 test("preprocessFile::args", async () => {
     const filePath = join(__dirname, "files", "input_ok.csv");
     let results = await preprocessFile({ config: CONFIG, inputFilePath: filePath, limit: 1 });
     
-    expect(results.inputData.sheets.length).toEqual(1);
-    expect(results.inputData.sheets[0].data.length).toEqual(1);
+    expect(results.data.sheets.length).toEqual(1);
+    expect(results.data.sheets[0].data.length).toEqual(1);
     
     results = await preprocessFile({ config: CONFIG, inputFilePath: filePath });
-    expect(results.inputData.sheets.length).toEqual(1);
-    expect(results.inputData.sheets[0].data.length).toEqual(2);
+    expect(results.data.sheets.length).toEqual(1);
+    expect(results.data.sheets[0].data.length).toEqual(2);
 })
 
 
@@ -112,17 +101,13 @@ test("preprocessFile mapping", async () => {
     const filePath = join(__dirname, "files", "input_mapping_ok.csv");
     const results = await preprocessFile({ config: CONFIG, inputFilePath: filePath, limit: 10 });
 
+    expect(results.data.sheets.length).toEqual(1);
+    expect(results.data.sheets[0].data[0]).toEqual({ col_a: "A0" });
+
+    expect(results.isValid).toEqual(true);
     expect(results.isMappingDocument).toEqual(true);
-    expect(results.inputData.sheets.length).toEqual(1);
-    expect(results.inputData.sheets[0].data[0]).toEqual({
-        col_a: "A0"
-    });
-
-    expect(results.validationResult.length).toEqual(1);
-    expect(results.validationResult[0].sheet).toEqual("Sheet1");
-    expect(results.validationResult[0].ok).toEqual(true);
-
-
+    expect(results.inputFilePath).toEqual(filePath);
+    expect(results.errorFilePath).toEqual(undefined);
 })
 
 test("preprocessFile mapping invalid", async () => {
@@ -133,11 +118,8 @@ test("preprocessFile mapping invalid", async () => {
 
     const results = await preprocessFile({ config: newConfig, inputFilePath: filePath, limit: 10});
 
-
     expect(results.isMappingDocument).toEqual(true);
-    expect(results.validationResult[0].ok).toEqual(false);
-
-
+    expect(results.isValid).toEqual(false);
 })
 
 test("preprocessFile invalid", async () => {
@@ -147,28 +129,15 @@ test("preprocessFile invalid", async () => {
 
 
     expect(results.isMappingDocument).toEqual(false);
-    expect(results.inputData.sheets.length).toEqual(1);
-    expect(results.inputData.sheets[0].data[0]).toEqual({ col_a: "A0", col_b: "B0" });
-    expect(results.inputData.sheets[0].data[1]).toEqual({ col_a: "A1 TOO LONG", col_b: "B1" });
+    expect(results.data.sheets.length).toEqual(1);
+    expect(results.data.sheets[0].data[0]).toEqual({ col_a: "A0", col_b: "B0", errors: "", row_number: 2 });
+    expect(results.data.sheets[0].data[1]).toEqual({ col_a: "A1 TOO LONG", col_b: "B1", errors: "A must be shorter than 2 characters;", "row_number": 3 });
 
+    expect(results.isValid).toEqual(false);
 
-    expect(results.validationResult.length).toEqual(1);
-    expect(results.validationResult[0].sheet).toEqual("Sheet1");
-    expect(results.validationResult[0].ok).toEqual(false);
-
-
-    const rr = results.validationResult[0].results;
-
-    expect(rr[0].ok).toEqual(true)
-
-    expect(rr[1].ok).toEqual(false)
-    expect(rr[1].errors.length).toEqual(1)
-    expect(rr[1].errors[0].column).toEqual("col_a")
-
-    const errorFile = results.validationErrorsOutputFile;
+    const errorFile = results.errorFilePath;
     expect(errorFile).not.toEqual(undefined)
     expect(existsSync(errorFile as string)).toEqual(true)
-
 })
 
 
@@ -206,14 +175,11 @@ test("processFile", async () => {
         format: SUPPORTED_FILE_TYPES.CSV,
     });
 
-    expect(results.outputFilePaths).toEqual([`${outputBasePath}_OUTPUT.csv`]);
-    expect(results.mappingFilePaths).toEqual([`${outputBasePath}_MAPPING.csv`]);
-    expect(results.allOutputPaths).toEqual([
-        `${outputBasePath}_OUTPUT.csv`, `${outputBasePath}_MAPPING.csv`
-    ])
+    expect(results.outputFilePath).toEqual(`${outputBasePath}_OUTPUT.csv`);
+    expect(results.mappingFilePath).toEqual(`${outputBasePath}_MAPPING.csv`);
 
-    expect(results.outputData.sheets.length).toEqual(1)
-    const [row1, row2] = results.outputData.sheets[0].data;
+    expect(results.data.sheets.length).toEqual(1)
+    const [row1, row2] = results.data.sheets[0].data;
 
     expect(row1.col_a).toEqual("A0")
     expect(row1.test).toEqual("TEST A0")
@@ -242,13 +208,11 @@ test("processMappingFile", async () => {
     const results = await processFile({ config: newConfig, outputPath: outputBasePath, inputFilePath: filePath, hasherFactory: makeTestHasher, format: SUPPORTED_FILE_TYPES.CSV, limit: 10});
 
     // expect(results.outputFilePaths).toEqual([`${outputBasePath}_OUTPUT.csv`]);
-    expect(results.mappingFilePaths).toEqual([`${outputBasePath}_MAPPING.csv`]);
-    expect(results.allOutputPaths).toEqual([
-        `${outputBasePath}_MAPPING.csv`
-    ])
+    expect(results.mappingFilePath).toEqual(`${outputBasePath}_MAPPING.csv`);
+    expect(results.outputFilePath).toEqual(undefined);
 
-    expect(results.outputData.sheets.length).toEqual(1)
-    const [row1, row2] = results.outputData.sheets[0].data;
+    expect(results.data.sheets.length).toEqual(1)
+    const [row1, row2] = results.data.sheets[0].data;
 
     expect(row1.col_a).toEqual("A0")
     expect(row1.test).toEqual("TEST A0 B0")
