@@ -25,7 +25,7 @@ import { makeConfigStore } from '../../config/configStore.js';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 test("ConfigStore default options", async () => {
-    const c = makeConfigStore();
+    const c = makeConfigStore({ region: "ABC" });
 
     expect(c.getConfigFilePath()).toMatch(/config\.[A-Z]{3}\.json$/)
     expect(c.getBackupConfigFilePath()).toMatch(/config\.backup\.(toml|json)/)
@@ -62,7 +62,7 @@ function placeTestConfigFiles(basePathPrefix: string) {
 test("ConfigStore loading", () => {
     const basePath = placeTestConfigFiles("ConfigStore-normal");
 
-    const c = makeConfigStore(makeTestConfig(basePath));
+    const c = makeConfigStore({ storeConfig: makeTestConfig(basePath)});
 
     c.boot();
 
@@ -93,7 +93,7 @@ test("ConfigStore backup loading", () => {
     const basePath = placeTestConfigFiles("ConfigStore-backup");
     fs.unlinkSync(join(basePath, CONFIG_FILE_NAME));
 
-    const c = makeConfigStore(makeTestConfig(basePath));
+    const c = makeConfigStore({ storeConfig: makeTestConfig(basePath)});
 
     c.boot();
 
@@ -123,7 +123,7 @@ test("ConfigStore error loading", () => {
     fs.unlinkSync(join(basePath, CONFIG_FILE_NAME));
     fs.unlinkSync(join(basePath, BACKUP_CONFIG_FILE_NAME));
 
-    const c = makeConfigStore(makeTestConfig(basePath));
+    const c = makeConfigStore({ storeConfig: makeTestConfig(basePath)});
 
     c.boot();
 
@@ -144,7 +144,7 @@ test("ConfigStore saving and loading user config", () => {
     fs.unlinkSync(join(basePath, CONFIG_FILE_NAME));
     // fs.unlinkSync(join(basePath, BACKUP_CONFIG_FILE_NAME));
 
-    const c = makeConfigStore(makeTestConfig(basePath));
+    const c = makeConfigStore({ storeConfig: makeTestConfig(basePath)});
 
     c.boot();
     expect(c.isUsingBackupConfig).toEqual(true)
@@ -210,7 +210,7 @@ test("ConfigStore app config TnS", () => {
     const basePath = placeTestConfigFiles("ConfigStore-appconfig");
 
     {
-        const c = makeConfigStore(makeTestConfig(basePath));
+        const c = makeConfigStore({ storeConfig: makeTestConfig(basePath)});
         c.boot();
 
         expect(c.hasAcceptedTermsAndConditions()).toEqual(false);
@@ -219,7 +219,7 @@ test("ConfigStore app config TnS", () => {
     }
     // should keep between instantiations
     {
-        const c = makeConfigStore(makeTestConfig(basePath));
+        const c = makeConfigStore({ storeConfig: makeTestConfig(basePath)});
         c.boot();
 
         expect(c.hasAcceptedTermsAndConditions()).toEqual(true);

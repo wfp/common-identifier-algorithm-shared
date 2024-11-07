@@ -25,28 +25,9 @@ import { loadConfig, CONFIG_FILE_ENCODING } from './loadConfig.js';
 import { loadAppConfig, saveAppConfig, DEFAULT_APP_CONFIG } from './appConfig.js';
 import {appDataLocation} from './utils.js';
 
-// The current region name comes from the active algorithm
-import { REGION, makeHasher } from '../../active_algorithm.js';
 import { AppConfigData, Config } from './Config.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-
-const APP_DIR_NAME = `commonid-tool-${REGION.toLowerCase()}`;
-const CONFIG_FILE_NAME = `config.${REGION}.json`;
-const APP_CONFIG_FILE_NAME = `appconfig.${REGION}.json`;
-
-// the path of the application's data files
-const APP_DIR_PATH = join(appDataLocation(), APP_DIR_NAME);
-
-// the path of the store configuration file
-const CONFIG_FILE_PATH = join(APP_DIR_PATH, CONFIG_FILE_NAME);
-
-// the path of the application config file (containing config-independent settings)
-const APP_CONFIG_FILE_PATH = join(APP_DIR_PATH, APP_CONFIG_FILE_NAME);
-
-// TODO: if used without the app, this should be injected
-const BACKUP_CONFIG_FILE_PATH = join(__dirname, "..", "..", "config.backup.toml");
-
 
 
 // Ensure the application's config file directory exists
@@ -74,14 +55,6 @@ interface ConfigStorePaths {
     appConfigFilePath: string,
     backupConfigFilePath: string,
     region: string
-}
-
-// Default configuration for the store
-const DEFAULT_CONFIG_STORE_CONFIG: ConfigStorePaths = {
-    configFilePath: CONFIG_FILE_PATH,
-    appConfigFilePath: APP_CONFIG_FILE_PATH,
-    backupConfigFilePath: BACKUP_CONFIG_FILE_PATH,
-    region: REGION,
 }
 
 export class ConfigStore {
@@ -307,6 +280,33 @@ export class ConfigStore {
 
 }
 
-export function makeConfigStore(storeConfig=DEFAULT_CONFIG_STORE_CONFIG) {
+export function makeConfigStore({region, storeConfig}: {region?: string, storeConfig?: ConfigStorePaths}) {
+    if (!storeConfig) {
+        if (!region) throw new Error("Region must be provided if storeConfig is not.")
+        const APP_DIR_NAME = `commonid-tool-${region.toLowerCase()}`;
+        const CONFIG_FILE_NAME = `config.${region}.json`;
+        const APP_CONFIG_FILE_NAME = `appconfig.${region}.json`;
+
+        // the path of the application's data files
+        const APP_DIR_PATH = join(appDataLocation(), APP_DIR_NAME);
+
+        // the path of the store configuration file
+        const CONFIG_FILE_PATH = join(APP_DIR_PATH, CONFIG_FILE_NAME);
+
+        // the path of the application config file (containing config-independent settings)
+        const APP_CONFIG_FILE_PATH = join(APP_DIR_PATH, APP_CONFIG_FILE_NAME);
+
+        // TODO: if used without the app, this should be injected
+        const BACKUP_CONFIG_FILE_PATH = join(__dirname, "..", "..", "config.backup.toml");
+
+        // Default configuration for the store
+        const DEFAULT_CONFIG_STORE_CONFIG: ConfigStorePaths = {
+            configFilePath: CONFIG_FILE_PATH,
+            appConfigFilePath: APP_CONFIG_FILE_PATH,
+            backupConfigFilePath: BACKUP_CONFIG_FILE_PATH,
+            region: region,
+        }
+        return new ConfigStore(DEFAULT_CONFIG_STORE_CONFIG)
+    }
     return new ConfigStore(storeConfig);
 }
