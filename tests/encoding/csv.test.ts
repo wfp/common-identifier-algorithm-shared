@@ -64,6 +64,9 @@ test("makeCsvEncoder creation", () => {
     e.encodeDocument(TEST_DOC, test_output_path)
 
     expect(readFileSync(test_output_path_postfixed, 'utf-8')).toEqual("A,B\nA0,B0\nA1,B1\n")
+    
+    if (existsSync(test_output_path_postfixed)) {
+        unlinkSync(test_output_path_postfixed);
+    }
 
-    unlinkSync(test_output_path_postfixed);
 })

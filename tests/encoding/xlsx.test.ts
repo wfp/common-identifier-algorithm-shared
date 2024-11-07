@@ -77,5 +77,7 @@ test("makeXlsxEncoder creation", () => {
         {A: "A1", B: "B1"},
     ])
 
-    unlinkSync(test_output_path_postfixed);
+    if (existsSync(test_output_path_postfixed)) {
+        unlinkSync(test_output_path_postfixed);
+    }
 })
