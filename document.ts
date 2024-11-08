@@ -25,18 +25,11 @@ export type RawData = Array<Array<any>>;
 export type MappedData = { [key: string]: any };
 
 // The data class describing a sheet
-export class Sheet {
+export class CidDocument {
     name: string;
     data: MappedData[];
     constructor(name: string, data: MappedData[]) {
         this.name = name;
         this.data = data;
-    }
-}
-
-export class CidDocument {
-    sheets: Sheet[];
-    constructor(sheets: Sheet[]) {
-        this.sheets = sheets;
     }
 }

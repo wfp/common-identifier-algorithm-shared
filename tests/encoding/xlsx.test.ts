@@ -33,13 +33,12 @@ const TEST_MAPPING = {
 }
 
 const TEST_DOC = {
-        sheets: [
-            { name: "sheet1", data: [
-                {col_a: "A0", col_b: "B0" },
-                {col_a: "A1", col_b: "B1" },
-            ]}
-        ]
-    };
+    name: "sheet1",
+    data: [
+        {col_a: "A0", col_b: "B0" },
+        {col_a: "A1", col_b: "B1" },
+    ]
+};
 
 test("makeXlsxEncoder creation", () => {
     const e = makeXlsxEncoder(TEST_MAPPING);

@@ -34,22 +34,12 @@ const TEST_MAPPING: Config.ColumnMap = {
 }
 
 const TEST_DOC: CidDocument = {
-        sheets: [
-            { name: "sheet1", data: [
-                {col_a: "A0", col_b: "B0" },
-                {col_a: "A1", col_b: "B1" },
-            ]}
-        ]
-    };
-
-// test("fail when calling without calling startDocument before", () => {
-//     const e = makeCsvEncoder(TEST_MAPPING);
-
-//     // fail when calling writeSheet whout
-//     expect(() => { e.writeSheet("sheet", { current:0, length:1 }) } ).toThrow()
-//     expect(() => { e.encodeDocument("sheet", "config", { current:0, length:1 }) } ).toThrow()
-
-// })
+    name: "qwerty",
+    data: [
+            {col_a: "A0", col_b: "B0" },
+            {col_a: "A1", col_b: "B1" },
+    ]
+};
 
 test("makeCsvEncoder creation", () => {
     const e = makeCsvEncoder(TEST_MAPPING);

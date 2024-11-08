@@ -20,7 +20,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { lightFormat } from "date-fns";
 import { Config } from '../config/Config.js';
-import { CidDocument, Sheet } from '../document.js';
+import { CidDocument } from '../document.js';
 import Debug from 'debug';
 const log = Debug('CID:Encoding')
 
@@ -95,25 +95,16 @@ export class EncoderBase {
     }
 
     // Writes a Sheet to the pre-determined output
-    writeSheet(sheet: Sheet, config?: { current?: number, length?: number }) {
+    writeDocument(document: CidDocument) {
         throw new Error("not implemented");
     }
 
     // Wraps encoding a whole document using this encoder.
     // Returns the list of files output
     encodeDocument(document: CidDocument, outputPath: string) {
-        // start the document
         this.startDocument(outputPath);
-
-        // write all sheets to the document
-        document.sheets.forEach((sheet, i) => {
-            // write the sheet and allow the writer to know how many sheets are there
-            this.writeSheet(sheet, { length: document.sheets.length });
-        });
-
-        // end the document
+        this.writeDocument(document)
         this.endDocument(document);
-
         return this.outputPath;
     }
 

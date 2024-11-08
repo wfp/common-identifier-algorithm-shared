@@ -20,7 +20,7 @@ import fs from 'node:fs';
 import { stringify } from 'csv-stringify/sync';
 import { EncoderBase } from './base.js';
 import { Config } from '../config/Config.js';
-import type { Sheet } from '../document.js';
+import type { CidDocument } from '../document.js';
 
 import Debug from 'debug';
 const log = Debug('CID:CSVEncoder')
@@ -46,40 +46,37 @@ class CsvEncoder extends EncoderBase {
         return;
     }
 
-    // Writes a Sheet to the pre-determined output
-    writeSheet(sheet: Sheet, { length }: { length: number }) {
+    // Writes a document to the pre-determined output
+    writeDocument(document: CidDocument) {
         // no base path means no document yet, so we'll skip
         if (!this.basePath) {
             throw new Error("No output path provided.");
         }
 
-        // is this the only sheet in the document?
-        const hasOnlyOneSheet = (length === 1);
-        // generate the full output path
-        let outputBaseName = hasOnlyOneSheet ? this.basePath : `${this.basePath}-${sheet.name}`;
-
         // if there is only one sheet we don't need the sheet name in the filename
-        let outputPath = this.getOutputNameFor(outputBaseName) + '.csv';
+        let outputPath = this.getOutputNameFor(this.basePath) + '.csv';
 
         // attempt to write the data from the sheet as rows
-        let fullData = [this.generateHeaderRow()].concat( sheet.data);
+        let fullData = [this.generateHeaderRow()].concat( document.data);
         let generated = stringify(fullData, {});
 
         // write the file to a temporary location
         // --------------------------------------
+
+        console.log("GENERATED", generated)
 
         // write to a temporary location then move the file
         this.withTemporaryFile(outputPath, (temporaryFilePath: string) => {
             // write to the disk
             // fs.writeFileSync(outputPath, generated, 'utf-8');
             fs.writeFileSync(temporaryFilePath, generated, 'utf-8');
-            log("Saved output to temporary location:", temporaryFilePath);
+            console.log("Saved output to temporary location:", temporaryFilePath);
         });
 
         // add the current file to the list of outputs
         this.outputPath = outputPath;
 
-        log("[CSV] Written", outputPath);
+        console.log("[CSV] Written", outputPath);
     }
 
 }

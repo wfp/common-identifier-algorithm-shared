@@ -25,8 +25,8 @@ import Debug from 'debug';
 const log = Debug('CID:XLSXDecoder')
 
 import { DecoderBase } from './base.js';
-import { Sheet } from '../document.js';
 import type { Config } from "../config/Config.js";
+import { CidDocument } from "../document.js";
 
 // A decoder for CSVs
 class XlsxDecoder extends DecoderBase {
@@ -39,27 +39,23 @@ class XlsxDecoder extends DecoderBase {
 
     async decodeFile(path: string) {
         const workbook = XLSX.readFile(path, this.decodeOptions);
-    
-        let sheets = workbook.SheetNames.map((sheetName: string) => {
-            const worksheet = workbook.Sheets[sheetName];
-            // load the data from the sheet
-            const data = XLSX.utils.sheet_to_json(worksheet, {
-                // ensure that all data is retrieved as formatted strings, not raw data
-                // (necessary for ID numbers with too many bits, that are not
-                // representable by JS numbers)
-                raw: false,
-            })
-            log("RAW:", data[0])
 
-            // convert the human names to aliases
-            const dataWithAliases = this.renameColumnsToAliases(data)
-
-            log("DECODED:", dataWithAliases[0])
-            return new Sheet(sheetName, dataWithAliases);
+        // workbook always has one sheet, and we only care about single sheet workbooks
+        const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+        // load the data from the sheet
+        const data = XLSX.utils.sheet_to_json(worksheet, {
+            // ensure that all data is retrieved as formatted strings, not raw data
+            // (necessary for ID numbers with too many bits, that are not
+            // representable by JS numbers)
+            raw: false,
         })
+        log("RAW:", data[0])
 
-        let document = this.documentFromSheets(sheets);
-        return document;
+        // convert the human names to aliases
+        const dataWithAliases = this.renameColumnsToAliases(data)
+
+        log("DECODED:", dataWithAliases[0])
+        return new CidDocument(path, dataWithAliases);
     }
 
     // Renames the incoming columns from their hunan names to their aliases

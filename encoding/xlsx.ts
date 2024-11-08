@@ -26,7 +26,7 @@ const log = Debug('CID:XLSXEncoder')
 
 import { EncoderBase } from './base.js';
 import { Config } from '../config/Config.js';
-import { Sheet } from '../document.js';
+import { CidDocument } from '../document.js';
 
 // The longest allowed sheet name length
 const MAX_EXCEL_SHEET_NAME_LENGTH = 31;
@@ -76,8 +76,8 @@ class XlsxEncoder extends EncoderBase {
     }
 
 
-    // Writes a Sheet to the pre-determined output
-    writeSheet(sheet: Sheet) {
+    // Writes a document to the pre-determined output
+    writeDocument(document: CidDocument) {
         // no base path means no document yet, so we'll skip
         if (!this.basePath) {
             throw new Error("No output path provided.");
@@ -85,7 +85,7 @@ class XlsxEncoder extends EncoderBase {
 
         // SheetJS needs the objects to have only the properties we output
         // so we filter them here
-        let fullData = this.filterDataBasedOnConfig(sheet.data); //[this._generateHeaderRow()].concat( sheet.data);
+        let fullData = this.filterDataBasedOnConfig(document.data);
 
         // generate a list of headers in the right order
         let headers = this.mapping.columns.reduce((memo, {alias, name}: { alias: string, name: string }) => {

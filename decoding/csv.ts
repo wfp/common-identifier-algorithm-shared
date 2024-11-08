@@ -35,9 +35,7 @@ class CsvDecoder extends DecoderBase {
     decodeFile(path: string, fileEncoding: fs.EncodingOption='utf-8') {
         let data = fs.readFileSync(path, fileEncoding);
         let parsed = csv_parse(data, this.csvOptions);
-        return this.documentFromSheets([
-            this.sheetFromRawData("Sheet1", parsed)
-        ]);
+        return this.documentFromRawData(path, parsed);
     }
 }
 

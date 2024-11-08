@@ -43,16 +43,9 @@ function makeDecoderBase(cfg=BASE_CFG) {
     return new DecoderBase(cfg)
 }
 
-test("Decoderbase::documentFromSheets", () => {
-    const d = makeDecoderBase();
-    const SHEETS = [{ name: "x", data: []}]
-    const doc = d.documentFromSheets(SHEETS)
-    expect(doc.sheets).toEqual(SHEETS)
-})
-
 test("Decoderbase::sheetFromRawData", () => {
     const d = makeDecoderBase();
-    const s = d.sheetFromRawData("sheet1", TEST_DATA);
+    const s = d.documentFromRawData("path", TEST_DATA);
     expect(s.data).toEqual(TEST_DATA_OUT)
 })
 

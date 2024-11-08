@@ -14,11 +14,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import { existsSync, unlinkSync, writeFileSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { join, dirname } from 'node:path';
 import { EncoderBase } from '../../encoding/base.js';
-import { CidDocument, Sheet } from '../../document.js';
+import { CidDocument } from '../../document.js';
 import { Config } from '../../config/Config.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -37,7 +36,7 @@ function makeEncoderBase(cfg=BASE_CFG) {
 
 test("EncoderBase abstracts", () => {
     const e = makeEncoderBase()
-    expect(() => { e.startDocument("") }).toThrow();
-    expect(() => { e.endDocument(new CidDocument([])) }).toThrow();
-    expect(() => { e.writeSheet({ name: "", data: [] }, { current: 0, length: 10}) }).toThrow();
+    expect(() => e.startDocument("") ).toThrow();
+    expect(() => e.endDocument(new CidDocument("", [])) ).toThrow();
+    expect(() => e.writeDocument({ name: "", data: [] }) ).toThrow();
 });

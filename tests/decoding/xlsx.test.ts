@@ -33,9 +33,10 @@ test("XLSXDecoder", async () => {
     const d = makeXlsxDecoder(BASE_CFG);
     const decoded = await d.decodeFile(join(__dirname, "files", "test.xlsx"))
 
-    expect(decoded.sheets.length).toEqual(1);
-    expect(decoded.sheets[0].data[0]).toEqual({ y: "1994", o: "ORG1" })
-    expect(decoded.sheets[0].data[1]).toEqual({ y: "1982", o: "ORG1" })
+
+    expect(decoded.data.length).toEqual(10);
+    expect(decoded.data[0]).toEqual({ y: "1994", o: "ORG1" })
+    expect(decoded.data[1]).toEqual({ y: "1982", o: "ORG1" })
 })
 
 test("XLSXDecoder::with limit", async () => {
@@ -43,8 +44,7 @@ test("XLSXDecoder::with limit", async () => {
     const d = makeXlsxDecoder(BASE_CFG, limit);
     const decoded = await d.decodeFile(join(__dirname, "files", "test.xlsx"))
 
-    expect(decoded.sheets.length).toEqual(1);
-    expect(decoded.sheets[0].data.length).toEqual(limit);
-    expect(decoded.sheets[0].data[0]).toEqual({ y: "1994", o: "ORG1" })
-    expect(decoded.sheets[0].data[1]).toEqual({ y: "1982", o: "ORG1" })
+    expect(decoded.data.length).toEqual(limit);
+    expect(decoded.data[0]).toEqual({ y: "1994", o: "ORG1" })
+    expect(decoded.data[1]).toEqual({ y: "1982", o: "ORG1" })
 })
