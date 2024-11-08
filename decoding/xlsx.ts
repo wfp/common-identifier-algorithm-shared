@@ -41,6 +41,7 @@ class XlsxDecoder extends DecoderBase {
         const workbook = XLSX.readFile(path, this.decodeOptions);
 
         // workbook always has one sheet, and we only care about single sheet workbooks
+        if (workbook.SheetNames.length > 1) throw new Error("Only single sheet XSLX workbooks are supported.");
         const worksheet = workbook.Sheets[workbook.SheetNames[0]];
         // load the data from the sheet
         const data = XLSX.utils.sheet_to_json(worksheet, {
