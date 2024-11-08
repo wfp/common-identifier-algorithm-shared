@@ -63,20 +63,18 @@ class CsvEncoder extends EncoderBase {
         // write the file to a temporary location
         // --------------------------------------
 
-        console.log("GENERATED", generated)
-
         // write to a temporary location then move the file
         this.withTemporaryFile(outputPath, (temporaryFilePath: string) => {
             // write to the disk
             // fs.writeFileSync(outputPath, generated, 'utf-8');
             fs.writeFileSync(temporaryFilePath, generated, 'utf-8');
-            console.log("Saved output to temporary location:", temporaryFilePath);
+            log("Saved output to temporary location:", temporaryFilePath);
         });
 
         // add the current file to the list of outputs
         this.outputPath = outputPath;
 
-        console.log("[CSV] Written", outputPath);
+        log("[CSV] Written", outputPath);
     }
 
 }
