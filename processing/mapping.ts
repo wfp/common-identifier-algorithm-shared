@@ -24,7 +24,7 @@
 
 import Debug from 'debug';
 import { Config } from '../config/Config.js';
-import { Sheet } from '../document.js';
+import { CidDocument } from '../document.js';
 const log = Debug('CID:Processing::mapping')
 
 // Returns a list of columns containing both algorithm-required and "always-include" columns
@@ -55,17 +55,15 @@ export function mapRequiredColumns(configAlgo: Config.AlgorithmColumns, configSo
 
 // Returns true if the sheet is containing only the hash input columns
 // in which case its a mapping-only sheet, and we need to treat it differently
-export function isMappingOnlySheet(configAlgo: Config.AlgorithmColumns, configSource: Config.ColumnMap, configDestination: Config.ColumnMap, sheet: Sheet) {
+export function isMappingOnlyDocument(configAlgo: Config.AlgorithmColumns, configSource: Config.ColumnMap, configDestination: Config.ColumnMap, document: CidDocument) {
     // returns true if two sets are equal
     const areSetsEqual = (xs: Set<string>,ys: Set<string>) => xs.size === ys.size && [...xs].every((x) => ys.has(x));
 
     // build list of column names either in configConfig or BOTH configSource and configDestination
     const mappingDocumentColumns = mapRequiredColumns(configAlgo, configSource, configDestination);
-    // here we've already checked to have only one sheet
-    const sheetColumns = (sheet.data.length > 0) ? Object.keys(sheet.data[0]) : [];
+    const documentColumns = (document.data.length > 0) ? Object.keys(document.data[0]) : [];
 
-    const isMappingDocument = areSetsEqual(new Set(mappingDocumentColumns), new Set(sheetColumns));
-    // log("MAPPING: ======>>>> ", {mappingDocumentColumns, sheetColumns, isMappingDocument});
+    const isMappingDocument = areSetsEqual(new Set(mappingDocumentColumns), new Set(documentColumns));
 
     return isMappingDocument;
 

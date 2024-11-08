@@ -75,8 +75,7 @@ test("preprocessFile", async () => {
     const filePath = join(__dirname, "files", "input_ok.csv");
     const results = await preprocessFile({ config: CONFIG, inputFilePath: filePath, limit: 10 });
 
-    expect(results.data.sheets.length).toEqual(1);
-    expect(results.data.sheets[0].data[0]).toEqual({col_a: "A0", col_b: "B0" });
+    expect(results.document.data[0]).toEqual({col_a: "A0", col_b: "B0" });
     expect(results.isValid).toEqual(true);
     expect(results.isMappingDocument).toEqual(false);
     expect(results.inputFilePath).toEqual(filePath);
@@ -87,12 +86,10 @@ test("preprocessFile::args", async () => {
     const filePath = join(__dirname, "files", "input_ok.csv");
     let results = await preprocessFile({ config: CONFIG, inputFilePath: filePath, limit: 1 });
     
-    expect(results.data.sheets.length).toEqual(1);
-    expect(results.data.sheets[0].data.length).toEqual(1);
+    expect(results.document.data.length).toEqual(1);
     
     results = await preprocessFile({ config: CONFIG, inputFilePath: filePath });
-    expect(results.data.sheets.length).toEqual(1);
-    expect(results.data.sheets[0].data.length).toEqual(2);
+    expect(results.document.data.length).toEqual(2);
 })
 
 
@@ -101,8 +98,7 @@ test("preprocessFile mapping", async () => {
     const filePath = join(__dirname, "files", "input_mapping_ok.csv");
     const results = await preprocessFile({ config: CONFIG, inputFilePath: filePath, limit: 10 });
 
-    expect(results.data.sheets.length).toEqual(1);
-    expect(results.data.sheets[0].data[0]).toEqual({ col_a: "A0" });
+    expect(results.document.data[0]).toEqual({ col_a: "A0" });
 
     expect(results.isValid).toEqual(true);
     expect(results.isMappingDocument).toEqual(true);
@@ -129,9 +125,8 @@ test("preprocessFile invalid", async () => {
 
 
     expect(results.isMappingDocument).toEqual(false);
-    expect(results.data.sheets.length).toEqual(1);
-    expect(results.data.sheets[0].data[0]).toEqual({ col_a: "A0", col_b: "B0", errors: "", row_number: 2 });
-    expect(results.data.sheets[0].data[1]).toEqual({ col_a: "A1 TOO LONG", col_b: "B1", errors: "A must be shorter than 2 characters;", "row_number": 3 });
+    expect(results.document.data[0]).toEqual({ col_a: "A0", col_b: "B0", errors: "", row_number: 2 });
+    expect(results.document.data[1]).toEqual({ col_a: "A1 TOO LONG", col_b: "B1", errors: "A must be shorter than 2 characters;", "row_number": 3 });
 
     expect(results.isValid).toEqual(false);
 
@@ -178,8 +173,7 @@ test("processFile", async () => {
     expect(results.outputFilePath).toEqual(`${outputBasePath}_OUTPUT.csv`);
     expect(results.mappingFilePath).toEqual(`${outputBasePath}_MAPPING.csv`);
 
-    expect(results.data.sheets.length).toEqual(1)
-    const [row1, row2] = results.data.sheets[0].data;
+    const [row1, row2] = results.document.data;
 
     expect(row1.col_a).toEqual("A0")
     expect(row1.test).toEqual("TEST A0")
@@ -211,8 +205,7 @@ test("processMappingFile", async () => {
     expect(results.mappingFilePath).toEqual(`${outputBasePath}_MAPPING.csv`);
     expect(results.outputFilePath).toEqual(undefined);
 
-    expect(results.data.sheets.length).toEqual(1)
-    const [row1, row2] = results.data.sheets[0].data;
+    const [row1, row2] = results.document.data;
 
     expect(row1.col_a).toEqual("A0")
     expect(row1.test).toEqual("TEST A0 B0")

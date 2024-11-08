@@ -32,7 +32,7 @@ export class SameValueForAllRowsValidator implements Validator.Base {
         // in the sheet, so we dont need to check for that
 
         // get the value in the first row
-        const targetValue = data.sheet.data[0][data.column];
+        const targetValue = data.document.data[0][data.column];
 
         // check if it matches the current value
         if (value === targetValue) return { ok: true, kind: this.kind }

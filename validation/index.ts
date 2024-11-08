@@ -18,7 +18,7 @@ import { DateDiffValidator, DateFieldDiffValidator, FieldTypeValidator, Language
          LinkedFieldValidator, MaxFieldLengthValidator, MaxValueValidator, MinFieldLengthValidator,
          MinValueValidator, OptionsValidator, RegexpValidator, SameValueForAllRowsValidator } from './validators/index.js';
 import { SUPPORTED_VALIDATORS, Validation, Validator } from "./Validation.js";
-import { CidDocument, Sheet } from "../document.js";
+import { CidDocument } from "../document.js";
 import type { Config } from "../config/Config.js";
 
 // MAIN VALIDATION
@@ -26,10 +26,10 @@ import type { Config } from "../config/Config.js";
 
 // Validates a single value with a list of validators.
 // The row is passed to allow for cross-column checks
-function validateValueWithList(validatorList: Validator.Base[], value: any, {row, sheet, column}: Validation.Data) {
+function validateValueWithList(validatorList: Validator.Base[], value: any, {row, document, column}: Validation.Data) {
     return validatorList.reduce((memo, validator) => {
         // check if the validator says OK
-        let result = validator.validate(value, {row, sheet, column});
+        let result = validator.validate(value, {row, document, column});
         // if failed add to the list of errors
         if (!result.ok) memo.push(result);
         return memo;
@@ -39,7 +39,7 @@ function validateValueWithList(validatorList: Validator.Base[], value: any, {row
 export function validateRowWithListDict(
         validatorListDict: Validation.FuncMap,
         row: Validation.Data["row"],
-        sheet: Validation.Data["sheet"]
+        document: CidDocument
     ) : Validation.ErrorMap
     {
     // check if all expected columns are present
@@ -66,7 +66,7 @@ export function validateRowWithListDict(
         let fieldValue = row[fieldName];
 
         // use the validators
-        memo[fieldName] = validateValueWithList(validatorList, fieldValue, {row, sheet, column: fieldName});
+        memo[fieldName] = validateValueWithList(validatorList, fieldValue, {row, document, column: fieldName});
 
         return memo;
     }, {} as Validation.ErrorMap)
@@ -148,65 +148,51 @@ export function makeValidatorListDict(validationOpts: Config.Options["validation
 //////////////////////////////////////////////////////////////////////
 
 // Validates a full document with the pre-generated validator list dict
-export function validateDocumentWithListDict(validatorDict: Validation.FuncMap, document: CidDocument): Validation.SheetResult[] {
-    let results = document.sheets.map((sheet) => {
-        let results = sheet.data.map((row) => {
-            // do the actual validation
-            let results = validateRowWithListDict(validatorDict, row, sheet);
-            let compactResults = Object.keys(results).reduce((memo, col) => {
-                let colResults = results[col];
-                if (colResults.length > 0) {
-                    memo.push({ column: col, errors: colResults });
-                }
-                return memo;
-            }, [] as Validation.ColumnResult[]);
-
-            // // to know if the whole row is valid check every column in the results
-            // let ok = Object.keys(results).reduce((memo, col) => {
-            //     return memo && results[col].length === 0;
-            // }, true);
-            // package it up
-            return { row, ok: compactResults.length === 0, errors: compactResults };
-        }) as Validation.RowResult[];
-        return {
-            sheet: sheet.name,
-            ok: !results.some((res) => !res.ok),
-            results
-        };
-    });
-
-    return results;
+export function validateDocumentWithListDict(validatorDict: Validation.FuncMap, document: CidDocument): Validation.DocumentResult {
+    let results = document.data.map((row) => {
+        // do the actual validation
+        let results = validateRowWithListDict(validatorDict, row, document);
+        let compactResults = Object.keys(results).reduce((memo, col) => {
+            let colResults = results[col];
+            if (colResults.length > 0) {
+                memo.push({ column: col, errors: colResults });
+            }
+            return memo;
+        }, [] as Validation.ColumnResult[]);
+        return { row, ok: compactResults.length === 0, errors: compactResults };
+    }) as Validation.RowResult[];
+    return {
+        ok: !results.some((res) => !res.ok),
+        results
+    };
 }
 
 // Generates a document for output based on the validation results.
 // sourceConfig is required to map the original column names in the error messages
-export function makeValidationResultDocument(sourceConfig: Config.Options["source"], results: Validation.SheetResult[]) {
+export function makeValidationResultDocument(sourceConfig: Config.Options["source"], documentResult: Validation.DocumentResult) {
 
     let fieldNameMapping = sourceConfig.columns.reduce((memo, col) => {
         return Object.assign(memo, {[col.alias]: col.name})
     }, {} as {[key: string]: string});
 
 
-    return new CidDocument(results.map((sheetResult) => {;
+    return new CidDocument("validationResult", documentResult.results.map((rowResult, rowIdx) => {;
+        // build an error message
+        let errorList = rowResult.errors.map((error) => {
 
-        return new Sheet(sheetResult.sheet, sheetResult.results.map((rowResult, rowIdx) => {
-            // build an error message
-            let errorList = rowResult.errors.map((error) => {
-
-                // find the column name
-                let columnHumanName = fieldNameMapping[error.column] || error.column;
-                return error.errors.map(({ message }) => `${columnHumanName} ${message};`).join("\n");
-            });
+            // find the column name
+            let columnHumanName = fieldNameMapping[error.column] || error.column;
+            return error.errors.map(({ message }) => `${columnHumanName} ${message};`).join("\n");
+        });
 
 
-            // combine with the row onject
-            return Object.assign({
-                // The row number should match the row number in the input document (row index 0 is row# 2)
-                row_number: rowIdx + 2,
-                // The error list should be an empty string (so that it'll be hidden if no errors are present)
-                // NOTE: the line-ending can be tricky
-                errors: errorList.join("\n"),
-            }, rowResult.row)
-        }));
+        // combine with the row onject
+        return Object.assign({
+            // The row number should match the row number in the input document (row index 0 is row# 2)
+            row_number: rowIdx + 2,
+            // The error list should be an empty string (so that it'll be hidden if no errors are present)
+            // NOTE: the line-ending can be tricky
+            errors: errorList.join("\n"),
+        }, rowResult.row)
     }));
 }

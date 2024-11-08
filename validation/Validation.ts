@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import type { MappedData, Sheet } from "../document.js";
+import type { CidDocument, MappedData } from "../document.js";
 
 export enum SUPPORTED_VALIDATORS {
     FIELD_NAME = "field_name",
@@ -36,7 +36,7 @@ export enum SUPPORTED_VALIDATORS {
 export namespace Validation {
     export interface Data {
         row: MappedData;
-        sheet: Sheet;
+        document: CidDocument;
         column: string;
     }
     export interface ColumnResult {
@@ -48,9 +48,8 @@ export namespace Validation {
         ok: Boolean;
         errors: ColumnResult[];
     }
-    export interface SheetResult {
-        sheet: Sheet["name"];
-        ok: Boolean;
+    export interface DocumentResult {
+        ok: boolean;
         results: RowResult[];
     }
     export type FuncMap = {[key: string]: Validator.Base[] }

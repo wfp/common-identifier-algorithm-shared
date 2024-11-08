@@ -16,7 +16,7 @@
  */
 import { LinkedFieldValidator } from "../../validation/validators/linked_field.js";
 
-let TEST_SHEET_PARAMS = { row: { col_a: "b" }, sheet: { name: "", data: [] }, column: "" };
+let TEST_SHEET_PARAMS = { row: { col_a: "b" }, document: { name: "", data: [] }, column: "" };
 
 test("LinkedFieldValidator", () => {
     const v = new LinkedFieldValidator({ op: "linked_field", target: "col_a" });

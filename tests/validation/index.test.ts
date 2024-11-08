@@ -19,15 +19,10 @@ import { Config } from '../../config/Config.js';
 import { makeValidatorListDict, validateDocumentWithListDict, makeValidationResultDocument } from '../../validation/index.js';
 import { OptionsValidator } from '../../validation/validators/options.js';
 import { SUPPORTED_VALIDATORS, Validation } from '../../validation/Validation.js';
+import { CidDocument } from '../../document.js';
 
 // get the class name
 const className = (obj: object) => obj.constructor.name;
-
-// test("makeValidatorListDict throws", () => {
-//     expect(() => makeValidatorListDict({ col_a: "ASD" })).toThrow()
-//     expect(() => makeValidatorListDict({ col_a: [{ oppa: "ASD" }]})).toThrow()
-//     expect(() => makeValidatorListDict({ col_a: [{ op: "ASD" }]})).toThrow()
-// })
 
 test("makeValidatorListDict types", () => {
     const TEST_CONFIG: Config.Options["validations"] = {
@@ -98,38 +93,23 @@ test("validateDocumentWithListDict OK", () => {
         col_b: [ new OptionsValidator({ op: "options", value: ["B", "B0" ]}) ],
     }
 
-    const TEST_DOC_OK = {
-        sheets: [
-            {
-                name: "Sheet 1",
-                data: [
-                    { col_a: "A0", col_b: "B0" },
-                    { col_a: "A", col_b: "B" },
-                ]
-            },
-            {
-                name: "Sheet 2",
-                data: [
-                    { col_a: "A", col_b: "B" },
-                    { col_a: "A0", col_b: "B0" },
-                ]
-            }
-        ],
+    const TEST_DOC_OK: CidDocument = {
+        name: "",
+        data: [
+            { col_a: "A0", col_b: "B0" },
+            { col_a: "A", col_b: "B" },
+        ]
     }
 
-    const res_ok = validateDocumentWithListDict(VALIDATOR_DICT, TEST_DOC_OK)
+    const res = validateDocumentWithListDict(VALIDATOR_DICT, TEST_DOC_OK)
 
-    expect(res_ok.length).toEqual(2);
-    res_ok.forEach((res, i) => {
-        expect(res.ok).toEqual(true);
-        expect(res.sheet).toEqual(`Sheet ${i + 1}`);
-        expect(res.results.length).toEqual(2);
-        res.results.forEach((result, rowIdx) => {
-            expect(result.ok).toEqual(true);
-            expect(result.row).toEqual(TEST_DOC_OK.sheets[i].data[rowIdx])
-        })
+    expect(res.ok).toEqual(true);
+    expect(res.results.length).toEqual(2);
+
+    res.results.forEach((result, rowIdx) => {
+        expect(result.ok).toEqual(true);
+        expect(result.row).toEqual(TEST_DOC_OK.data[rowIdx])
     })
-
 })
 
 test("validateDocumentWithListDict ERROR", () => {
@@ -139,36 +119,21 @@ test("validateDocumentWithListDict ERROR", () => {
     }
 
     const TEST_DOC_OK = {
-        sheets: [
-            {
-                name: "Sheet 1",
-                data: [
-                    { col_a: "A0", col_b: "B0" },
-                    { col_a: "A", col_b: "B" },
-                ]
-            },
-            {
-                name: "Sheet 2",
-                data: [
-                    { col_a: "A1", col_b: "B1" },
-                    { col_a: "A0", col_b: "B0" },
-                ]
-            }
-        ],
+        name: "Sheet 2",
+        data: [
+            { col_a: "A1", col_b: "B1" },
+            { col_a: "A0", col_b: "B0" },
+        ]
     }
 
-    const res_err = validateDocumentWithListDict(VALIDATOR_DICT, TEST_DOC_OK)
+    const res = validateDocumentWithListDict(VALIDATOR_DICT, TEST_DOC_OK)
 
-    expect(res_err.length).toEqual(2);
+    expect(res.ok).toEqual(false);
+    expect(res.results.length).toEqual(2);
 
-    const sheet2 = res_err[1];
+    expect(res.results[1].ok).toEqual(true)
 
-    expect(sheet2.ok).toEqual(false);
-    expect(sheet2.results.length).toEqual(2);
-
-    expect(sheet2.results[1].ok).toEqual(true)
-
-    const errRow = sheet2.results[0];
+    const errRow = res.results[0];
     expect(errRow.ok).toEqual(false);
     expect(errRow.errors.length).toEqual(2);
     expect(errRow.errors[0].column).toEqual("col_a");
@@ -184,59 +149,46 @@ test("validateDocumentWithListDict ERROR", () => {
 test("makeValidationResultDocument", () => {
     const TEST_CONFIG = { columns: [ { name: "A", alias: "col_a" } ]};
 
-    const TEST_RESULT: Validation.SheetResult[] = [
-        {
-            sheet: 'Sheet 1',
-            ok: true,
-            results: [
-                { row: { col_a: 'A0', col_b: 'B0' }, ok: true, errors: [] },
-                { row: { col_a: 'A', col_b: 'B' }, ok: true, errors: [] }
-            ]
-        },
-        {
-            sheet: 'Sheet 2',
-            ok: false,
-            results: [
-                {
-                    row: { col_a: 'A1', col_b: 'B1' },
-                    ok: false,
-                    errors: [
-                        {
-                            column: 'col_a',
-                            errors: [
-                                {
-                                    kind: SUPPORTED_VALIDATORS.OPTIONS,
-                                    message: 'must be one of: "A", "A0"'
-                                }
-                            ]
-                        },
-                        {
-                            column: 'col_b',
-                            errors: [
-                                {
-                                    kind: SUPPORTED_VALIDATORS.OPTIONS,
-                                    message: 'must be one of: "B", "B0"'
-                                }
-                            ]
-                        }
-                    ]
-                },
-                { row: { col_a: 'A0', col_b: 'B0' }, ok: true, errors: [] }
+    const TEST_RESULT: Validation.DocumentResult = {
+        ok: true,
+        results: [
+            { row: { col_a: 'A0', col_b: 'B0' }, ok: true, errors: [] },
+            { row: { col_a: 'A', col_b: 'B' }, ok: true, errors: [] }
+        ]
+    }
+
+    const doc = makeValidationResultDocument(TEST_CONFIG, TEST_RESULT);
+
+    expect(doc.name).toEqual("validationResult");
+    expect(doc.data).toEqual([
+        { errors: '', row_number: 2, col_a: "A0", col_b: "B0" },
+        { errors: '', row_number: 3, col_a: "A",  col_b: "B" },
+    ]);
+});
+
+test("makeValidationResultDocument::error", () => {
+    const TEST_CONFIG = { columns: [ { name: "A", alias: "col_a" } ]};
+
+    const TEST_RESULT: Validation.DocumentResult = {
+        ok: false,
+        results: [
+            {
+                row: { col_a: 'A1', col_b: 'B1' },
+                ok: false,
+                errors: [
+                    { column: 'col_a', errors: [ { kind: SUPPORTED_VALIDATORS.OPTIONS, message: 'must be one of: "A", "A0"' }]},
+                    { column: 'col_b', errors: [ { kind: SUPPORTED_VALIDATORS.OPTIONS, message: 'must be one of: "B", "B0"' }]}
+                ]
+            },
+            { row: { col_a: 'A0', col_b: 'B0' }, ok: true, errors: [] }
             ]
         }
-    ]
 
     const doc = makeValidationResultDocument(TEST_CONFIG, TEST_RESULT);
     const ERR_STR = 'A must be one of: "A", "A0";\ncol_b must be one of: "B", "B0";';
 
-    expect(doc.sheets.length).toEqual(2)
-    expect(doc.sheets[0].name).toEqual("Sheet 1");
-    expect(doc.sheets[0].data).toEqual([
-        { errors: '', row_number: 2, col_a: "A0", col_b: "B0" },
-        { errors: '', row_number: 3, col_a: "A",  col_b: "B" },
-    ]);
-    expect(doc.sheets[1].name).toEqual("Sheet 2");
-    expect(doc.sheets[1].data).toEqual([
+    expect(doc.name).toEqual("validationResult");
+    expect(doc.data).toEqual([
         { errors: ERR_STR, row_number: 2, col_a: "A1", col_b: "B1" },
         { errors: '', row_number: 3, col_a: "A0", col_b: "B0" },
     ]);

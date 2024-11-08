@@ -18,14 +18,14 @@
 import path from 'node:path';
 import os from 'node:os';
 
-import { Sheet, CidDocument, SUPPORTED_FILE_TYPES } from '../document.js';
+import { CidDocument, SUPPORTED_FILE_TYPES } from '../document.js';
 
 import { encoderForFile } from '../encoding/index.js';
 import { decoderForFile, fileTypeOf } from '../decoding/index.js';
 
 import { makeValidationResultDocument, makeValidatorListDict, validateDocumentWithListDict } from '../validation/index.js';
 
-import { keepOutputColumns, isMappingOnlySheet, keepValidatorsForColumns } from './mapping.js';
+import { keepOutputColumns, isMappingOnlyDocument, keepValidatorsForColumns } from './mapping.js';
 import { Config } from '../config/Config.js';
 import { BaseHasher, makeHasherFunction } from '../hashing/base.js';
 import { Validation } from '../validation/Validation.js';
@@ -40,12 +40,10 @@ export async function readFile(fileType: SUPPORTED_FILE_TYPES, columnConfig: Con
 
     // decode the data
     let decoded = await decoder.decodeFile(filePath);
-
-    if (decoded.sheets.length > 1) throw new Error("Input files must have only one sheet");
     return decoded
 }
 
-export function validateDocument(config: Config.Options, decoded: CidDocument, isMapping: boolean = false): Validation.SheetResult[] {
+export function validateDocument(config: Config.Options, decoded: CidDocument, isMapping: boolean = false): Validation.DocumentResult {
     let validatorDict = makeValidatorListDict(config.validations);
 
     // if this is a mapping document leave only the validators for the algorithm columns
@@ -57,17 +55,11 @@ export function validateDocument(config: Config.Options, decoded: CidDocument, i
 
 export function generateHashesForDocument(hasher: BaseHasher, document: CidDocument) {
     // generate for all rows
-    let sheets = document.sheets.map((sheet) => {
-        // generate for all rows
-        let rows = sheet.data.map((row) => {
-            const generatedHashes = hasher.generateHashForObject(row);
-            return Object.assign({}, row, generatedHashes);
-        });
-
-        return new Sheet(sheet.name, rows);
+    let rows = document.data.map((row) => {
+        const generatedHashes = hasher.generateHashForObject(row);
+        return Object.assign({}, row, generatedHashes);
     });
-
-    return new CidDocument(sheets);
+    return new CidDocument("hashedDocument", rows);
 }
 
 // helper to output a document with a specific config
@@ -84,7 +76,7 @@ export function writeFileWithConfig(fileType: SUPPORTED_FILE_TYPES, columnConfig
 export interface PreprocessFileResult {
     isValid: boolean;
     isMappingDocument: boolean;
-    data: CidDocument;
+    document: CidDocument; // either legitimate or error
     inputFilePath: string;
     errorFilePath?: string;
 }
@@ -107,19 +99,14 @@ export async function preprocessFile({ config, inputFilePath, errorFileOutputPat
     
     // VALIDATION
     // ==========
-    const isMappingDocument = isMappingOnlySheet(
-        config.algorithm.columns,
-        config.source,
-        config.destination_map,
-        decoded.sheets[0])
+    const isMappingDocument = isMappingOnlyDocument(config.algorithm.columns,config.source, config.destination_map, decoded);
     const validationResult = validateDocument(config, decoded, isMappingDocument);
     
-    let isValid: boolean = validationResult.some(sheet => sheet.ok);
     let validationErrorsOutputFile: string | undefined;
     let validationResultDocument: CidDocument | undefined;
 
     // if any sheets contain errors, create an error file
-    if (!isValid){
+    if (!validationResult.ok){
 
         // by default the validation results show the "source" section columns
         let validationResultBaseConfig = config.source;
@@ -136,9 +123,9 @@ export async function preprocessFile({ config, inputFilePath, errorFileOutputPat
     }
 
     return {
-        isValid,
+        isValid: validationResult.ok,
         isMappingDocument,
-        data: validationResultDocument ? validationResultDocument : decoded,
+        document: validationResultDocument ? validationResultDocument : decoded,
         inputFilePath: inputFilePath,
         errorFilePath: validationErrorsOutputFile
     };
@@ -151,7 +138,7 @@ export async function preprocessFile({ config, inputFilePath, errorFileOutputPat
 
 export interface ProcessFileResult {
     isMappingDocument: boolean;
-    data: CidDocument;
+    document: CidDocument;
     outputFilePath?: string;
     mappingFilePath: string;
 }
@@ -185,11 +172,7 @@ export async function processFile({config, outputPath, inputFilePath, hasherFact
     // if the user specified a format use that, otherwise use the input format
     const outputFileType = format || inputFileType;
     
-    const isMappingDocument = isMappingOnlySheet(
-        config.algorithm.columns,
-        config.source,
-        config.destination_map,
-        decoded.sheets[0])
+    const isMappingDocument = isMappingOnlyDocument(config.algorithm.columns,config.source, config.destination_map, decoded)
     // output the base document
     const mainOutputFile = isMappingDocument ? undefined : writeFileWithConfig(outputFileType, config.destination, result, outputPath);
     // output the mapping document
@@ -197,7 +180,7 @@ export async function processFile({config, outputPath, inputFilePath, hasherFact
 
     return {
         isMappingDocument,
-        data: result,
+        document: result,
         outputFilePath: mainOutputFile,
         mappingFilePath: mappingFilePath
     };

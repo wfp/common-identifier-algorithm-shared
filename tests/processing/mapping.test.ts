@@ -16,8 +16,8 @@
  */
 
 import { Config } from '../../config/Config.js';
-import { Sheet } from '../../document.js';
-import { mapRequiredColumns, isMappingOnlySheet } from '../../processing/mapping.js';
+import { CidDocument } from '../../document.js';
+import { mapRequiredColumns, isMappingOnlyDocument } from '../../processing/mapping.js';
 
 test("mapping::mapRequiredColumns", () => {
     expect(mapRequiredColumns(
@@ -58,28 +58,28 @@ test("mapping::mapRequiredColumns", () => {
     ])
 })
 
-test("mapping::isMappingOnlySheet empty config", () => {
-    const testSheet: Sheet = { name: "", data: [
+test("mapping::isMappingOnlyDocument empty config", () => {
+    const testSheet: CidDocument = { name: "", data: [
         { "A": 1, "B": 2, "C": 3 }
     ] }
     let A: Config.AlgorithmColumns = { to_translate: [ ], static: [], reference: [] };
     let S: Config.ColumnMap = { columns: [  ] };
     let D: Config.ColumnMap = { columns: [  ] };
-    expect(isMappingOnlySheet(A, S, D, testSheet)).toEqual(false);
+    expect(isMappingOnlyDocument(A, S, D, testSheet)).toEqual(false);
 })
 
-test("mapping::isMappingOnlySheet algo columns specified only", () => {
-    const testSheet: Sheet = { name: "", data: [
+test("mapping::isMappingOnlyDocument algo columns specified only", () => {
+    const testSheet: CidDocument = { name: "", data: [
         { "A": 1, "B": 2, "C": 3 }
     ] }
     const A: Config.AlgorithmColumns = { to_translate: [ ], static: [], reference: [ "A", "B", "C" ] };
     const S: Config.ColumnMap = { columns: [  ] };
     const D: Config.ColumnMap = { columns: [  ] };
-    expect(isMappingOnlySheet(A, S, D, testSheet)).toEqual(true)
+    expect(isMappingOnlyDocument(A, S, D, testSheet)).toEqual(true)
 })
 
-test("mapping::isMappingOnlySheet src dest specified only", () => {
-    const testSheet: Sheet = { name: "", data: [
+test("mapping::isMappingOnlyDocument src dest specified only", () => {
+    const testSheet: CidDocument = { name: "", data: [
         { "A": 1, "B": 2, "C": 3 }
     ] }
     const A: Config.AlgorithmColumns = { to_translate: [ ], static: [], reference: [] };
@@ -89,18 +89,18 @@ test("mapping::isMappingOnlySheet src dest specified only", () => {
     // src config doesn't include all sheet columns, dest empty
     S = { columns: [ { name: "A", alias: "A"} ] };
     D = { columns: [] };
-    expect(isMappingOnlySheet(A, S, D, testSheet)).toEqual(false)
+    expect(isMappingOnlyDocument(A, S, D, testSheet)).toEqual(false)
     // src config doesn't include all sheet columns
     S = { columns: [ { name: "A", alias: "A"} ] };
     D = { columns: [ { name: "A", alias: "A"} ] };
-    expect(isMappingOnlySheet(A, S, D, testSheet)).toEqual(false)
+    expect(isMappingOnlyDocument(A, S, D, testSheet)).toEqual(false)
     // set of config columns doesn't include all sheet columns in both configs
     S.columns = [ { name: "A", alias: "A"}, { name: "B", alias: "B"}, { name: "C", alias: "C"} ];
     D.columns = [ { name: "A", alias: "A"} ];
-    expect(isMappingOnlySheet(A, S, D, testSheet)).toEqual(false)
+    expect(isMappingOnlyDocument(A, S, D, testSheet)).toEqual(false)
     // set of config columns in both configs fully includes sheet columns
     S.columns = [ { name: "A", alias: "A"}, { name: "B", alias: "B"}, { name: "C", alias: "C"} ];
     D.columns = [ { name: "A", alias: "A"}, { name: "B", alias: "B"}, { name: "C", alias: "C"} ];
-    expect(isMappingOnlySheet(A, S, D, testSheet)).toEqual(true)
+    expect(isMappingOnlyDocument(A, S, D, testSheet)).toEqual(true)
 })
 
