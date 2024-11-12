@@ -1,11 +1,11 @@
 {
     "algorithm": {
       "columns": {
-        "reference": [],
+        "reference": [ "1", "2", "4", "5", "3" ],
         "static": [
           "national_id"
         ],
-        "to_translate": []
+        "to_translate": [ "a", "b", "d", "e", "c"]
       },
       "hash": {
         "block_size": 8,
@@ -113,7 +113,7 @@
       "version": "0.1.0"
     },
     "signature": {
-      "config_signature": "63cea18c968de00e8c9cb9a478d4d935"
+      "config_signature": "4a68d41735c475271b5c2953f5fd7de4"
     },
     "source": {
       "columns": [

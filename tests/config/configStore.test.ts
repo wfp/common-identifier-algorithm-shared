@@ -80,6 +80,9 @@ test("ConfigStore loading", () => {
     delete config.algorithm.salt.value;
 
     const originalConfig = JSON.parse(fs.readFileSync(join(__dirname, "files", CONFIG_FILE_NAME), 'utf-8'));
+    // check that the columns are actually sorted alphabetically.
+    originalConfig.algorithm.columns.to_translate = ["a", "b", "c", "d", "e" ]
+    originalConfig.algorithm.columns.reference = ["1", "2", "3", "4", "5" ]
     delete originalConfig.algorithm.salt.source;
     delete originalConfig.algorithm.salt.value;
 

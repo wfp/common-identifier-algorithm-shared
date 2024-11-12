@@ -33,8 +33,14 @@ test("loadConfig ok", ()=>{
     expect(loadResult.success).toEqual(true)
     if (!loadResult.success) throw new TypeError();
     expect(loadResult.lastUpdated).toEqual(new Date(statSync(TEST_FILE_PATH).mtime))
-    expect(loadResult.config).toEqual(JSON.parse(readFileSync(TEST_FILE_PATH, 'utf-8')))
-})
+
+    const expected = JSON.parse(readFileSync(TEST_FILE_PATH, 'utf-8'))
+    // check that the columns are actually sorted alphabetically.
+    expected.algorithm.columns.to_translate = ["a", "b", "c", "d", "e" ]
+    expected.algorithm.columns.reference = ["1", "2", "3", "4", "5" ]
+    expect(loadResult.config).toEqual(expected)
+
+});
 
 test("loadConfig invalid", ()=>{
     const TEST_FILE_PATH = join(FILES_PATH, "test-appconfig.json");

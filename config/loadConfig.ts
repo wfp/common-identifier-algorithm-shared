@@ -44,7 +44,7 @@ export function loadConfig(configPath: string, region: string): LoadConfigResult
     log("Loading config from", configPath);
 
     // attempt to read the file
-    const configData = attemptToReadTOMLData(configPath, CONFIG_FILE_ENCODING);
+    const configData = attemptToReadTOMLData<Config.Options>(configPath, CONFIG_FILE_ENCODING);
 
     // if cannot be read, we have an error
     if (!configData) {
@@ -80,6 +80,12 @@ export function loadConfig(configPath: string, region: string): LoadConfigResult
         }
     }
 
+    // alphabetically sort the to_translate, static, and reference fields to standardise and prevent
+    // different ordering in config producing different results in output.
+    configData.algorithm.columns.to_translate = configData.algorithm.columns.to_translate.sort()
+    configData.algorithm.columns.reference = configData.algorithm.columns.reference.sort()
+    configData.algorithm.columns.static = configData.algorithm.columns.static.sort()
+
     // check if we need to inject the salt data into the config
     // if not, the config loading is finished
     if (configData.algorithm.salt.source.toUpperCase() !== "FILE") {
@@ -90,12 +96,12 @@ export function loadConfig(configPath: string, region: string): LoadConfigResult
         }
     }
 
-
     // figure out the file path and the validation regexp
     const saltFilePath = configData.algorithm.salt.value;
     const saltFileValidatorRegexp = configData.algorithm.salt.validator_regex;
 
     // attempt to load the salt file
+    // @ts-ignore saltFilePath must be { win32: string, darwin: string } at this stage since salt.source is guaranteed to be "FILE".
     const saltData = loadSaltFile(saltFilePath, saltFileValidatorRegexp);
 
     // if the salt file load failed, we have failed
@@ -114,6 +120,8 @@ export function loadConfig(configPath: string, region: string): LoadConfigResult
     // replace the "FILE" with "STRING" amd embed the salt data
     configData.algorithm.salt.source = "STRING";
     configData.algorithm.salt.value = saltData;
+
+    configData
 
     // return the freshly injected config
     return {
