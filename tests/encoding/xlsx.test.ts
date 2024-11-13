@@ -79,4 +79,11 @@ test("makeXlsxEncoder creation", () => {
     if (existsSync(test_output_path_postfixed)) {
         unlinkSync(test_output_path_postfixed);
     }
+});
+
+test("XlsxEncoder::must start document before writing or ending", () => {
+    const e = makeXlsxEncoder(TEST_MAPPING);
+
+    expect(() => e.writeDocument(TEST_DOC)).toThrow();
+    expect(e.endDocument()).toBe(undefined);
 })

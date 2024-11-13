@@ -43,12 +43,12 @@ test("CSVDecoder", async () => {
     expect(decoded.data).toEqual(TEST_DATA_OUT)
 })
 
-// test("CSVDecoder::test limit", async () => {
-//     const d = makeCsvDecoder(BASE_CFG, 2);
-//     const decoded = d.decodeFile(join(__dirname, "files", "test.csv"))
+test("CSVDecoder::test limit", async () => {
+    const d = makeCsvDecoder(BASE_CFG, 2);
+    const decoded = d.decodeFile(join(__dirname, "files", "test.csv"))
 
-//     console.log(decoded)
+    console.log(decoded)
 
-//     expect(decoded.data.length).toEqual(2)
-//     expect(decoded.data).toEqual(TEST_DATA_OUT.slice(0, 2))
-// })
+    expect(decoded.data.length).toEqual(2)
+    expect(decoded.data).toEqual(TEST_DATA_OUT.slice(0, 2))
+})

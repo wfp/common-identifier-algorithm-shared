@@ -22,7 +22,7 @@ import { Config } from "../config/Config.js";
 import { CidDocument } from '../document.js';
 import type { RawData, MappedData } from "../document.js";
 
-export class DecoderBase {
+export abstract class DecoderBase {
     sourceConfig: Config.Options["source"];
 
     constructor(sourceConfig: Config.Options["source"]) {

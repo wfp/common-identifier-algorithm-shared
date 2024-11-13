@@ -31,12 +31,49 @@ const BASE_CFG: Config.ColumnMap = {
 }
 
 function makeEncoderBase(cfg=BASE_CFG) {
-    return new EncoderBase(cfg)
+    class TestEncoder extends EncoderBase {
+        constructor(){ super(cfg)}
+        test__getOutputNameFor(baseFileName: string) {
+            return this.getOutputNameFor(baseFileName);
+        }
+        test__generateHeaderRow() {
+            return this.generateHeaderRow();
+        }
+        test__filterDataBasedOnConfig(data: any) {
+            return this.filterDataBasedOnConfig(data);
+        }
+        startDocument() { return }
+        endDocument() { return }
+        writeDocument() { return }
+    }
+    return new TestEncoder()
 }
 
-test("EncoderBase abstracts", () => {
-    const e = makeEncoderBase()
-    expect(() => e.startDocument("") ).toThrow();
-    expect(() => e.endDocument(new CidDocument("", [])) ).toThrow();
-    expect(() => e.writeDocument({ name: "", data: [] }) ).toThrow();
+test("EncoderBase::getOutputNameFor", () => {
+    let e = makeEncoderBase(BASE_CFG);
+    expect(e.test__getOutputNameFor("output")).toEqual("output_POSTFIX");
+
+    BASE_CFG.postfix = "_PF_{{yyyy}}";
+    e = makeEncoderBase(BASE_CFG);
+    const d = new Date()
+    expect(e.test__getOutputNameFor("output")).toEqual(`output_PF_${d.getFullYear()}`);
+});
+
+test("EncoderBase::generateHeaderRow", () => {
+    let e = makeEncoderBase(BASE_CFG);
+    expect(e.test__generateHeaderRow()).toEqual({ col_a: "A", col_b: "B" });
+});
+
+test("EncoderBase::filterDataBasedOnConfig", () => {
+    let e = makeEncoderBase(BASE_CFG);
+    const test_data = [
+        { col_a: 123, col_b: 456, col_c: "zxc" },
+        { col_a: 789, col_b: "abc" }
+    ]
+    const expected = [
+        { col_a: 123, col_b: 456 },
+        { col_a: 789, col_b: "abc" }
+    ]
+
+    expect(e.test__filterDataBasedOnConfig(test_data)).toEqual(expected);
 });

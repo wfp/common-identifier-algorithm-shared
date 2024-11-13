@@ -20,7 +20,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { lightFormat } from "date-fns";
 import { Config } from '../config/Config.js';
-import { CidDocument } from '../document.js';
+import { CidDocument, MappedData } from '../document.js';
 import Debug from 'debug';
 const log = Debug('CID:Encoding')
 
@@ -59,13 +59,31 @@ function moveFile(oldPath: string, newPath: string): void {
     }
 }
 
-export class EncoderBase {
+export abstract class EncoderBase {
     mapping: Config.ColumnMap;
-    outputPath: string = ""; // add every file path the encoder has written to this array
+    outputPath: string = "";
     basePath: string = "";
 
     constructor(mapping: Config.ColumnMap) {
         this.mapping = mapping;
+    }
+
+    // Starts the wiriting of a new document
+    abstract startDocument(outputPath: string): void;
+
+    // Ends wiriting the document
+    abstract endDocument(document: CidDocument): void;
+
+    // Writes a Sheet to the pre-determined output
+    abstract writeDocument(document: CidDocument): void;
+
+    // Wraps encoding a whole document using this encoder.
+    // Returns the list of files output
+    encodeDocument(document: CidDocument, outputPath: string) {
+        this.startDocument(outputPath);
+        this.writeDocument(document)
+        this.endDocument(document);
+        return this.outputPath;
     }
 
 
@@ -83,34 +101,8 @@ export class EncoderBase {
         }, {} as {[key: string]: string})
     }
 
-
-    // Starts the wiriting of a new document (could be a single output file or multiple)
-    startDocument(outputPath: string, options={}) {
-        throw new Error("not implemented");
-    }
-
-    // Ends wiriting the document
-    endDocument(document: CidDocument) {
-        throw new Error("not implemented");
-    }
-
-    // Writes a Sheet to the pre-determined output
-    writeDocument(document: CidDocument) {
-        throw new Error("not implemented");
-    }
-
-    // Wraps encoding a whole document using this encoder.
-    // Returns the list of files output
-    encodeDocument(document: CidDocument, outputPath: string) {
-        this.startDocument(outputPath);
-        this.writeDocument(document)
-        this.endDocument(document);
-        return this.outputPath;
-    }
-
-
     // Attempts to filter out the columns that should not be present in the
-    protected filterDataBasedOnConfig(data: any) {
+    protected filterDataBasedOnConfig(data: MappedData[]) {
         // build a set of keys
         let keysArray = this.mapping.columns.map((col) => col.alias);
         // let keysSet = new Set(keysArray);

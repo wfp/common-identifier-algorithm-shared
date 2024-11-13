@@ -48,3 +48,10 @@ test("XLSXDecoder::with limit", async () => {
     expect(decoded.data[0]).toEqual({ y: "1994", o: "ORG1" })
     expect(decoded.data[1]).toEqual({ y: "1982", o: "ORG1" })
 })
+
+test("XLSXDecoder::multipleSheets", async () => {
+    const limit = 8;
+    const d = makeXlsxDecoder(BASE_CFG, limit);
+
+    expect(async () => await d.decodeFile(join(__dirname, "files", "test_multiple_sheets.xlsx"))).rejects.toThrow()
+})

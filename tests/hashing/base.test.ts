@@ -17,6 +17,7 @@
 
 import { Config } from '../../config/Config.js';
 import { BaseHasher } from '../../hashing/base.js';
+import { Validation } from '../../validation/Validation.js';
 
 const BASE_CFG: Config.Options["algorithm"] = {
     columns: { static: [], to_translate: [], reference: []},
@@ -25,21 +26,26 @@ const BASE_CFG: Config.Options["algorithm"] = {
 }
 
 function makeBaseHasher(cfg=BASE_CFG) {
-    return new BaseHasher(cfg)
+    class TestHasher extends BaseHasher {
+        constructor() { super(cfg) }
+        generateHashForObject(obj: Validation.Data['row']): { [key: string]: string; } {
+            return {}
+        }
+    }
+    return new TestHasher()
 }
-
-test("BaseHasher::generateHashForExtractedObject", () => {
-
-    const h = makeBaseHasher();
-
-    expect(() => { h.generateHashForObject({})}).toThrow()
-
-})
 
 test("BaseHasher::generateHash", () => {
 
     const h = makeBaseHasher();
 
     expect(h.generateHashForValue("TEST123")).toEqual("3RYYVQ6SB2UT5NKYHRBKLRBZUR6WHXXEUCV5LPATTYAQEFCZWLSA====")
+
+})
+
+test("BaseHasher::invalid", () => {
+    BASE_CFG.salt.source = "FILE";
+
+    expect(() => makeBaseHasher(BASE_CFG)).toThrow()
 
 })

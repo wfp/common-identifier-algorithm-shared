@@ -23,7 +23,7 @@ import type { Validation } from '../validation/Validation.js';
 
 export type makeHasherFunction = (config: Config.Options["algorithm"]) => BaseHasher;
 
-export class BaseHasher {
+export abstract class BaseHasher {
     config: Config.Options["algorithm"];
     saltValue: Config.Options["algorithm"]["salt"]["value"];
 
@@ -47,7 +47,5 @@ export class BaseHasher {
         return base32.encode(hashDigest);
     }
 
-    generateHashForObject(obj: Validation.Data["row"]): { [key: string]: string } {
-        throw new Error("Hasher::generateHashForExtractedObject(obj) not implemented!")
-    }
+    abstract generateHashForObject(obj: Validation.Data["row"]): { [key: string]: string };
 }

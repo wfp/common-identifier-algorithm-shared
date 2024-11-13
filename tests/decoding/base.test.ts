@@ -40,7 +40,12 @@ const TEST_DATA_OUT = [
 ];
 
 function makeDecoderBase(cfg=BASE_CFG) {
-    return new DecoderBase(cfg)
+    class TestDecoder extends DecoderBase {
+        constructor() {
+            super(cfg)
+        }
+    }
+    return new TestDecoder()
 }
 
 test("Decoderbase::sheetFromRawData", () => {

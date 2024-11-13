@@ -59,4 +59,11 @@ test("makeCsvEncoder creation", () => {
         unlinkSync(test_output_path_postfixed);
     }
 
+});
+
+test("CsvEncoder::must start document before writing or ending", () => {
+    const e = makeCsvEncoder(TEST_MAPPING);
+
+    expect(() => e.writeDocument(TEST_DOC)).toThrow();
+    expect(e.endDocument()).toBe(undefined);
 })

@@ -14,20 +14,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+import { fileURLToPath } from 'node:url';
+import { dirname, join } from 'node:path'
+import { attemptToReadTOMLData, getSaltFilePath } from "../../config/utils.js";
+import { Config } from '../../config/Config.js';
 
-import { SUPPORTED_FILE_TYPES } from '../../document.js';
-import { encoderForFile } from '../../encoding/index.js';
-import { makeCsvEncoder } from '../../encoding/csv.js';
-import { makeXlsxEncoder } from '../../encoding/xlsx.js';
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
-test("encoderForFile", () => {
-    expect(encoderForFile(SUPPORTED_FILE_TYPES.CSV)).toEqual(makeCsvEncoder);
-    expect(encoderForFile(SUPPORTED_FILE_TYPES.XLSX)).toEqual(makeXlsxEncoder);
-
-    // @ts-ignore
-    expect(() => encoderForFile(null)).toThrow();
-    // @ts-ignore
-    expect(() => encoderForFile("")).toThrow();
-    // @ts-ignore
-    expect(() => encoderForFile(new Date())).toThrow();
-})
+test('utils::attemptToReadTomlData', () => {
+    let filePath = join(__dirname, "files", "test.salt");
+    expect(attemptToReadTOMLData<Config.Options>(filePath, "utf-8")).toBeNull();
+});
