@@ -1,3 +1,3 @@
 # Introduction
 
-This is the algorithm repository for the "Goverment of Syria" hashing algorithm of the Building Blocks CommonID Tool.
+This is the core repository for the Common Identifier application, containing all configuration, file handling, and data processing components.
