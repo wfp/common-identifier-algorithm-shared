@@ -6,6 +6,7 @@ export {
   processFile,
   validateDocument,
 } from './processing/index.js';
+export { appDataLocation } from './config/utils.js';
 export { CidDocument, SUPPORTED_FILE_TYPES } from './document.js';
 export { makeValidationResultDocument } from './validation/index.js';
 export { keepOutputColumns } from './processing/mapping.js'; 
