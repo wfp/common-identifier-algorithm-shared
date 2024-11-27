@@ -20,7 +20,7 @@ import Debug from 'debug';
 const log = Debug('CID:loadSaltFile');
 
 import { getSaltFilePath, attemptToReadFileData } from './utils.js';
-import { Config } from './Config.js';
+import type { Config } from './Config.js';
 
 // the encoding used for the salt file
 const SALT_FILE_ENCODING: fs.EncodingOption = 'utf-8';

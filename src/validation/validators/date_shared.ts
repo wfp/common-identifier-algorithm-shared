@@ -15,13 +15,13 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import {
-  Duration,
   parse as date_parse,
   add as date_add,
   isValid as date_isValid,
   formatDate,
   isWithinInterval,
 } from 'date-fns';
+import type { Duration } from 'date-fns';
 import { utc, UTCDate } from '@date-fns/utc';
 
 export interface ParsedDateDiff {

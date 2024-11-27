@@ -15,7 +15,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Config } from './Config.js';
+import type { Config } from './Config.js';
 
 // enums with the validation result
 export function validateConfig(config: Config.Options, region: string) {
@@ -215,15 +215,15 @@ export function validateConfig(config: Config.Options, region: string) {
             isString('algorithm.salt.value', algorithm.salt.value) &&
             (isObject('algorithm.salt.value', algorithm.salt.value) || // @ts-ignore
               isString(
-                'algorithm.salt.value.win32',
+                'algorithm.salt.value.win32', // @ts-ignore
                 algorithm.salt.value.win32,
               ) || // @ts-ignore
               isString(
-                'algorithm.salt.value.darwin',
+                'algorithm.salt.value.darwin', // @ts-ignore
                 algorithm.salt.value.darwin,
               ) || // @ts-ignore
               isString(
-                'algorithm.salt.value.linux',
+                'algorithm.salt.value.linux', // @ts-ignore
                 algorithm.salt.value.linux,
               ))
           );

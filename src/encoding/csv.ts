@@ -19,7 +19,7 @@ import fs from 'node:fs';
 
 import { stringify } from 'csv-stringify/sync';
 import { EncoderBase } from './base.js';
-import { Config } from '../config/Config.js';
+import type { Config } from '../config/Config.js';
 import type { CidDocument } from '../document.js';
 
 import Debug from 'debug';

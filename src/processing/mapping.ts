@@ -22,7 +22,7 @@
  */
 
 import Debug from 'debug';
-import { Config } from '../config/Config.js';
+import type { Config } from '../config/Config.js';
 import { CidDocument } from '../document.js';
 const log = Debug('CID:Processing::mapping');
 

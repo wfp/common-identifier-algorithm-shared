@@ -14,15 +14,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import { SUPPORTED_VALIDATORS, Validation, Validator } from '../Validation.js';
+import { SUPPORTED_VALIDATORS } from '../Validation.js';
+import type { Validation, Validator } from '../Validation.js';
 
 import {
   parseDateDiff,
   isValidDateDiff,
   attemptToParseDate,
   isDateInRange,
-  ParsedDateDiff,
 } from './date_shared.js';
+import type { ParsedDateDiff } from './date_shared.js';
 
 export class DateFieldDiffValidator implements Validator.Base {
   kind = SUPPORTED_VALIDATORS.DATE_FIELD_DIFF;

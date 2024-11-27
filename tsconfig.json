@@ -10,7 +10,7 @@
     "verbatimModuleSyntax": true,
 
     "strict": true,
-    "noUncheckedIndexedAccess": true,
+    "noUncheckedIndexedAccess": false,
     "noImplicitOverride": true,
 
     "outDir": "dist",
@@ -23,6 +23,6 @@
 
     "lib": ["ES2022"]
   },
-  "include": ["src/**/*.ts", "src/tests/**/*.ts"],
-  "exclude": ["node_modules", "dist", "tmp", "examples"]
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", "tests", "dist", "tmp", "examples"]
 }

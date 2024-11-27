@@ -18,7 +18,7 @@
 import Debug from 'debug';
 const log = Debug('CID:Decoder');
 
-import { Config } from '../config/Config.js';
+import type { Config } from '../config/Config.js';
 import { CidDocument } from '../document.js';
 import type { RawData, MappedData } from '../document.js';
 

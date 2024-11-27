@@ -19,8 +19,8 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { lightFormat } from 'date-fns';
-import { Config } from '../config/Config.js';
-import { CidDocument, MappedData } from '../document.js';
+import type { CidDocument, MappedData } from '../document.js';
+import type { Config } from '../config/Config.js';
 import Debug from 'debug';
 const log = Debug('CID:Encoding');
 

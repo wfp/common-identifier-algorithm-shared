@@ -15,8 +15,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Config } from '../config/Config.js';
-import { Validation } from '../validation/Validation.js';
+import type { Config } from '../config/Config.js';
+import type { Validation } from '../validation/Validation.js';
 
 // takes an row object and the "algorithm.columns" config and returns a new
 // object with { static: [<COL VALUES>], to_translate: [..], reference: [...] } columns

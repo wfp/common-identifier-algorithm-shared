@@ -34,9 +34,10 @@ import {
   isMappingOnlyDocument,
   keepValidatorsForColumns,
 } from './mapping.js';
-import { Config } from '../config/Config.js';
-import { BaseHasher, makeHasherFunction } from '../hashing/base.js';
-import { Validation } from '../validation/Validation.js';
+import type { Config } from '../config/Config.js';
+import { BaseHasher } from '../hashing/base.js';
+import type { makeHasherFunction } from '../hashing/base.js';
+import type { Validation } from '../validation/Validation.js';
 
 import Debug from 'debug';
 const log = Debug('CID:Processing');

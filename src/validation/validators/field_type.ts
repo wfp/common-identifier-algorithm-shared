@@ -14,7 +14,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import { SUPPORTED_VALIDATORS, Validator } from '../Validation.js';
+import { SUPPORTED_VALIDATORS } from '../Validation.js';
+import type { Validator } from '../Validation.js';
 
 const SUPPORTED_FIELD_TYPES = [
   { type: 'string', value: 'text' },

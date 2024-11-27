@@ -28,7 +28,8 @@ import {
   RegexpValidator,
   SameValueForAllRowsValidator,
 } from './validators/index.js';
-import { SUPPORTED_VALIDATORS, Validation, Validator } from './Validation.js';
+import { SUPPORTED_VALIDATORS } from './Validation.js';
+import type { Validation, Validator } from './Validation.js';
 import { CidDocument } from '../document.js';
 import type { Config } from '../config/Config.js';
 

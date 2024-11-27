@@ -14,7 +14,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import { SUPPORTED_VALIDATORS, Validation, Validator } from '../Validation.js';
+import { SUPPORTED_VALIDATORS } from '../Validation.js';
+import type { Validation, Validator } from '../Validation.js';
 
 export class SameValueForAllRowsValidator implements Validator.Base {
   kind = SUPPORTED_VALIDATORS.SAME_VALUE_FOR_ALL_ROWS;

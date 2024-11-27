@@ -15,7 +15,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { SUPPORTED_VALIDATORS, Validator } from '../Validation.js';
+import { SUPPORTED_VALIDATORS } from '../Validation.js';
+import type { Validator } from '../Validation.js';
 
 export class RegexpValidator implements Validator.Base {
   kind = SUPPORTED_VALIDATORS.REGEX_MATCH;

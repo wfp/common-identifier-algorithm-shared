@@ -22,7 +22,7 @@ import { loadSaltFile } from './loadSaltFile.js';
 import { generateConfigHash } from './generateConfigHash.js';
 
 import { getSaltFilePath, attemptToReadTOMLData } from './utils.js';
-import { Config } from './Config.js';
+import type { Config } from './Config.js';
 import Debug from 'debug';
 const log = Debug('CID:loadConfig');
 

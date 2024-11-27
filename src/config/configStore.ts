@@ -29,7 +29,7 @@ import {
 } from './appConfig.js';
 import { appDataLocation } from './utils.js';
 
-import { AppConfigData, Config } from './Config.js';
+import type { AppConfigData, Config } from './Config.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
