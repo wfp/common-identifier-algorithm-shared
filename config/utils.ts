@@ -67,11 +67,12 @@ export function getSaltFilePath(saltValueConfig: Config.Options["algorithm"]["sa
     // no salt path means the config does not have our platform
     /* istanbul ignore next */
     if (process.platform in saltValueConfig === false) {
-        // throw new Error(`Not supported platform for salt file location: ${process.platform}`);
-        console.error(`Not supported platform for salt file location: ${process.platform}`);
+        throw new Error(`Unsupported platform for salt file location: ${process.platform}`);
     }
-    // @ts-ignore
-    const platformSaltPath = saltValueConfig[process.platform];
+    const platform = process.platform as keyof typeof saltValueConfig;
+    const platformSaltPath = saltValueConfig[platform];
+
+    if (!platformSaltPath) throw new Error(`Salt path not provided for platform: ${process.platform}`)
     
     // token replacement
     return path.resolve(
@@ -82,6 +83,11 @@ export function getSaltFilePath(saltValueConfig: Config.Options["algorithm"]["sa
     
     // Returns the prefered Application Data storage location based on the operating system
 export function appDataLocation() {
-    /* istanbul ignore next */
-    return process.env.APPDATA || (process.platform == 'darwin' ? process.env.HOME + '/Library/Preferences' : process.env.HOME + "/.local/share")
+    switch(process.platform) {
+        case "win32": return process.env.APPDATA as string;
+        case "darwin": return process.env.HOME + '/Library/Preferences'
+        case "linux": return process.env.HOME + '/.local/share'
+        default:
+            throw new Error(`Unsupported platform for salt file location: ${process.platform}`)
+    }
 }

@@ -20,6 +20,7 @@ import Debug from 'debug';
 const log = Debug('CID:loadSaltFile');
 
 import { getSaltFilePath, attemptToReadFileData } from './utils.js';
+import { Config } from './Config.js';
 
 // the encoding used for the salt file
 const SALT_FILE_ENCODING: fs.EncodingOption = "utf-8";
@@ -29,7 +30,7 @@ const DEFAULT_VALIDATOR_REGEXP: RegExp = /-----BEGIN PGP PUBLIC KEY BLOCK-----[A
 
 
 // Attempts to load and clean up the salt file data
-export function loadSaltFile(saltFilePath: string, validatorRegexp=DEFAULT_VALIDATOR_REGEXP) {
+export function loadSaltFile(saltFilePath: Config.Options["algorithm"]["salt"]["value"], validatorRegexp=DEFAULT_VALIDATOR_REGEXP) {
     // resolve the salt file path from the config & platform
     const fullSaltFilePath = getSaltFilePath(saltFilePath);
 
@@ -37,6 +38,7 @@ export function loadSaltFile(saltFilePath: string, validatorRegexp=DEFAULT_VALID
     // return null;
     // TODO: potentially clean up line endings and whitespace here
     const saltData = attemptToReadFileData(fullSaltFilePath, SALT_FILE_ENCODING);
+    console.log(saltData)
     if (!saltData) return null;
 
     // check if the structure is correct for the file
@@ -44,7 +46,7 @@ export function loadSaltFile(saltFilePath: string, validatorRegexp=DEFAULT_VALID
     const CHECK_RX = new RegExp(validatorRegexp);
 
     if (!CHECK_RX.test(saltData)) {
-        log("SALT FILE Regexp error")
+        console.log("SALT FILE Regexp error")
         return null;
     }
 

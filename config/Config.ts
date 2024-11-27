@@ -45,9 +45,9 @@ export namespace Config {
                 source: "FILE" | "STRING";
                 validator_regex: string;
                 value: {
-                    win32: string;
-                    darwin: string;
-                    linux: string;
+                    win32?: string;
+                    darwin?: string;
+                    linux?: string;
                 } | string;
             };
         };

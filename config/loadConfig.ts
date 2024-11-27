@@ -98,10 +98,10 @@ export function loadConfig(configPath: string, region: string): LoadConfigResult
 
     // figure out the file path and the validation regexp
     const saltFilePath = configData.algorithm.salt.value;
-    const saltFileValidatorRegexp = configData.algorithm.salt.validator_regex;
+    const saltFileValidatorRegexp = RegExp(configData.algorithm.salt.validator_regex);
 
     // attempt to load the salt file
-    // @ts-ignore saltFilePath must be { win32: string, darwin: string } at this stage since salt.source is guaranteed to be "FILE".
+    // saltFilePath must be { win32: string, darwin: string } at this stage since salt.source is guaranteed to be "FILE".
     const saltData = loadSaltFile(saltFilePath, saltFileValidatorRegexp);
 
     // if the salt file load failed, we have failed

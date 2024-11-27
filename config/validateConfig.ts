@@ -176,7 +176,8 @@ export function validateConfig(config: Config.Options, region: string) {
                     (
                         isObject("algorithm.salt.value", algorithm.salt.value) || // @ts-ignore
                         isString("algorithm.salt.value.win32", algorithm.salt.value.win32) || // @ts-ignore
-                        isString("algorithm.salt.value.darwin", algorithm.salt.value.darwin)
+                        isString("algorithm.salt.value.darwin", algorithm.salt.value.darwin) || // @ts-ignore
+                        isString("algorithm.salt.value.linux", algorithm.salt.value.linux)
                     );
                 case "STRING":
                     return isString("algorithm.salt.value", algorithm.salt.value);
