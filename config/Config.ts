@@ -47,6 +47,7 @@ export namespace Config {
                 value: {
                     win32: string;
                     darwin: string;
+                    linux: string;
                 } | string;
             };
         };
