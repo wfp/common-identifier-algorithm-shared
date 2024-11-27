@@ -1,12 +1,13 @@
 export { loadConfig } from './config/loadConfig.js';
 export { makeConfigStore, ConfigStore } from './config/configStore.js';
+export { appDataLocation, attemptToReadTOMLData } from './config/utils.js';
+export { generateConfigHash } from './config/generateConfigHash.js';
 export {
   generateHashesForDocument,
   preprocessFile,
   processFile,
   validateDocument,
 } from './processing/index.js';
-export { appDataLocation, attemptToReadTOMLData } from './config/utils.js';
 export { CidDocument, SUPPORTED_FILE_TYPES } from './document.js';
 export { makeValidationResultDocument } from './validation/index.js';
 export { keepOutputColumns } from './processing/mapping.js'; 
