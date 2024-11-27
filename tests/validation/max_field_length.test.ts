@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import { MaxFieldLengthValidator } from "../../validation/validators/max_field_length.js"
+import { MaxFieldLengthValidator }from '../../src/validation/validators/max_field_length.js';
 
 test("MaxFieldLengthValidator", () => {
     const v = new MaxFieldLengthValidator({ op: "max_field_length", value: 2 })

@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import { DateFieldDiffValidator } from "../../validation/validators/date_field_diff.js";
+import { DateFieldDiffValidator }from '../../src/validation/validators/date_field_diff.js';
 
 let TEST_SHEET_PARAMS: any = { row: { col_a: "19910101" }, sheet: { name: "", data: [] }, column: "" };
 

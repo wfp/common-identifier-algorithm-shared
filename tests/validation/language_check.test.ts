@@ -15,7 +15,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { LanguageCheckValidator } from "../../validation/validators/language_check.js";
+import { LanguageCheckValidator }from '../../src/validation/validators/language_check.js';
 
 test("LanguageCheckValidator", () => {
 

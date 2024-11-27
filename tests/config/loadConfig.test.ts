@@ -19,8 +19,8 @@ import { statSync, readFileSync, writeFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url';
 import { join, dirname } from 'node:path'
 import { tmpdir } from 'node:os'
-import { loadConfig } from '../../config/loadConfig.js'
-import { generateConfigHash } from '../../config/generateConfigHash.js'
+import { loadConfig }from '../../src/config/loadConfig.js'
+import { generateConfigHash }from '../../src/config/generateConfigHash.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REGION = "GOS";

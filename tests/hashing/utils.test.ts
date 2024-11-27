@@ -15,7 +15,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { extractAlgoColumnsFromObject, joinFieldsForHash, cleanValueList } from '../../hashing/utils.js'
+import { extractAlgoColumnsFromObject, joinFieldsForHash, cleanValueList }from '../../src/hashing/utils.js'
 
 test("extractAlgoColumnsFromObject", () => {
     // expect(() => { extractAlgoColumnsFromObject("", {}) }).toThrow()

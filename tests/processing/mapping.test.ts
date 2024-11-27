@@ -15,9 +15,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Config } from '../../config/Config.js';
-import { CidDocument } from '../../document.js';
-import { mapRequiredColumns, isMappingOnlyDocument } from '../../processing/mapping.js';
+import { Config }from '../../src/config/Config.js';
+import { CidDocument }from '../../src/document.js';
+import { mapRequiredColumns, isMappingOnlyDocument }from '../../src/processing/mapping.js';
 
 test("mapping::mapRequiredColumns", () => {
     expect(mapRequiredColumns(

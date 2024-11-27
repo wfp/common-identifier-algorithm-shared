@@ -15,9 +15,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Config } from '../../config/Config.js';
-import { BaseHasher } from '../../hashing/base.js';
-import { Validation } from '../../validation/Validation.js';
+import { Config }from '../../src/config/Config.js';
+import { BaseHasher }from '../../src/hashing/base.js';
+import { Validation }from '../../src/validation/Validation.js';
 
 const BASE_CFG: Config.Options["algorithm"] = {
     columns: { static: [], to_translate: [], reference: []},

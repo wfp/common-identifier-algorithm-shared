@@ -16,8 +16,8 @@
  */
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path'
-import { attemptToReadTOMLData, getSaltFilePath } from "../../config/utils.js";
-import { Config } from '../../config/Config.js';
+import { attemptToReadTOMLData, getSaltFilePath }from '../../src/config/utils.js';
+import { Config }from '../../src/config/Config.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 

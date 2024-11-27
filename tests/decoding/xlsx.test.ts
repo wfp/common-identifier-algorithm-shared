@@ -18,7 +18,7 @@
 
 import { fileURLToPath } from 'node:url';
 import { join, dirname } from 'path';
-import { makeXlsxDecoder } from '../../decoding/xlsx.js';
+import { makeXlsxDecoder }from '../../src/decoding/xlsx.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 

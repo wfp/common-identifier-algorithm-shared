@@ -20,7 +20,7 @@ import { fileURLToPath } from 'node:url';
 import fs from 'node:fs'
 import os from 'node:os'
 import toml from 'toml'
-import { makeConfigStore } from '../../config/configStore.js';
+import { makeConfigStore }from '../../src/config/configStore.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 

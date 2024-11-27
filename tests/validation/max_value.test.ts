@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import { MaxValueValidator } from "../../validation/validators/max_value.js"
+import { MaxValueValidator }from '../../src/validation/validators/max_value.js';
 
 test("MaxValueValidator", () => {
     const v = new MaxValueValidator({ op: "max_value", value: 100})

@@ -14,8 +14,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import { Validation } from "../../validation/Validation.js"
-import { SameValueForAllRowsValidator } from "../../validation/validators/same_value_for_all_rows.js"
+import { Validation }from '../../src/validation/Validation.js';
+import { SameValueForAllRowsValidator }from '../../src/validation/validators/same_value_for_all_rows.js';
 
 const TEST_DOCUMENT = {
     name: "TEST",

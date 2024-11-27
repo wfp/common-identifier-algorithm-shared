@@ -19,9 +19,9 @@
 import { fileURLToPath } from 'node:url';
 import { join, dirname } from 'node:path';
 import { existsSync, unlinkSync, readFileSync } from 'node:fs';
-import { makeCsvEncoder } from '../../encoding/csv.js';
-import { Config } from '../../config/Config.js';
-import { CidDocument } from '../../document.js';
+import { makeCsvEncoder }from '../../src/encoding/csv.js';
+import { Config }from '../../src/config/Config.js';
+import { CidDocument }from '../../src/document.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 

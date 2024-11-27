@@ -15,7 +15,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import * as dateFns from 'date-fns';
-import { DateDiffValidator } from "../../validation/validators/date_diff.js";
+import { DateDiffValidator }from '../../src/validation/validators/date_diff.js';
 
 function toDateStr(offset: dateFns.Duration) {
     const d = dateFns.add(new Date(), offset);

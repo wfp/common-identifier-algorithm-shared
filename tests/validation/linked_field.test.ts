@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import { LinkedFieldValidator } from "../../validation/validators/linked_field.js";
+import { LinkedFieldValidator }from '../../src/validation/validators/linked_field.js';
 
 let TEST_SHEET_PARAMS = { row: { col_a: "b" }, document: { name: "", data: [] }, column: "" };
 

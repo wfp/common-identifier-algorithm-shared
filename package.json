@@ -1,0 +1,44 @@
+{
+  "name": "common-identifier-algorithm-shared",
+  "version": "1.0.0",
+  "description": "Generate psuedonymous identifiers from tabular data",
+  "author": "dean.ford@wfp.org",
+  "license": "AGPL-3.0-or-later",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "tsc": "tsc",
+    "tsc:watch": "tsc -w",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage --config=jest.config.js",
+    "test:ci": "node --experimental-vm-modules node_modules/jest/bin/jest.js --ci --coverage --config=jest.ci.config.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wfp/common-identifier-algorithm-shared.git"
+  },
+  "bugs": {
+    "url": "https://github.com/wfp/common-identifier-algorithm-shared/issues"
+  },
+  "homepage": "https://github.com/wfp/common-identifier-algorithm-shared#readme",
+  "devDependencies": {
+    "@types/debug": "^4.1.12",
+    "@types/jest": "^29.5.14",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.2.5",
+    "typescript": "^5.7.2"
+  },
+  "dependencies": {
+    "@date-fns/utc": "^2.1.0",
+    "csv": "^6.3.9",
+    "date-fns": "^4.1.0",
+    "debug": "^4.3.7",
+    "electron-squirrel-startup": "^1.0.1",
+    "hi-base32": "^0.5.1",
+    "safe-stable-stringify": "^2.4.3",
+    "toml": "^3.0.0",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
+  },
+  "keywords": [
+    "common-identifier"
+  ]
+}

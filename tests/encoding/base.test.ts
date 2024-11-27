@@ -16,9 +16,9 @@
  */
 import { fileURLToPath } from 'node:url';
 import { join, dirname } from 'node:path';
-import { EncoderBase } from '../../encoding/base.js';
-import { CidDocument } from '../../document.js';
-import { Config } from '../../config/Config.js';
+import { EncoderBase }from '../../src/encoding/base.js';
+import { CidDocument }from '../../src/document.js';
+import { Config }from '../../src/config/Config.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 

@@ -15,7 +15,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { DecoderBase } from '../../decoding/base.js';
+import { DecoderBase }from '../../src/decoding/base.js';
 
 const BASE_CFG = {
     columns: [

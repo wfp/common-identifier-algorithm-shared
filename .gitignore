@@ -1,1 +1,7 @@
-*.js
+node_modules
+tmp
+dist
+.vscode
+coverage
+
+/lib

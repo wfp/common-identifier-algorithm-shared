@@ -15,7 +15,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { OptionsValidator } from "../../validation/validators/options.js";
+import { OptionsValidator }from '../../src/validation/validators/options.js';
 
 test("OptionsValidator", () => {
     const v = new OptionsValidator({ op: "options", value: ["A", "B", "AB" ]})

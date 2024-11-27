@@ -21,12 +21,12 @@ import { readFileSync, existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { parse } from 'csv-parse/sync';
 
-import { preprocessFile, processFile } from '../../processing/index.js';
-import { SUPPORTED_FILE_TYPES } from '../../document.js';
-import { BaseHasher, makeHasherFunction } from '../../hashing/base.js';
-import { Config } from '../../config/Config.js';
-import { Validation } from '../../validation/Validation.js';
-import { extractAlgoColumnsFromObject } from '../../hashing/utils.js';
+import { preprocessFile, processFile }from '../../src/processing/index.js';
+import { SUPPORTED_FILE_TYPES }from '../../src/document.js';
+import { BaseHasher, makeHasherFunction }from '../../src/hashing/base.js';
+import { Config }from '../../src/config/Config.js';
+import { Validation }from '../../src/validation/Validation.js';
+import { extractAlgoColumnsFromObject }from '../../src/hashing/utils.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 

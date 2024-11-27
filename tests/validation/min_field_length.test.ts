@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import { MinFieldLengthValidator } from "../../validation/validators/min_field_length.js"
+import { MinFieldLengthValidator }from '../../src/validation/validators/min_field_length.js';
 
 test("MinFieldLengthValidator", () => {
     const v = new MinFieldLengthValidator({ op: "min_field_length", value: 2 })
