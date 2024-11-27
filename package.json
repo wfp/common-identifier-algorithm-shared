@@ -11,10 +11,10 @@
   ],
   "type": "module",
   "scripts": {
-    "prepare": "npm run tsc",
     "format": "prettier --write .",
-    "tsc": "tsc",
-    "tsc:watch": "tsc -w",
+    "build": "tsc",
+    "watch": "tsc -w",
+    "prepare": "npm run build",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage --config=jest.config.js",
     "test:ci": "node --experimental-vm-modules node_modules/jest/bin/jest.js --ci --coverage --config=jest.ci.config.js"
   },
