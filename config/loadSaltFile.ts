@@ -38,7 +38,6 @@ export function loadSaltFile(saltFilePath: Config.Options["algorithm"]["salt"]["
     // return null;
     // TODO: potentially clean up line endings and whitespace here
     const saltData = attemptToReadFileData(fullSaltFilePath, SALT_FILE_ENCODING);
-    console.log(saltData)
     if (!saltData) return null;
 
     // check if the structure is correct for the file
@@ -46,7 +45,7 @@ export function loadSaltFile(saltFilePath: Config.Options["algorithm"]["salt"]["
     const CHECK_RX = new RegExp(validatorRegexp);
 
     if (!CHECK_RX.test(saltData)) {
-        console.log("SALT FILE Regexp error")
+        log("SALT FILE Regexp error")
         return null;
     }
 
