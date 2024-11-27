@@ -67,7 +67,8 @@ export function getSaltFilePath(saltValueConfig: Config.Options["algorithm"]["sa
     // no salt path means the config does not have our platform
     /* istanbul ignore next */
     if (process.platform in saltValueConfig === false) {
-        throw new Error(`Not supported platform for salt file location: ${process.platform}`);
+        // throw new Error(`Not supported platform for salt file location: ${process.platform}`);
+        console.error(`Not supported platform for salt file location: ${process.platform}`);
     }
     // @ts-ignore
     const platformSaltPath = saltValueConfig[process.platform];
