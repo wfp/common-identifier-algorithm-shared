@@ -11,6 +11,7 @@
   ],
   "type": "module",
   "scripts": {
+    "prepare": "npm run tsc",
     "format": "prettier --write .",
     "tsc": "tsc",
     "tsc:watch": "tsc -w",
