@@ -1,17 +1,28 @@
 {
-    "compilerOptions": {
-      "target": "ESNext",
-      "outDir": "lib",
-      "module": "NodeNext",
-      "moduleResolution": "NodeNext",
-      "skipLibCheck": true,
-      "strict": true
-      // TODO: Enable these when we can:
-      // "noUncheckedIndexedAccess": true,
-      // "exactOptionalPropertyTypes": true
-      // Enable for debug, but keep disabled after that as it slows down builds a lot
-      // "noErrorTruncation": true
-    },
-    "include": ["src/**/*.ts", "tests/**/*.ts"],
-    "exclude": ["node_modules", "dist", "tmp", "examples"]
-  }
+  "compilerOptions": {
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "target": "ES2022",
+    "allowJs": true,
+    "resolveJsonModule": true,
+    "moduleDetection": "force",
+    "isolatedModules": true,
+    "verbatimModuleSyntax": true,
+
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+
+    "outDir": "dist",
+    "module": "NodeNext",
+    "rootDir": "src",
+    "sourceMap": true,
+
+    "declaration": true,
+    "declarationMap": true,
+
+    "lib": ["ES2022"]
+  },
+  "include": ["src/**/*.ts", "src/tests/**/*.ts"],
+  "exclude": ["node_modules", "dist", "tmp", "examples"]
+}
