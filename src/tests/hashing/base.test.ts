@@ -15,37 +15,40 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Config }from '../../config/Config.js';
-import { BaseHasher }from '../../hashing/base.js';
-import { Validation }from '../../validation/Validation.js';
+import { Config } from '../../config/Config.js';
+import { BaseHasher } from '../../hashing/base.js';
+import { Validation } from '../../validation/Validation.js';
 
-const BASE_CFG: Config.Options["algorithm"] = {
-    columns: { static: [], to_translate: [], reference: []},
-    hash: { strategy: "SHA256" },
-    salt: { source: "STRING", value: "NOPE", validator_regex: "" }
-}
+const BASE_CFG: Config.Options['algorithm'] = {
+  columns: { static: [], to_translate: [], reference: [] },
+  hash: { strategy: 'SHA256' },
+  salt: { source: 'STRING', value: 'NOPE', validator_regex: '' },
+};
 
-function makeBaseHasher(cfg=BASE_CFG) {
-    class TestHasher extends BaseHasher {
-        constructor() { super(cfg) }
-        generateHashForObject(obj: Validation.Data['row']): { [key: string]: string; } {
-            return {}
-        }
+function makeBaseHasher(cfg = BASE_CFG) {
+  class TestHasher extends BaseHasher {
+    constructor() {
+      super(cfg);
     }
-    return new TestHasher()
+    generateHashForObject(obj: Validation.Data['row']): {
+      [key: string]: string;
+    } {
+      return {};
+    }
+  }
+  return new TestHasher();
 }
 
-test("BaseHasher::generateHash", () => {
+test('BaseHasher::generateHash', () => {
+  const h = makeBaseHasher();
 
-    const h = makeBaseHasher();
+  expect(h.generateHashForValue('TEST123')).toEqual(
+    '3RYYVQ6SB2UT5NKYHRBKLRBZUR6WHXXEUCV5LPATTYAQEFCZWLSA====',
+  );
+});
 
-    expect(h.generateHashForValue("TEST123")).toEqual("3RYYVQ6SB2UT5NKYHRBKLRBZUR6WHXXEUCV5LPATTYAQEFCZWLSA====")
+test('BaseHasher::invalid', () => {
+  BASE_CFG.salt.source = 'FILE';
 
-})
-
-test("BaseHasher::invalid", () => {
-    BASE_CFG.salt.source = "FILE";
-
-    expect(() => makeBaseHasher(BASE_CFG)).toThrow()
-
-})
+  expect(() => makeBaseHasher(BASE_CFG)).toThrow();
+});

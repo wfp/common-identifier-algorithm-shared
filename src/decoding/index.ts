@@ -20,26 +20,25 @@ import { SUPPORTED_FILE_TYPES } from '../document.js';
 import { makeCsvDecoder } from './csv.js';
 import { makeXlsxDecoder } from './xlsx.js';
 
-
 // Returns the file type based on the file name
 export function fileTypeOf(filePath: string) {
-    if (filePath.endsWith(".xlsx")) {
-        return SUPPORTED_FILE_TYPES.XLSX
-    }
-    if (filePath.endsWith(".csv")) {
-        return SUPPORTED_FILE_TYPES.CSV
-    }
-    throw new Error("Unknown file type");
+  if (filePath.endsWith('.xlsx')) {
+    return SUPPORTED_FILE_TYPES.XLSX;
+  }
+  if (filePath.endsWith('.csv')) {
+    return SUPPORTED_FILE_TYPES.CSV;
+  }
+  throw new Error('Unknown file type');
 }
 
 // Returns an appropriate decoder for a file
 export function decoderForFile(fileType: SUPPORTED_FILE_TYPES) {
-    switch (fileType) {
-        case SUPPORTED_FILE_TYPES.XLSX:
-            return makeXlsxDecoder;
-        case SUPPORTED_FILE_TYPES.CSV:
-            return makeCsvDecoder;
-        default:
-            throw new Error(`Unknown file type: '${fileType}'`)
-    }
+  switch (fileType) {
+    case SUPPORTED_FILE_TYPES.XLSX:
+      return makeXlsxDecoder;
+    case SUPPORTED_FILE_TYPES.CSV:
+      return makeCsvDecoder;
+    default:
+      throw new Error(`Unknown file type: '${fileType}'`);
+  }
 }

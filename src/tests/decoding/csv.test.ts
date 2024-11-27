@@ -17,36 +17,36 @@
 
 import { fileURLToPath } from 'node:url';
 import { join, dirname } from 'path';
-import {makeCsvDecoder}from '../../decoding/csv.js';
+import { makeCsvDecoder } from '../../decoding/csv.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const BASE_CFG = {
-    columns: [
-        {name: "A", alias: "col_a"},
-        {name: "B", alias: "col_b", default: "B_DEFAULT"},
-    ]
-}
+  columns: [
+    { name: 'A', alias: 'col_a' },
+    { name: 'B', alias: 'col_b', default: 'B_DEFAULT' },
+  ],
+};
 
 const TEST_DATA_OUT = [
-    { col_a: "A0", col_b: "B0" },
-    { col_a: "A1", col_b: "B1" },
-    { col_a: "A2", col_b: "" },
-    { col_a: "", col_b: "B3" },
+  { col_a: 'A0', col_b: 'B0' },
+  { col_a: 'A1', col_b: 'B1' },
+  { col_a: 'A2', col_b: '' },
+  { col_a: '', col_b: 'B3' },
 ];
 
-test("CSVDecoder", async () => {
-    const d = makeCsvDecoder(BASE_CFG);
-    const decoded = d.decodeFile(join(__dirname, "files", "test.csv"))
+test('CSVDecoder', async () => {
+  const d = makeCsvDecoder(BASE_CFG);
+  const decoded = d.decodeFile(join(__dirname, 'files', 'test.csv'));
 
-    expect(decoded.data.length).toEqual(4)
-    expect(decoded.data).toEqual(TEST_DATA_OUT)
-})
+  expect(decoded.data.length).toEqual(4);
+  expect(decoded.data).toEqual(TEST_DATA_OUT);
+});
 
-test("CSVDecoder::test limit", async () => {
-    const d = makeCsvDecoder(BASE_CFG, 2);
-    const decoded = d.decodeFile(join(__dirname, "files", "test.csv"))
+test('CSVDecoder::test limit', async () => {
+  const d = makeCsvDecoder(BASE_CFG, 2);
+  const decoded = d.decodeFile(join(__dirname, 'files', 'test.csv'));
 
-    expect(decoded.data.length).toEqual(2)
-    expect(decoded.data).toEqual(TEST_DATA_OUT.slice(0, 2))
-})
+  expect(decoded.data.length).toEqual(2);
+  expect(decoded.data).toEqual(TEST_DATA_OUT.slice(0, 2));
+});

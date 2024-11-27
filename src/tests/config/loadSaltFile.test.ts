@@ -17,20 +17,24 @@
 import { fileURLToPath } from 'node:url';
 import { join, dirname } from 'node:path';
 import { readFileSync } from 'node:fs';
-import { loadSaltFile }from '../../config/loadSaltFile.js';
+import { loadSaltFile } from '../../config/loadSaltFile.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-const VALIDATOR_REGEXP = /BEGIN TEST[a-z\s]*END TEST/
-const SALT_FILE_PATH = join(__dirname, "files", "test.salt")
+const VALIDATOR_REGEXP = /BEGIN TEST[a-z\s]*END TEST/;
+const SALT_FILE_PATH = join(__dirname, 'files', 'test.salt');
 
-test("loadSaltFile", ()=> {
-    expect(loadSaltFile(SALT_FILE_PATH, VALIDATOR_REGEXP))
-        .toEqual(readFileSync(SALT_FILE_PATH, 'utf-8'))
+test('loadSaltFile', () => {
+  expect(loadSaltFile(SALT_FILE_PATH, VALIDATOR_REGEXP)).toEqual(
+    readFileSync(SALT_FILE_PATH, 'utf-8'),
+  );
 
-    expect(loadSaltFile("NON-EXISTANT-FILE", VALIDATOR_REGEXP))
-        .toEqual(null)
+  expect(loadSaltFile('NON-EXISTANT-FILE', VALIDATOR_REGEXP)).toEqual(null);
 
-    expect(loadSaltFile(join(__dirname, "files", "test-config.json"), VALIDATOR_REGEXP))
-        .toEqual(null)
-})
+  expect(
+    loadSaltFile(
+      join(__dirname, 'files', 'test-config.json'),
+      VALIDATOR_REGEXP,
+    ),
+  ).toEqual(null);
+});

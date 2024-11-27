@@ -21,31 +21,40 @@ import base32 from 'hi-base32';
 import type { Config } from '../config/Config.js';
 import type { Validation } from '../validation/Validation.js';
 
-export type makeHasherFunction = (config: Config.Options["algorithm"]) => BaseHasher;
+export type makeHasherFunction = (
+  config: Config.Options['algorithm'],
+) => BaseHasher;
 
 export abstract class BaseHasher {
-    config: Config.Options["algorithm"];
-    saltValue: Config.Options["algorithm"]["salt"]["value"];
+  config: Config.Options['algorithm'];
+  saltValue: Config.Options['algorithm']['salt']['value'];
 
-    constructor(config: Config.Options["algorithm"]) {
-        this.config = config;
+  constructor(config: Config.Options['algorithm']) {
+    this.config = config;
 
-        // at this point the salt data should be injected into the config
-        if (config.salt.source.toLowerCase() !== 'string') {
-            throw new Error("only embedded salt values supported for hashing -- import & save the config if file support is desired here");
-        }
-
-        // load the salt value based on the config
-        this.saltValue = config.salt.value;
+    // at this point the salt data should be injected into the config
+    if (config.salt.source.toLowerCase() !== 'string') {
+      throw new Error(
+        'only embedded salt values supported for hashing -- import & save the config if file support is desired here',
+      );
     }
 
+    // load the salt value based on the config
+    this.saltValue = config.salt.value;
+  }
 
-    // Generates a hash based on the configuration from an already concatenated string
-    // TODO: pass full algo config if SCRYPT or other more parameterized hash is used
-    generateHashForValue(stringValue: string, algorithm: string ='sha256') {
-        let hashDigest = crypto.createHash(algorithm).update(this.saltValue as string).update(stringValue).digest();
-        return base32.encode(hashDigest);
-    }
+  // Generates a hash based on the configuration from an already concatenated string
+  // TODO: pass full algo config if SCRYPT or other more parameterized hash is used
+  generateHashForValue(stringValue: string, algorithm: string = 'sha256') {
+    let hashDigest = crypto
+      .createHash(algorithm)
+      .update(this.saltValue as string)
+      .update(stringValue)
+      .digest();
+    return base32.encode(hashDigest);
+  }
 
-    abstract generateHashForObject(obj: Validation.Data["row"]): { [key: string]: string };
+  abstract generateHashForObject(obj: Validation.Data['row']): {
+    [key: string]: string;
+  };
 }

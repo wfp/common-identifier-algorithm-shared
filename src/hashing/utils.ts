@@ -15,34 +15,36 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Config } from "../config/Config.js";
-import { Validation } from "../validation/Validation.js";
+import { Config } from '../config/Config.js';
+import { Validation } from '../validation/Validation.js';
 
 // takes an row object and the "algorithm.columns" config and returns a new
 // object with { static: [<COL VALUES>], to_translate: [..], reference: [...] } columns
-export function extractAlgoColumnsFromObject(columnConfig: Config.Options["algorithm"]["columns"], obj: Validation.Data["row"]) {
-    // check if we have an actual config
-    if (typeof columnConfig !== "object") {
-        throw new Error("Invalid algorithm columns config");
-    }
+export function extractAlgoColumnsFromObject(
+  columnConfig: Config.Options['algorithm']['columns'],
+  obj: Validation.Data['row'],
+) {
+  // check if we have an actual config
+  if (typeof columnConfig !== 'object') {
+    throw new Error('Invalid algorithm columns config');
+  }
 
-    let output: Config.Options["algorithm"]["columns"] = {
-        static: columnConfig.static.map((colName) => obj[colName]),
-        to_translate: columnConfig.to_translate.map((colName) => obj[colName]),
-        reference: columnConfig.reference.map((colName) => obj[colName]),
-    };
+  let output: Config.Options['algorithm']['columns'] = {
+    static: columnConfig.static.map((colName) => obj[colName]),
+    to_translate: columnConfig.to_translate.map((colName) => obj[colName]),
+    reference: columnConfig.reference.map((colName) => obj[colName]),
+  };
 
-    return output;
+  return output;
 }
-
 
 // Centralized helper to join different parts of a field value list
 export function joinFieldsForHash(fieldValueList: string[]) {
-    return fieldValueList.join("");
+  return fieldValueList.join('');
 }
 
 // Returns a cleaned version (null and undefined values removed)
 // TODO: implement this based on WFP feedback
 export function cleanValueList(fieldValueList: any[]) {
-    return fieldValueList.map((v) => typeof v === 'string' ? v : "")
+  return fieldValueList.map((v) => (typeof v === 'string' ? v : ''));
 }

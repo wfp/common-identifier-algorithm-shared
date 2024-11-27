@@ -19,52 +19,53 @@ import fs from 'node:fs';
 import { attemptToReadTOMLData } from './utils.js';
 import type { AppConfigData } from './Config.js';
 import Debug from 'debug';
-const log = Debug('CID:appConfig')
+const log = Debug('CID:appConfig');
 
 const APP_CONFIG_ENCODING: fs.EncodingOption = 'utf-8';
 
 export const DEFAULT_APP_CONFIG: AppConfigData = {
-    // a map of <signature>:true values
-    // that stores which config's termsAndConditions were accepted
-    termsAndConditions: {},
-    window: {
-        // default window sizing
-        width: 1024,
-        height: 800,
-    }
-}
+  // a map of <signature>:true values
+  // that stores which config's termsAndConditions were accepted
+  termsAndConditions: {},
+  window: {
+    // default window sizing
+    width: 1024,
+    height: 800,
+  },
+};
 
 export function loadAppConfig(configPath: string) {
-    log("Loading Application config from", configPath);
+  log('Loading Application config from', configPath);
 
+  // attempt to read the file
+  const configData = attemptToReadTOMLData<AppConfigData>(
+    configPath,
+    APP_CONFIG_ENCODING,
+  );
 
-    // attempt to read the file
-    const configData = attemptToReadTOMLData<AppConfigData>(configPath, APP_CONFIG_ENCODING);
+  // if cannot be read we assume default application configuration
+  if (!configData) {
+    log('Cannot find Application config file -- using the default');
+    return DEFAULT_APP_CONFIG;
+  }
 
-    // if cannot be read we assume default application configuration
-    if (!configData) {
-        log("Cannot find Application config file -- using the default");
-        return DEFAULT_APP_CONFIG;
-    }
+  // validate the application config
+  if (
+    !configData.termsAndConditions ||
+    !configData.window ||
+    typeof configData.window.width !== 'number' ||
+    typeof configData.window.height !== 'number'
+  ) {
+    log('Application config file is not valid -- using the default');
+    return DEFAULT_APP_CONFIG;
+  }
 
-    // validate the application config
-    if (!configData.termsAndConditions ||
-        !configData.window ||
-        typeof configData.window.width !== 'number' ||
-        typeof configData.window.height !== 'number'
-    ) {
-        log("Application config file is not valid -- using the default");
-        return DEFAULT_APP_CONFIG
-    }
-
-    return configData;
+  return configData;
 }
 
-
 export function saveAppConfig(configData: AppConfigData, outputPath: string) {
-
-    // update the config hash on import to account for the
-    const outputData = JSON.stringify(configData, null, "    ");
-    fs.writeFileSync(outputPath, outputData, APP_CONFIG_ENCODING );
-    log("Written Application config data to ", outputPath);
+  // update the config hash on import to account for the
+  const outputData = JSON.stringify(configData, null, '    ');
+  fs.writeFileSync(outputPath, outputData, APP_CONFIG_ENCODING);
+  log('Written Application config data to ', outputPath);
 }

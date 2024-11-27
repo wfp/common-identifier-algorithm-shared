@@ -14,24 +14,36 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import { FieldTypeValidator }from '../../validation/validators/field_type.js';
+import { FieldTypeValidator } from '../../validation/validators/field_type.js';
 
-test("FieldTypeValidator", () => {
-    {
-        let v = new FieldTypeValidator({ op: "field_type", value: "string" });        
-        expect(v.validate(123)).toEqual({ ok: false, kind: "field_type", message: "must be of type: text" });
-        expect(v.validate("123")).toEqual({ ok: true, kind: "field_type" });
-    }
-    {
-        const v = new FieldTypeValidator({ op: "field_type", value: "number" })
-        expect(v.validate(123)).toEqual({ ok: true, kind: "field_type" });
-        expect(v.validate("123")).toEqual({ ok: false, kind: "field_type", message: "must be of type: number" });
-    }
+test('FieldTypeValidator', () => {
+  {
+    let v = new FieldTypeValidator({ op: 'field_type', value: 'string' });
+    expect(v.validate(123)).toEqual({
+      ok: false,
+      kind: 'field_type',
+      message: 'must be of type: text',
+    });
+    expect(v.validate('123')).toEqual({ ok: true, kind: 'field_type' });
+  }
+  {
+    const v = new FieldTypeValidator({ op: 'field_type', value: 'number' });
+    expect(v.validate(123)).toEqual({ ok: true, kind: 'field_type' });
+    expect(v.validate('123')).toEqual({
+      ok: false,
+      kind: 'field_type',
+      message: 'must be of type: number',
+    });
+  }
 });
 
-test("FieldTypeValidator fails for invalid option value", () => {
-    // @ts-ignore
-    expect(() => new FieldTypeValidator({ op: "field_type", value: 123 })).toThrow()
-    // @ts-ignore
-    expect(() => new FieldTypeValidator({ op: "field_type", value: "[[[" })).toThrow()
-})
+test('FieldTypeValidator fails for invalid option value', () => {
+  // @ts-ignore
+  expect(
+    () => new FieldTypeValidator({ op: 'field_type', value: 123 }),
+  ).toThrow();
+  // @ts-ignore
+  expect(
+    () => new FieldTypeValidator({ op: 'field_type', value: '[[[' }),
+  ).toThrow();
+});

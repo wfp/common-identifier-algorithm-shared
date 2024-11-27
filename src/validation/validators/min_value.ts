@@ -14,35 +14,46 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import { SUPPORTED_VALIDATORS, Validator } from "../Validation.js";
+import { SUPPORTED_VALIDATORS, Validator } from '../Validation.js';
 
 export class MinValueValidator implements Validator.Base {
-    kind = SUPPORTED_VALIDATORS.MIN_VALUE;
-    opts: Validator.Options.MinValue;
+  kind = SUPPORTED_VALIDATORS.MIN_VALUE;
+  opts: Validator.Options.MinValue;
 
-    constructor(opts: Validator.Options.MinValue) {
-        if (typeof opts.value !== 'number') {
-            throw new Error(`MinValue validator must have a 'value' with a number -- ${JSON.stringify(opts)}`)
-        }
-        this.opts = opts;
+  constructor(opts: Validator.Options.MinValue) {
+    if (typeof opts.value !== 'number') {
+      throw new Error(
+        `MinValue validator must have a 'value' with a number -- ${JSON.stringify(opts)}`,
+      );
+    }
+    this.opts = opts;
+  }
+
+  message = (msg?: string) =>
+    this.opts.message
+      ? this.opts.message
+      : msg
+        ? msg
+        : `must be at least ${this.opts.value}`;
+
+  validate = (value: unknown): Validator.Result => {
+    if (typeof value !== 'string' && typeof value !== 'number') {
+      return {
+        ok: false,
+        kind: this.kind,
+        message: 'must be text or a number',
+      };
     }
 
-    message = (msg?: string) => this.opts.message
-        ? this.opts.message
-            : msg
-                ? msg
-                    : `must be at least ${this.opts.value}`
+    let numericValue = typeof value === 'string' ? parseFloat(value) : value;
+    if (isNaN(numericValue))
+      return {
+        ok: false,
+        kind: this.kind,
+        message: 'must be text or a number',
+      };
 
-    validate = (value: unknown): Validator.Result => {
-        if (typeof value !== 'string' && typeof value !== 'number') {
-            return { ok: false, kind: this.kind, message: "must be text or a number" }
-        }
-
-        let numericValue = typeof value === "string" ? parseFloat(value) : value;
-        if (isNaN(numericValue)) return { ok: false, kind: this.kind, message: "must be text or a number"};
-
-        if (numericValue >= this.opts.value) return { ok: true, kind: this.kind };
-        return { ok: false, kind: this.kind, message: this.message() }
-
-    }
+    if (numericValue >= this.opts.value) return { ok: true, kind: this.kind };
+    return { ok: false, kind: this.kind, message: this.message() };
+  };
 }

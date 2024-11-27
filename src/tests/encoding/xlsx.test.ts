@@ -20,70 +20,69 @@ import { existsSync, unlinkSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
 import { read, utils } from 'xlsx';
-import { makeXlsxEncoder }from '../../encoding/xlsx.js';
+import { makeXlsxEncoder } from '../../encoding/xlsx.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const TEST_MAPPING = {
-    postfix: "_POSTFIX",
-    columns: [
-        { name: "A", alias: "col_a" },
-        { name: "B", alias: "col_b" },
-    ],
-}
-
-const TEST_DOC = {
-    name: "sheet1",
-    data: [
-        {col_a: "A0", col_b: "B0" },
-        {col_a: "A1", col_b: "B1" },
-    ]
+  postfix: '_POSTFIX',
+  columns: [
+    { name: 'A', alias: 'col_a' },
+    { name: 'B', alias: 'col_b' },
+  ],
 };
 
-test("makeXlsxEncoder creation", () => {
-    const e = makeXlsxEncoder(TEST_MAPPING);
+const TEST_DOC = {
+  name: 'sheet1',
+  data: [
+    { col_a: 'A0', col_b: 'B0' },
+    { col_a: 'A1', col_b: 'B1' },
+  ],
+};
 
-    const test_output_path = join(__dirname, "xlsx_encoder_test")
-    const test_output_path_postfixed = join(__dirname, "xlsx_encoder_test_POSTFIX.xlsx")
+test('makeXlsxEncoder creation', () => {
+  const e = makeXlsxEncoder(TEST_MAPPING);
 
-    if (existsSync(test_output_path_postfixed)) {
-        unlinkSync(test_output_path_postfixed);
-    }
+  const test_output_path = join(__dirname, 'xlsx_encoder_test');
+  const test_output_path_postfixed = join(
+    __dirname,
+    'xlsx_encoder_test_POSTFIX.xlsx',
+  );
 
-    e.encodeDocument(TEST_DOC, test_output_path)
+  if (existsSync(test_output_path_postfixed)) {
+    unlinkSync(test_output_path_postfixed);
+  }
 
+  e.encodeDocument(TEST_DOC, test_output_path);
 
-    let data = readFileSync(test_output_path_postfixed);
-    let workbook = read(data);
+  let data = readFileSync(test_output_path_postfixed);
+  let workbook = read(data);
 
+  expect(workbook.SheetNames.length).toEqual(1);
 
-    expect(workbook.SheetNames.length).toEqual(1)
+  const sheetName = workbook.SheetNames[0];
+  const worksheet = workbook.Sheets[sheetName];
 
-    const sheetName = workbook.SheetNames[0];
-    const worksheet = workbook.Sheets[sheetName];
+  const decodedData = utils.sheet_to_json(worksheet, {
+    // ensure that all data is retrieved as formatted strings, not raw data
+    // (necessary for ID numbers with too many bits, that are not
+    // representable by JS numbers)
+    raw: false,
+  });
 
+  expect(decodedData).toEqual([
+    { A: 'A0', B: 'B0' },
+    { A: 'A1', B: 'B1' },
+  ]);
 
-    const decodedData = utils.sheet_to_json(worksheet, {
-        // ensure that all data is retrieved as formatted strings, not raw data
-        // (necessary for ID numbers with too many bits, that are not
-        // representable by JS numbers)
-        raw: false,
-    })
-
-
-    expect(decodedData).toEqual([
-        {A: "A0", B: "B0"},
-        {A: "A1", B: "B1"},
-    ])
-
-    if (existsSync(test_output_path_postfixed)) {
-        unlinkSync(test_output_path_postfixed);
-    }
+  if (existsSync(test_output_path_postfixed)) {
+    unlinkSync(test_output_path_postfixed);
+  }
 });
 
-test("XlsxEncoder::must start document before writing or ending", () => {
-    const e = makeXlsxEncoder(TEST_MAPPING);
+test('XlsxEncoder::must start document before writing or ending', () => {
+  const e = makeXlsxEncoder(TEST_MAPPING);
 
-    expect(() => e.writeDocument(TEST_DOC)).toThrow();
-    expect(e.endDocument()).toBe(undefined);
-})
+  expect(() => e.writeDocument(TEST_DOC)).toThrow();
+  expect(e.endDocument()).toBe(undefined);
+});

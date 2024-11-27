@@ -15,13 +15,13 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import { fileURLToPath } from 'node:url';
-import { dirname, join } from 'node:path'
-import { attemptToReadTOMLData, getSaltFilePath }from '../../config/utils.js';
-import type { Config }from '../../config/Config.js';
+import { dirname, join } from 'node:path';
+import { attemptToReadTOMLData, getSaltFilePath } from '../../config/utils.js';
+import type { Config } from '../../config/Config.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 test('utils::attemptToReadTomlData', () => {
-    let filePath = join(__dirname, "files", "test.salt");
-    expect(attemptToReadTOMLData<Config.Options>(filePath, "utf-8")).toBeNull();
+  let filePath = join(__dirname, 'files', 'test.salt');
+  expect(attemptToReadTOMLData<Config.Options>(filePath, 'utf-8')).toBeNull();
 });

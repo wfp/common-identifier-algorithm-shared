@@ -15,10 +15,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 export enum SUPPORTED_FILE_TYPES {
-    CSV = ".csv",
-    XLSX = ".xlsx"
+  CSV = '.csv',
+  XLSX = '.xlsx',
 }
 
 export type RawData = Array<Array<any>>;
@@ -26,10 +25,10 @@ export type MappedData = { [key: string]: any };
 
 // The data class describing a sheet
 export class CidDocument {
-    name: string;
-    data: MappedData[];
-    constructor(name: string, data: MappedData[]) {
-        this.name = name;
-        this.data = data;
-    }
+  name: string;
+  data: MappedData[];
+  constructor(name: string, data: MappedData[]) {
+    this.name = name;
+    this.data = data;
+  }
 }

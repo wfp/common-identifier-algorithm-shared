@@ -15,78 +15,82 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { statSync, readFileSync, writeFileSync } from 'node:fs'
+import { statSync, readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { join, dirname } from 'node:path'
-import { tmpdir } from 'node:os'
-import { loadConfig }from '../../config/loadConfig.js'
-import { generateConfigHash }from '../../config/generateConfigHash.js'
+import { join, dirname } from 'node:path';
+import { tmpdir } from 'node:os';
+import { loadConfig } from '../../config/loadConfig.js';
+import { generateConfigHash } from '../../config/generateConfigHash.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const REGION = "GOS";
-const FILES_PATH = join(__dirname, "files");
+const REGION = 'GOS';
+const FILES_PATH = join(__dirname, 'files');
 
-test("loadConfig ok", ()=>{
-    const TEST_FILE_PATH = join(FILES_PATH, "test-config.json");
-    const loadResult = loadConfig(TEST_FILE_PATH, REGION);
+test('loadConfig ok', () => {
+  const TEST_FILE_PATH = join(FILES_PATH, 'test-config.json');
+  const loadResult = loadConfig(TEST_FILE_PATH, REGION);
 
-    expect(loadResult.success).toEqual(true)
-    if (!loadResult.success) throw new TypeError();
-    expect(loadResult.lastUpdated).toEqual(new Date(statSync(TEST_FILE_PATH).mtime))
+  expect(loadResult.success).toEqual(true);
+  if (!loadResult.success) throw new TypeError();
+  expect(loadResult.lastUpdated).toEqual(
+    new Date(statSync(TEST_FILE_PATH).mtime),
+  );
 
-    const expected = JSON.parse(readFileSync(TEST_FILE_PATH, 'utf-8'))
-    // check that the columns are actually sorted alphabetically.
-    expected.algorithm.columns.to_translate = ["a", "b", "c", "d", "e" ]
-    expected.algorithm.columns.reference = ["1", "2", "3", "4", "5" ]
-    expect(loadResult.config).toEqual(expected)
-
+  const expected = JSON.parse(readFileSync(TEST_FILE_PATH, 'utf-8'));
+  // check that the columns are actually sorted alphabetically.
+  expected.algorithm.columns.to_translate = ['a', 'b', 'c', 'd', 'e'];
+  expected.algorithm.columns.reference = ['1', '2', '3', '4', '5'];
+  expect(loadResult.config).toEqual(expected);
 });
 
-test("loadConfig invalid", ()=>{
-    const TEST_FILE_PATH = join(FILES_PATH, "test-appconfig.json");
-    const loadResult = loadConfig(TEST_FILE_PATH, REGION);
+test('loadConfig invalid', () => {
+  const TEST_FILE_PATH = join(FILES_PATH, 'test-appconfig.json');
+  const loadResult = loadConfig(TEST_FILE_PATH, REGION);
 
-    expect(loadResult.success).toEqual(false)
-    if (loadResult.success) throw new TypeError();
-    expect(typeof loadResult.error).toEqual('string')
-})
+  expect(loadResult.success).toEqual(false);
+  if (loadResult.success) throw new TypeError();
+  expect(typeof loadResult.error).toEqual('string');
+});
 
-test("loadConfig salt", ()=>{
-    const SALT_FILE_PATH = join(FILES_PATH, 'test.salt');
-    const TEST_FILE_PATH = join(tmpdir(), "salt-config.json");
-    const cfg = JSON.parse(readFileSync(join(FILES_PATH, "test-salt-loading-config.json"), 'utf-8'));
+test('loadConfig salt', () => {
+  const SALT_FILE_PATH = join(FILES_PATH, 'test.salt');
+  const TEST_FILE_PATH = join(tmpdir(), 'salt-config.json');
+  const cfg = JSON.parse(
+    readFileSync(join(FILES_PATH, 'test-salt-loading-config.json'), 'utf-8'),
+  );
 
+  cfg.algorithm.salt.value.darwin = SALT_FILE_PATH;
+  cfg.algorithm.salt.value.win32 = SALT_FILE_PATH;
+  cfg.algorithm.salt.value.linux = SALT_FILE_PATH;
+  cfg.signature.config_signature = generateConfigHash(cfg);
 
-    cfg.algorithm.salt.value.darwin = SALT_FILE_PATH;
-    cfg.algorithm.salt.value.win32 = SALT_FILE_PATH;
-    cfg.algorithm.salt.value.linux = SALT_FILE_PATH;
-    cfg.signature.config_signature = generateConfigHash(cfg);
+  writeFileSync(TEST_FILE_PATH, JSON.stringify(cfg), 'utf-8');
 
-    writeFileSync(TEST_FILE_PATH, JSON.stringify(cfg), 'utf-8');
+  const loadResult = loadConfig(TEST_FILE_PATH, REGION);
 
-    const loadResult = loadConfig(TEST_FILE_PATH, REGION);
+  expect(loadResult.success).toEqual(true);
+  if (!loadResult.success) throw new TypeError();
+  const config = loadResult.config;
+  expect(config.algorithm.salt.source).toEqual('STRING');
+  expect(config.algorithm.salt.value).toEqual(
+    readFileSync(SALT_FILE_PATH, 'utf-8'),
+  );
+});
 
-    expect(loadResult.success).toEqual(true)
-    if (!loadResult.success) throw new TypeError();
-    const config = loadResult.config;
-    expect(config.algorithm.salt.source).toEqual("STRING");
-    expect(config.algorithm.salt.value).toEqual(readFileSync(SALT_FILE_PATH, 'utf-8'));
-})
+test('loadConfig salt error', () => {
+  const SALT_FILE_PATH = 'INVALID SALT PATH';
+  const TEST_FILE_PATH = join(tmpdir(), 'salt-config.json');
+  const cfg = JSON.parse(
+    readFileSync(join(FILES_PATH, 'test-salt-loading-config.json'), 'utf-8'),
+  );
 
-test("loadConfig salt error", ()=>{
-    const SALT_FILE_PATH = "INVALID SALT PATH";
-    const TEST_FILE_PATH = join(tmpdir(), "salt-config.json");
-    const cfg = JSON.parse(readFileSync(join(FILES_PATH, "test-salt-loading-config.json"), 'utf-8'));
+  cfg.algorithm.salt.value.darwin = SALT_FILE_PATH;
+  cfg.algorithm.salt.value.win32 = SALT_FILE_PATH;
+  cfg.signature.config_signature = generateConfigHash(cfg);
 
+  writeFileSync(TEST_FILE_PATH, JSON.stringify(cfg), 'utf-8');
 
-    cfg.algorithm.salt.value.darwin = SALT_FILE_PATH;
-    cfg.algorithm.salt.value.win32 = SALT_FILE_PATH;
-    cfg.signature.config_signature = generateConfigHash(cfg);
+  const loadResult = loadConfig(TEST_FILE_PATH, REGION);
 
-    writeFileSync(TEST_FILE_PATH, JSON.stringify(cfg), 'utf-8');
-
-    const loadResult = loadConfig(TEST_FILE_PATH, REGION);
-
-    expect(loadResult.success).toEqual(false)
-
-})
+  expect(loadResult.success).toEqual(false);
+});

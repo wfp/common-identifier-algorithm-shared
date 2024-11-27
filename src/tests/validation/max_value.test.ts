@@ -14,62 +14,122 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-import { MaxValueValidator }from '../../validation/validators/max_value.js';
+import { MaxValueValidator } from '../../validation/validators/max_value.js';
 
-test("MaxValueValidator", () => {
-    const v = new MaxValueValidator({ op: "max_value", value: 100})
+test('MaxValueValidator', () => {
+  const v = new MaxValueValidator({ op: 'max_value', value: 100 });
 
-    expect(v.validate("")).toEqual({ ok: false, kind: "max_value", message: "must be text or a number" });
+  expect(v.validate('')).toEqual({
+    ok: false,
+    kind: 'max_value',
+    message: 'must be text or a number',
+  });
 
-    expect(v.validate("1")).toEqual({ ok: true, kind: "max_value" });
-    expect(v.validate("10")).toEqual({ ok: true, kind: "max_value" });
-    expect(v.validate("100")).toEqual({ ok: true, kind: "max_value" });
-    expect(v.validate("1000")).toEqual({ ok: false, kind: "max_value", message: "must be at most 100" });
+  expect(v.validate('1')).toEqual({ ok: true, kind: 'max_value' });
+  expect(v.validate('10')).toEqual({ ok: true, kind: 'max_value' });
+  expect(v.validate('100')).toEqual({ ok: true, kind: 'max_value' });
+  expect(v.validate('1000')).toEqual({
+    ok: false,
+    kind: 'max_value',
+    message: 'must be at most 100',
+  });
 
-    expect(v.validate(1)).toEqual({ ok: true, kind: "max_value" });
-    expect(v.validate(10)).toEqual({ ok: true, kind: "max_value" });
-    expect(v.validate(100)).toEqual({ ok: true, kind: "max_value" });
-    expect(v.validate(1000)).toEqual({ ok: false, kind: "max_value", message: "must be at most 100" });
+  expect(v.validate(1)).toEqual({ ok: true, kind: 'max_value' });
+  expect(v.validate(10)).toEqual({ ok: true, kind: 'max_value' });
+  expect(v.validate(100)).toEqual({ ok: true, kind: 'max_value' });
+  expect(v.validate(1000)).toEqual({
+    ok: false,
+    kind: 'max_value',
+    message: 'must be at most 100',
+  });
 
-    expect(v.validate("AAB")).toEqual({ ok: false, kind: "max_value", message: "must be text or a number" });
-    expect(v.validate(" ")).toEqual({ ok: false, kind: "max_value", message: "must be text or a number" });
-    expect(v.validate("ab")).toEqual({ ok: false, kind: "max_value", message: "must be text or a number" });
-    
-    expect(v.validate(null)).toEqual({ ok: false, kind: "max_value", message: "must be text or a number" });
-    expect(v.validate(undefined)).toEqual({ ok: false, kind: "max_value", message: "must be text or a number" });
-    expect(v.validate(new Date())).toEqual({ ok: false, kind: "max_value", message: "must be text or a number" });
-})
+  expect(v.validate('AAB')).toEqual({
+    ok: false,
+    kind: 'max_value',
+    message: 'must be text or a number',
+  });
+  expect(v.validate(' ')).toEqual({
+    ok: false,
+    kind: 'max_value',
+    message: 'must be text or a number',
+  });
+  expect(v.validate('ab')).toEqual({
+    ok: false,
+    kind: 'max_value',
+    message: 'must be text or a number',
+  });
 
-test("MaxValueValidator::dateString [year]", () => {
-    const v = new MaxValueValidator({ op: "max_value", value: "{{currentYear}}"});
+  expect(v.validate(null)).toEqual({
+    ok: false,
+    kind: 'max_value',
+    message: 'must be text or a number',
+  });
+  expect(v.validate(undefined)).toEqual({
+    ok: false,
+    kind: 'max_value',
+    message: 'must be text or a number',
+  });
+  expect(v.validate(new Date())).toEqual({
+    ok: false,
+    kind: 'max_value',
+    message: 'must be text or a number',
+  });
+});
 
-    const year = new Date().getUTCFullYear();
+test('MaxValueValidator::dateString [year]', () => {
+  const v = new MaxValueValidator({
+    op: 'max_value',
+    value: '{{currentYear}}',
+  });
 
-    expect(v.validate("1")).toEqual({ ok: true, kind: "max_value" });
-    expect(v.validate("10")).toEqual({ ok: true, kind: "max_value" });
-    expect(v.validate("100")).toEqual({ ok: true, kind: "max_value" });
-    expect(v.validate("3000")).toEqual({ ok: false, kind: "max_value", message: `must be at most ${year}` });
+  const year = new Date().getUTCFullYear();
 
-    expect(v.validate(year - 2)).toEqual({ ok: true, kind: "max_value" });
-    expect(v.validate(year - 1)).toEqual({ ok: true, kind: "max_value" });
-    expect(v.validate(year)).toEqual({ ok: true, kind: "max_value" });
-    expect(v.validate(year + 1)).toEqual({ ok: false, kind: "max_value", message: `must be at most ${year}` });
-    expect(v.validate(year + 2)).toEqual({ ok: false, kind: "max_value", message: `must be at most ${year}` });
-})
+  expect(v.validate('1')).toEqual({ ok: true, kind: 'max_value' });
+  expect(v.validate('10')).toEqual({ ok: true, kind: 'max_value' });
+  expect(v.validate('100')).toEqual({ ok: true, kind: 'max_value' });
+  expect(v.validate('3000')).toEqual({
+    ok: false,
+    kind: 'max_value',
+    message: `must be at most ${year}`,
+  });
 
-test("MaxValueValidator::dateString [month]", () => {
-    const v = new MaxValueValidator({ op: "max_value", value: "{{currentMonth}}"});
+  expect(v.validate(year - 2)).toEqual({ ok: true, kind: 'max_value' });
+  expect(v.validate(year - 1)).toEqual({ ok: true, kind: 'max_value' });
+  expect(v.validate(year)).toEqual({ ok: true, kind: 'max_value' });
+  expect(v.validate(year + 1)).toEqual({
+    ok: false,
+    kind: 'max_value',
+    message: `must be at most ${year}`,
+  });
+  expect(v.validate(year + 2)).toEqual({
+    ok: false,
+    kind: 'max_value',
+    message: `must be at most ${year}`,
+  });
+});
 
-    const month = new Date().getUTCMonth();
+test('MaxValueValidator::dateString [month]', () => {
+  const v = new MaxValueValidator({
+    op: 'max_value',
+    value: '{{currentMonth}}',
+  });
 
-    expect(v.validate(month-2)).toEqual({ ok: true, kind: "max_value" });
-    expect(v.validate(month-1)).toEqual({ ok: true, kind: "max_value" });
-    expect(v.validate(month)).toEqual({ ok: true, kind: "max_value" });
-    expect(v.validate(month+1)).toEqual({ ok: true, kind: "max_value" });
-    expect(v.validate(month+2)).toEqual({ ok: false, kind: "max_value", message: `must be at most ${month + 1}` });
-})
+  const month = new Date().getUTCMonth();
 
-test("MaxValueValidator fails for invalid options", () => {
-    // @ts-ignore
-    expect(() => new MaxValueValidator({ op: "max_value", value: "[[[" })).toThrow()
-})
+  expect(v.validate(month - 2)).toEqual({ ok: true, kind: 'max_value' });
+  expect(v.validate(month - 1)).toEqual({ ok: true, kind: 'max_value' });
+  expect(v.validate(month)).toEqual({ ok: true, kind: 'max_value' });
+  expect(v.validate(month + 1)).toEqual({ ok: true, kind: 'max_value' });
+  expect(v.validate(month + 2)).toEqual({
+    ok: false,
+    kind: 'max_value',
+    message: `must be at most ${month + 1}`,
+  });
+});
+
+test('MaxValueValidator fails for invalid options', () => {
+  // @ts-ignore
+  expect(
+    () => new MaxValueValidator({ op: 'max_value', value: '[[[' }),
+  ).toThrow();
+});

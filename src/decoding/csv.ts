@@ -18,27 +18,28 @@
 import fs from 'node:fs';
 import { parse as csv_parse, Options as CsvOptions } from 'csv-parse/sync';
 
-
 import { DecoderBase } from './base.js';
 import type { Config } from '../config/Config.js';
 
-
 // A decoder for CSVs
 class CsvDecoder extends DecoderBase {
-    csvOptions: CsvOptions = {};
+  csvOptions: CsvOptions = {};
 
-    constructor(sourceConfig: Config.Options["source"], limit?: number) {
-        super(sourceConfig)
-        if (limit) this.csvOptions.to = limit + 1; // n+1 since header is included
-    }
+  constructor(sourceConfig: Config.Options['source'], limit?: number) {
+    super(sourceConfig);
+    if (limit) this.csvOptions.to = limit + 1; // n+1 since header is included
+  }
 
-    decodeFile(path: string, fileEncoding: fs.EncodingOption='utf-8') {
-        let data = fs.readFileSync(path, fileEncoding);
-        let parsed = csv_parse(data, this.csvOptions);
-        return this.documentFromRawData(path, parsed);
-    }
+  decodeFile(path: string, fileEncoding: fs.EncodingOption = 'utf-8') {
+    let data = fs.readFileSync(path, fileEncoding);
+    let parsed = csv_parse(data, this.csvOptions);
+    return this.documentFromRawData(path, parsed);
+  }
 }
 
-export function makeCsvDecoder(sourceConfig: Config.Options["source"], limit?: number) {
-    return new CsvDecoder(sourceConfig, limit);
+export function makeCsvDecoder(
+  sourceConfig: Config.Options['source'],
+  limit?: number,
+) {
+  return new CsvDecoder(sourceConfig, limit);
 }

@@ -23,62 +23,60 @@ import { Config } from '../config/Config.js';
 import type { CidDocument } from '../document.js';
 
 import Debug from 'debug';
-const log = Debug('CID:CSVEncoder')
-
+const log = Debug('CID:CSVEncoder');
 
 class CsvEncoder extends EncoderBase {
-    constructor(mapping: Config.ColumnMap) {
-        super(mapping)
+  constructor(mapping: Config.ColumnMap) {
+    super(mapping);
+  }
+
+  startDocument(outputPath: string) {
+    // store the base path
+    this.basePath = outputPath;
+  }
+
+  // Ends writing the document
+  endDocument() {
+    // no base path means no document yet, so we'll skip
+    if (!this.basePath) return;
+
+    // otherwise we'll return
+    // TODO: this is where metadata injection (writing a summary text file next to the output files) can happen
+    return;
+  }
+
+  // Writes a document to the pre-determined output
+  writeDocument(document: CidDocument) {
+    // no base path means no document yet, so we'll skip
+    if (!this.basePath) {
+      throw new Error('No output path provided.');
     }
 
-    startDocument(outputPath: string) {
-        // store the base path
-        this.basePath = outputPath;
-    }
+    // if there is only one sheet we don't need the sheet name in the filename
+    let outputPath = this.getOutputNameFor(this.basePath) + '.csv';
 
-    // Ends writing the document
-    endDocument() {
-        // no base path means no document yet, so we'll skip
-        if (!this.basePath) return;
+    // attempt to write the data from the sheet as rows
+    let fullData = [this.generateHeaderRow()].concat(document.data);
+    let generated = stringify(fullData, {});
 
-        // otherwise we'll return
-        // TODO: this is where metadata injection (writing a summary text file next to the output files) can happen
-        return;
-    }
+    // write the file to a temporary location
+    // --------------------------------------
 
-    // Writes a document to the pre-determined output
-    writeDocument(document: CidDocument) {
-        // no base path means no document yet, so we'll skip
-        if (!this.basePath) {
-            throw new Error("No output path provided.");
-        }
+    // write to a temporary location then move the file
+    this.withTemporaryFile(outputPath, (temporaryFilePath: string) => {
+      // write to the disk
+      // fs.writeFileSync(outputPath, generated, 'utf-8');
+      fs.writeFileSync(temporaryFilePath, generated, 'utf-8');
+      log('Saved output to temporary location:', temporaryFilePath);
+    });
 
-        // if there is only one sheet we don't need the sheet name in the filename
-        let outputPath = this.getOutputNameFor(this.basePath) + '.csv';
+    // add the current file to the list of outputs
+    this.outputPath = outputPath;
 
-        // attempt to write the data from the sheet as rows
-        let fullData = [this.generateHeaderRow()].concat( document.data);
-        let generated = stringify(fullData, {});
-
-        // write the file to a temporary location
-        // --------------------------------------
-
-        // write to a temporary location then move the file
-        this.withTemporaryFile(outputPath, (temporaryFilePath: string) => {
-            // write to the disk
-            // fs.writeFileSync(outputPath, generated, 'utf-8');
-            fs.writeFileSync(temporaryFilePath, generated, 'utf-8');
-            log("Saved output to temporary location:", temporaryFilePath);
-        });
-
-        // add the current file to the list of outputs
-        this.outputPath = outputPath;
-
-        log("[CSV] Written", outputPath);
-    }
-
+    log('[CSV] Written', outputPath);
+  }
 }
 
 export function makeCsvEncoder(mapping: Config.ColumnMap) {
-    return new CsvEncoder(mapping);
+  return new CsvEncoder(mapping);
 }

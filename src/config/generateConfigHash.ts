@@ -19,35 +19,39 @@ import stableStringify from 'safe-stable-stringify';
 import { createHash } from 'node:crypto';
 import type { Config } from './Config.js';
 
-const DEFAULT_HASH_TYPE = "md5";
-const HASH_DIGEST_TYPE = "hex";
+const DEFAULT_HASH_TYPE = 'md5';
+const HASH_DIGEST_TYPE = 'hex';
 
 // Takes a config, removes the "signature" and salt keys from it, generates
 // a stable JSON representation and hashes it using the provided algorithm
-export function generateConfigHash(config: Config.Options, hashType=DEFAULT_HASH_TYPE) {
-    // create a nested copy of the object
-    const configCopy = JSON.parse(JSON.stringify(config));;
+export function generateConfigHash(
+  config: Config.Options,
+  hashType = DEFAULT_HASH_TYPE,
+) {
+  // create a nested copy of the object
+  const configCopy = JSON.parse(JSON.stringify(config));
 
-    // remove the "signature" key
-    delete configCopy.signature;
+  // remove the "signature" key
+  delete configCopy.signature;
 
-    // remove the "messages" key
-    // TODO: messages should go in a separate locales file to future proof translations
-    delete configCopy.messages;
+  // remove the "messages" key
+  // TODO: messages should go in a separate locales file to future proof translations
+  delete configCopy.messages;
 
-    // remove the "algorithm.salt" part as it may have injected keys
-    // TODO: this enables messing with the salt file path pre-injection without signature validations, but is required for compatibility w/ the injection workflow
-    delete configCopy.algorithm.salt.value;
-    // mock the salt source as STRING to ensure that both imported and saved
-    // (with pre-injected salt) config files work
-    configCopy.algorithm.salt.source = "STRING";
+  // remove the "algorithm.salt" part as it may have injected keys
+  // TODO: this enables messing with the salt file path pre-injection without signature validations, but is required for compatibility w/ the injection workflow
+  delete configCopy.algorithm.salt.value;
+  // mock the salt source as STRING to ensure that both imported and saved
+  // (with pre-injected salt) config files work
+  configCopy.algorithm.salt.source = 'STRING';
 
-    // generate a stable JSON representation
-    const stableJson = stableStringify(configCopy);
-    if (typeof stableJson !== "string") throw new Error(`Unable to serialise config object to JSON.`)
+  // generate a stable JSON representation
+  const stableJson = stableStringify(configCopy);
+  if (typeof stableJson !== 'string')
+    throw new Error(`Unable to serialise config object to JSON.`);
 
-    // generate the hash
-    const hash = createHash(hashType).update(stableJson).digest(HASH_DIGEST_TYPE);
+  // generate the hash
+  const hash = createHash(hashType).update(stableJson).digest(HASH_DIGEST_TYPE);
 
-    return hash;
+  return hash;
 }
