@@ -18,7 +18,8 @@
 import path from 'node:path';
 import os from 'node:os';
 
-import { CidDocument, SUPPORTED_FILE_TYPES } from '../document.js';
+import { SUPPORTED_FILE_TYPES } from '../document.js';
+import type { CidDocument } from '../document.js';
 
 import { encoderForFile } from '../encoding/index.js';
 import { decoderForFile, fileTypeOf } from '../decoding/index.js';
@@ -71,16 +72,19 @@ export function validateDocument(
   return validateDocumentWithListDict(validatorDict, decoded);
 }
 
-export function generateHashesForDocument(
+export const generateHashesForDocument = (
   hasher: BaseHasher,
   document: CidDocument,
-) {
+): CidDocument => {
   // generate for all rows
   let rows = document.data.map((row) => {
     const generatedHashes = hasher.generateHashForObject(row);
     return Object.assign({}, row, generatedHashes);
   });
-  return new CidDocument('hashedDocument', rows);
+  return {
+    name: 'hashedDocument',
+    data: rows
+  };
 }
 
 // helper to output a document with a specific config

@@ -30,7 +30,7 @@ import {
 } from './validators/index.js';
 import { SUPPORTED_VALIDATORS } from './Validation.js';
 import type { Validation, Validator } from './Validation.js';
-import { CidDocument } from '../document.js';
+import type { CidDocument } from '../document.js';
 import type { Config } from '../config/Config.js';
 
 // MAIN VALIDATION
@@ -225,10 +225,10 @@ export function validateDocumentWithListDict(
 
 // Generates a document for output based on the validation results.
 // sourceConfig is required to map the original column names in the error messages
-export function makeValidationResultDocument(
+export const makeValidationResultDocument = (
   sourceConfig: Config.Options['source'],
   documentResult: Validation.DocumentResult,
-) {
+): CidDocument => {
   let fieldNameMapping = sourceConfig.columns.reduce(
     (memo, col) => {
       return Object.assign(memo, { [col.alias]: col.name });
@@ -236,29 +236,31 @@ export function makeValidationResultDocument(
     {} as { [key: string]: string },
   );
 
-  return new CidDocument(
-    'validationResult',
-    documentResult.results.map((rowResult, rowIdx) => {
-      // build an error message
-      let errorList = rowResult.errors.map((error) => {
-        // find the column name
-        let columnHumanName = fieldNameMapping[error.column] || error.column;
-        return error.errors
-          .map(({ message }) => `${columnHumanName} ${message};`)
-          .join('\n');
-      });
+  const documentData: CidDocument["data"] = documentResult.results.map((rowResult, rowIdx) => {
+    // build an error message
+    let errorList = rowResult.errors.map((error) => {
+      // find the column name
+      let columnHumanName = fieldNameMapping[error.column] || error.column;
+      return error.errors
+        .map(({ message }) => `${columnHumanName} ${message};`)
+        .join('\n');
+    });
 
-      // combine with the row onject
-      return Object.assign(
-        {
-          // The row number should match the row number in the input document (row index 0 is row# 2)
-          row_number: rowIdx + 2,
-          // The error list should be an empty string (so that it'll be hidden if no errors are present)
-          // NOTE: the line-ending can be tricky
-          errors: errorList.join('\n'),
-        },
-        rowResult.row,
-      );
-    }),
-  );
+    // combine with the row onject
+    return Object.assign(
+      {
+        // The row number should match the row number in the input document (row index 0 is row# 2)
+        row_number: rowIdx + 2,
+        // The error list should be an empty string (so that it'll be hidden if no errors are present)
+        // NOTE: the line-ending can be tricky
+        errors: errorList.join('\n'),
+      },
+      rowResult.row,
+    );
+  })
+
+  return {
+    name: 'validationResult',
+    data: documentData
+  };
 }

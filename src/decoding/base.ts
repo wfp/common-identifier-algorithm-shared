@@ -19,7 +19,7 @@ import Debug from 'debug';
 const log = Debug('CID:Decoder');
 
 import type { Config } from '../config/Config.js';
-import { CidDocument } from '../document.js';
+import type { CidDocument } from '../document.js';
 import type { RawData, MappedData } from '../document.js';
 
 export abstract class DecoderBase {
@@ -106,7 +106,7 @@ export abstract class DecoderBase {
   }
 
   // takes a list of rows with a list of strings and returns a new Sheet object.
-  documentFromRawData(name: string, sheetData: RawData) {
-    return new CidDocument(name, this.convertSheetRowsToObjects(sheetData));
+  documentFromRawData = (name: string, sheetData: RawData): CidDocument => {
+    return { name, data: this.convertSheetRowsToObjects(sheetData) };
   }
 }

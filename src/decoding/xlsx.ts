@@ -26,7 +26,7 @@ const log = Debug('CID:XLSXDecoder');
 
 import { DecoderBase } from './base.js';
 import type { Config } from '../config/Config.js';
-import { CidDocument } from '../document.js';
+import type { CidDocument } from '../document.js';
 
 // A decoder for CSVs
 class XlsxDecoder extends DecoderBase {
@@ -57,7 +57,7 @@ class XlsxDecoder extends DecoderBase {
     const dataWithAliases = this.renameColumnsToAliases(data);
 
     log('DECODED:', dataWithAliases[0]);
-    return new CidDocument(path, dataWithAliases);
+    return { name: path, data: dataWithAliases };
   }
 
   // Renames the incoming columns from their hunan names to their aliases
