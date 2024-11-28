@@ -23,12 +23,7 @@ export enum SUPPORTED_FILE_TYPES {
 export type RawData = Array<Array<any>>;
 export type MappedData = { [key: string]: any };
 
-// The data class describing a sheet
-export class CidDocument {
+export interface CidDocument {
   name: string;
   data: MappedData[];
-  constructor(name: string, data: MappedData[]) {
-    this.name = name;
-    this.data = data;
-  }
 }

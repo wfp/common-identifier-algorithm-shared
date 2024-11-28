@@ -15,7 +15,6 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import type { Config } from '../../src/config/Config.js';
 import {
   makeValidatorListDict,
   validateDocumentWithListDict,
@@ -23,8 +22,10 @@ import {
 } from '../../src/validation/index.js';
 import { OptionsValidator } from '../../src/validation/validators/options.js';
 import { SUPPORTED_VALIDATORS } from '../../src/validation/Validation.js';
+
+import type { Config } from '../../src/config/Config.js';
 import type { Validation } from '../../src/validation/Validation.js';
-import { CidDocument } from '../../src/document.js';
+import type { CidDocument } from '../../src/document.js';
 
 // get the class name
 const className = (obj: object) => obj.constructor.name;

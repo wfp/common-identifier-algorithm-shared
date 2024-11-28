@@ -16,7 +16,7 @@
  */
 
 import type { Config } from '../../src/config/Config.js';
-import { CidDocument } from '../../src/document.js';
+import type { CidDocument } from '../../src/document.js';
 import {
   mapRequiredColumns,
   isMappingOnlyDocument,
