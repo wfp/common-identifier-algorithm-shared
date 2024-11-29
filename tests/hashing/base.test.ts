@@ -20,9 +20,9 @@ import type { Config } from '../../src/config/Config.js';
 import type { Validation } from '../../src/validation/Validation.js';
 
 const BASE_CFG: Config.Options['algorithm'] = {
-  columns: { static: [], to_translate: [], reference: [] },
+  columns: { static: [], process: [], reference: [] },
   hash: { strategy: 'SHA256' },
-  salt: { source: 'STRING', value: 'NOPE', validator_regex: '' },
+  salt: { source: 'STRING', value: 'NOPE' },
 };
 
 function makeBaseHasher(cfg = BASE_CFG) {

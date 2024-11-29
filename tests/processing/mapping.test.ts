@@ -25,7 +25,7 @@ import {
 test('mapping::mapRequiredColumns', () => {
   expect(
     mapRequiredColumns(
-      { to_translate: [], static: [], reference: [] },
+      { process: [], static: [], reference: [] },
       { columns: [] },
       { columns: [] },
     ),
@@ -34,7 +34,7 @@ test('mapping::mapRequiredColumns', () => {
   expect(
     mapRequiredColumns(
       {
-        to_translate: [
+        process: [
           'first_name',
           'last_name',
           'father_first_name',
@@ -75,7 +75,7 @@ test('mapping::mapRequiredColumns', () => {
 test('mapping::isMappingOnlyDocument empty config', () => {
   const testSheet: CidDocument = { name: '', data: [{ A: 1, B: 2, C: 3 }] };
   let A: Config.AlgorithmColumns = {
-    to_translate: [],
+    process: [],
     static: [],
     reference: [],
   };
@@ -87,7 +87,7 @@ test('mapping::isMappingOnlyDocument empty config', () => {
 test('mapping::isMappingOnlyDocument algo columns specified only', () => {
   const testSheet: CidDocument = { name: '', data: [{ A: 1, B: 2, C: 3 }] };
   const A: Config.AlgorithmColumns = {
-    to_translate: [],
+    process: [],
     static: [],
     reference: ['A', 'B', 'C'],
   };
@@ -99,7 +99,7 @@ test('mapping::isMappingOnlyDocument algo columns specified only', () => {
 test('mapping::isMappingOnlyDocument src dest specified only', () => {
   const testSheet: CidDocument = { name: '', data: [{ A: 1, B: 2, C: 3 }] };
   const A: Config.AlgorithmColumns = {
-    to_translate: [],
+    process: [],
     static: [],
     reference: [],
   };

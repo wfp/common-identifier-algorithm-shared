@@ -160,6 +160,8 @@ function makeValidatorList(optsList: Config.ColumnValidation[]) {
 export function makeValidatorListDict(
   validationOpts: Config.Options['validations'],
 ) {
+  if (!validationOpts) return {}
+
   // the "*" field denotes validators targeting all fields
   let allFieldValidators = validationOpts['*'];
 

@@ -32,8 +32,7 @@ import { extractAlgoColumnsFromObject } from '../../src/hashing/utils.js';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const CONFIG: Config.Options = {
-  meta: { region: '', version: '' },
-  signature: { config_signature: '' },
+  meta: { region: '', version: '', signature: '' },
   source: {
     columns: [
       { name: 'A', alias: 'col_a' },
@@ -42,10 +41,10 @@ const CONFIG: Config.Options = {
   },
   algorithm: {
     hash: { strategy: 'SHA256' },
-    salt: { source: 'STRING', value: 'TEST', validator_regex: '' },
+    salt: { source: 'STRING', value: 'TEST' },
     columns: {
       static: ['col_a'],
-      to_translate: [],
+      process: [],
       reference: [],
     },
   },

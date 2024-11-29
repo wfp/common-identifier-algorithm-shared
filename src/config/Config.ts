@@ -15,15 +15,26 @@ export namespace Config {
     target?: string;
   }
   export interface AlgorithmColumns {
-    to_translate: string[];
+    process: string[];
     static: string[];
     reference: string[];
   }
+  export type StringBasedSalt = { source: 'STRING'; value: string }
+  export type FileBasedSalt = {
+    source: 'FILE';
+    validator_regex?: string;
+    value: {
+      win32?: string;
+      darwin?: string;
+      linux?: string;
+    }
+  };
   export interface Options {
     isBackup?: boolean;
     meta: {
       region: string;
       version: string;
+      signature: string;
     };
     messages?: {
       terms_and_conditions: string;
@@ -31,34 +42,17 @@ export namespace Config {
       error_in_salt: string;
     };
     source: ColumnMap;
-    validations: { [key: string]: ColumnValidation[] };
+    validations?: { [key: string]: ColumnValidation[] };
     algorithm: {
       columns: AlgorithmColumns;
       hash: {
-        strategy: 'SHA256' | 'SCRYPT' | 'ARGON2';
-        num_iterations?: number;
-        parallelism?: number;
-        block_size?: number;
-        size?: number;
+        strategy: 'SHA256'
       };
-      salt: {
-        source: 'FILE' | 'STRING';
-        validator_regex: string;
-        value:
-          | {
-              win32?: string;
-              darwin?: string;
-              linux?: string;
-            }
-          | string;
-      };
+      salt: StringBasedSalt | FileBasedSalt
     };
     destination: ColumnMap;
     destination_map: ColumnMap;
     destination_errors: ColumnMap;
-    signature: {
-      config_signature: string;
-    };
   }
 }
 

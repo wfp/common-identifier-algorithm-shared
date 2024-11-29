@@ -23,7 +23,7 @@ import { loadConfig } from '../../src/config/loadConfig.js';
 import { generateConfigHash } from '../../src/config/generateConfigHash.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const REGION = 'GOS';
+const REGION = 'ANY';
 const FILES_PATH = join(__dirname, 'files');
 
 test('loadConfig ok', () => {
@@ -38,8 +38,8 @@ test('loadConfig ok', () => {
 
   const expected = JSON.parse(readFileSync(TEST_FILE_PATH, 'utf-8'));
   // check that the columns are actually sorted alphabetically.
-  expected.algorithm.columns.to_translate = ['a', 'b', 'c', 'd', 'e'];
-  expected.algorithm.columns.reference = ['1', '2', '3', '4', '5'];
+  expected.algorithm.columns.process = ['col_a', 'col_b', 'col_c', 'col_d', 'col_e',];
+  expected.algorithm.columns.reference = ['col_1', 'col_2', 'col_3'];
   expect(loadResult.config).toEqual(expected);
 });
 
@@ -62,11 +62,12 @@ test('loadConfig salt', () => {
   cfg.algorithm.salt.value.darwin = SALT_FILE_PATH;
   cfg.algorithm.salt.value.win32 = SALT_FILE_PATH;
   cfg.algorithm.salt.value.linux = SALT_FILE_PATH;
-  cfg.signature.config_signature = generateConfigHash(cfg);
+  cfg.meta.signature = generateConfigHash(cfg);
 
   writeFileSync(TEST_FILE_PATH, JSON.stringify(cfg), 'utf-8');
 
   const loadResult = loadConfig(TEST_FILE_PATH, REGION);
+  console.log(loadResult);
 
   expect(loadResult.success).toEqual(true);
   if (!loadResult.success) throw new TypeError();
@@ -86,7 +87,7 @@ test('loadConfig salt error', () => {
 
   cfg.algorithm.salt.value.darwin = SALT_FILE_PATH;
   cfg.algorithm.salt.value.win32 = SALT_FILE_PATH;
-  cfg.signature.config_signature = generateConfigHash(cfg);
+  cfg.meta.signature = generateConfigHash(cfg);
 
   writeFileSync(TEST_FILE_PATH, JSON.stringify(cfg), 'utf-8');
 

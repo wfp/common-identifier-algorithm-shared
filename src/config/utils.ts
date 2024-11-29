@@ -43,6 +43,7 @@ export function attemptToReadTOMLData<T>(
 
     // handle TOML
     if (filePath.toLowerCase().endsWith('.toml')) {
+      // TODO: better error handling for toml parsing (i.e. unsupported mixed array types)
       return toml.parse(fileData);
     }
 

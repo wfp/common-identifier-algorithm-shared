@@ -33,7 +33,7 @@ function makeTestConfig(basePath: string) {
     configFilePath: join(basePath, CONFIG_FILE_NAME),
     backupConfigFilePath: join(basePath, BACKUP_CONFIG_FILE_NAME),
     appConfigFilePath: join(basePath, APP_CONFIG_FILE_NAME),
-    region: 'GOS',
+    region: 'ANY',
   };
 }
 
@@ -60,7 +60,7 @@ test('ConfigStore loading', () => {
 
   const config = Object.assign({}, c.getConfig());
 
-  expect(config.meta.region).toEqual('GOS');
+  expect(config.meta.region).toEqual('ANY');
   expect(config.meta.version).toEqual('0.1.0');
 
   expect(config.algorithm.salt.source).toEqual('STRING');
@@ -72,8 +72,8 @@ test('ConfigStore loading', () => {
     fs.readFileSync(join(__dirname, 'files', CONFIG_FILE_NAME), 'utf-8'),
   );
   // check that the columns are actually sorted alphabetically.
-  originalConfig.algorithm.columns.to_translate = ['a', 'b', 'c', 'd', 'e'];
-  originalConfig.algorithm.columns.reference = ['1', '2', '3', '4', '5'];
+  originalConfig.algorithm.columns.process = ['col_a', 'col_b', 'col_c', 'col_d', 'col_e'];
+  originalConfig.algorithm.columns.reference = ['col_1', 'col_2', 'col_3'];
   delete originalConfig.algorithm.salt.source;
   delete originalConfig.algorithm.salt.value;
 
@@ -103,6 +103,9 @@ test('ConfigStore backup loading', () => {
   const originalConfig = toml.parse(
     fs.readFileSync(join(__dirname, 'files', BACKUP_CONFIG_FILE_NAME), 'utf-8'),
   );
+  // check that the columns are actually sorted alphabetically.
+  originalConfig.algorithm.columns.process = ['col_a', 'col_b', 'col_c', 'col_d', 'col_e'];
+  originalConfig.algorithm.columns.reference = ['col_1', 'col_2', 'col_3'];
   delete originalConfig.algorithm.salt.source;
   delete originalConfig.algorithm.salt.value;
 
@@ -150,7 +153,7 @@ test('ConfigStore saving and loading user config', () => {
     expect(c.isValid).toEqual(true);
 
     const config = Object.assign({}, c.getConfig());
-    expect(config.meta.region).toEqual('GOS');
+    expect(config.meta.region).toEqual('ANY');
 
     // ERROR
     const errResult = c.updateUserConfig(join(basePath, 'config.xxx.toml'));

@@ -46,7 +46,7 @@ export function mapRequiredColumns(
   } else {
     // concat the input columns from the config (or use an empty list as default)
     algorithmColumns = [
-      ...(configAlgo.to_translate || []),
+      ...(configAlgo.process || []),
       ...(configAlgo.static || []),
       ...(configAlgo.reference || []),
     ];

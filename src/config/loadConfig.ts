@@ -83,17 +83,17 @@ export function loadConfig(
   log('CONFIG HASH:', configHash);
 
   // fail if the signature is not OK
-  if (configHash !== configData.signature.config_signature) {
+  if (configHash !== configData.meta.signature) {
     return {
       success: false,
-      error: `Configuration file signature mismatch -- required signature is '${configData.signature.config_signature}' but user configuration has '${configHash}' `,
+      error: `Configuration file signature mismatch -- required signature is '${configData.meta.signature}' but user configuration has '${configHash}' `,
     };
   }
 
-  // alphabetically sort the to_translate, static, and reference fields to standardise and prevent
+  // alphabetically sort the process, static, and reference fields to standardise and prevent
   // different ordering in config producing different results in output.
-  configData.algorithm.columns.to_translate =
-    configData.algorithm.columns.to_translate.sort();
+  configData.algorithm.columns.process =
+    configData.algorithm.columns.process.sort();
   configData.algorithm.columns.reference =
     configData.algorithm.columns.reference.sort();
   configData.algorithm.columns.static =
@@ -101,7 +101,7 @@ export function loadConfig(
 
   // check if we need to inject the salt data into the config
   // if not, the config loading is finished
-  if (configData.algorithm.salt.source.toUpperCase() !== 'FILE') {
+  if (configData.algorithm.salt.source === 'STRING') {
     return {
       success: true,
       lastUpdated: lastUpdateDate,
@@ -111,9 +111,9 @@ export function loadConfig(
 
   // figure out the file path and the validation regexp
   const saltFilePath = configData.algorithm.salt.value;
-  const saltFileValidatorRegexp = RegExp(
-    configData.algorithm.salt.validator_regex,
-  );
+  const saltFileValidatorRegexp = configData.algorithm.salt.validator_regex
+    ? RegExp(configData.algorithm.salt.validator_regex)
+    : undefined;
 
   // attempt to load the salt file
   // saltFilePath must be { win32: string, darwin: string } at this stage since salt.source is guaranteed to be "FILE".
@@ -133,10 +133,9 @@ export function loadConfig(
   }
 
   // replace the "FILE" with "STRING" amd embed the salt data
+  configData.algorithm.salt = configData.algorithm.salt as unknown as Config.StringBasedSalt;
   configData.algorithm.salt.source = 'STRING';
   configData.algorithm.salt.value = saltData;
-
-  configData;
 
   // return the freshly injected config
   return {

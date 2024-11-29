@@ -29,14 +29,14 @@ test('extractAlgoColumnsFromObject', () => {
     extractAlgoColumnsFromObject(
       {
         static: [],
-        to_translate: [],
+        process: [],
         reference: [],
       },
       {},
     ),
   ).toEqual({
     static: [],
-    to_translate: [],
+    process: [],
     reference: [],
   });
 
@@ -44,14 +44,14 @@ test('extractAlgoColumnsFromObject', () => {
     extractAlgoColumnsFromObject(
       {
         static: ['col_a', 'col_b'],
-        to_translate: ['col_tra', 'col_trb'],
+        process: ['col_tra', 'col_trb'],
         reference: ['col_refa', 'col_refb'],
       },
       {},
     ),
   ).toEqual({
     static: [],
-    to_translate: [],
+    process: [],
     reference: [],
   });
 
@@ -59,7 +59,7 @@ test('extractAlgoColumnsFromObject', () => {
     extractAlgoColumnsFromObject(
       {
         static: ['col_a', 'col_b'],
-        to_translate: ['col_tra', 'col_trb'],
+        process: ['col_tra', 'col_trb'],
         reference: ['col_refa', 'col_refb'],
       },
       {
@@ -73,7 +73,7 @@ test('extractAlgoColumnsFromObject', () => {
     ),
   ).toEqual({
     static: ['a', 'b'],
-    to_translate: ['tra', 'trb'],
+    process: ['tra', 'trb'],
     reference: ['refa', 'refb'],
   });
 });
