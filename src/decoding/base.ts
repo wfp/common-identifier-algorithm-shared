@@ -91,12 +91,9 @@ export abstract class DecoderBase {
   // config's 'source.columns' mapping
   mapColumnNamesToIds(columnNames: string[]) {
     // convert the column map to a lookup object
-    let columnMap: { [key: string]: string } = this.sourceConfig.columns.reduce(
-      (memo, { name, alias }) => {
-        return Object.assign(memo, { [name]: alias });
-      },
-      {},
-    );
+    let columnMap: { [key: string]: string } = this.sourceConfig.columns.reduce((memo, { name, alias }) => {
+      return Object.assign(memo, { [name]: alias });
+    }, {});
 
     return columnNames.map((col) => {
       // check if we have this name
@@ -108,5 +105,5 @@ export abstract class DecoderBase {
   // takes a list of rows with a list of strings and returns a new Sheet object.
   documentFromRawData = (name: string, sheetData: RawData): CidDocument => {
     return { name, data: this.convertSheetRowsToObjects(sheetData) };
-  }
+  };
 }

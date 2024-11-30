@@ -41,8 +41,7 @@ function placeTestConfigFiles(basePathPrefix: string) {
   const fromPath = join(__dirname, 'files');
   const basePath = fs.mkdtempSync(join(os.tmpdir(), basePathPrefix));
 
-  const cp = (n: string) =>
-    fs.copyFileSync(join(fromPath, n), join(basePath, n));
+  const cp = (n: string) => fs.copyFileSync(join(fromPath, n), join(basePath, n));
   [CONFIG_FILE_NAME, BACKUP_CONFIG_FILE_NAME, APP_CONFIG_FILE_NAME].forEach(cp);
 
   return basePath;
@@ -68,9 +67,7 @@ test('ConfigStore loading', () => {
   delete config.algorithm.salt.source;
   delete config.algorithm.salt.value;
 
-  const originalConfig = JSON.parse(
-    fs.readFileSync(join(__dirname, 'files', CONFIG_FILE_NAME), 'utf-8'),
-  );
+  const originalConfig = JSON.parse(fs.readFileSync(join(__dirname, 'files', CONFIG_FILE_NAME), 'utf-8'));
   // check that the columns are actually sorted alphabetically.
   originalConfig.algorithm.columns.process = ['col_a', 'col_b', 'col_c', 'col_d', 'col_e'];
   originalConfig.algorithm.columns.reference = ['col_1', 'col_2', 'col_3'];
@@ -144,9 +141,7 @@ test('ConfigStore saving and loading user config', () => {
   {
     // OK
     expect(fs.existsSync(join(basePath, CONFIG_FILE_NAME))).toEqual(false);
-    expect(c.updateUserConfig(join(basePath, BACKUP_CONFIG_FILE_NAME))).toEqual(
-      undefined,
-    );
+    expect(c.updateUserConfig(join(basePath, BACKUP_CONFIG_FILE_NAME))).toEqual(undefined);
     expect(fs.existsSync(join(basePath, CONFIG_FILE_NAME))).toEqual(true);
 
     expect(c.isUsingBackupConfig).toEqual(false);
@@ -178,9 +173,7 @@ test('ConfigStore saving and loading user config', () => {
     expect(c.isValid).toEqual(true);
 
     // load the config back
-    expect(c.updateUserConfig(join(basePath, BACKUP_CONFIG_FILE_NAME))).toEqual(
-      undefined,
-    );
+    expect(c.updateUserConfig(join(basePath, BACKUP_CONFIG_FILE_NAME))).toEqual(undefined);
 
     // remove the backup
     fs.unlinkSync(join(basePath, BACKUP_CONFIG_FILE_NAME));

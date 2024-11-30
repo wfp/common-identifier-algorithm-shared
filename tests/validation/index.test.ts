@@ -199,8 +199,7 @@ test('makeValidationResultDocument::error', () => {
   };
 
   const doc = makeValidationResultDocument(TEST_CONFIG, TEST_RESULT);
-  const ERR_STR =
-    'A must be one of: "A", "A0";\ncol_b must be one of: "B", "B0";';
+  const ERR_STR = 'A must be one of: "A", "A0";\ncol_b must be one of: "B", "B0";';
 
   expect(doc.name).toEqual('validationResult');
   expect(doc.data).toEqual([

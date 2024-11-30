@@ -99,9 +99,7 @@ export class LanguageCheckValidator implements Validator.Base {
   }
 
   message = () =>
-    this.opts.message
-      ? this.opts.message
-      : `only readable ${this.languageName} characters are supported`;
+    this.opts.message ? this.opts.message : `only readable ${this.languageName} characters are supported`;
 
   validate = (value: unknown): Validator.Result => {
     if (typeof value !== 'string')
@@ -110,8 +108,7 @@ export class LanguageCheckValidator implements Validator.Base {
         kind: this.kind,
         message: 'only text values are supported',
       };
-    if (!checkArabicUtf8(value))
-      return { ok: false, kind: this.kind, message: this.message() };
+    if (!checkArabicUtf8(value)) return { ok: false, kind: this.kind, message: this.message() };
 
     return { ok: true, kind: this.kind };
   };

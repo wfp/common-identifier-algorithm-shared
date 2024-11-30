@@ -22,18 +22,15 @@ import type { Config } from './Config.js';
 const DEFAULT_HASH_TYPE = 'md5';
 const HASH_DIGEST_TYPE = 'hex';
 
-type PartialBy<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>
-type RecursivePartial<T> = { [P in keyof T]?: RecursivePartial<T[P]>}
-type RecursivePartialExcept<T, K extends keyof T> = RecursivePartial<T> & Pick<T, K>
+type PartialBy<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
+type RecursivePartial<T> = { [P in keyof T]?: RecursivePartial<T[P]> };
+type RecursivePartialExcept<T, K extends keyof T> = RecursivePartial<T> & Pick<T, K>;
 
 // Takes a config, removes the "signature" and salt keys from it, generates
 // a stable JSON representation and hashes it using the provided algorithm
-export function generateConfigHash(
-  config: Config.Options,
-  hashType = DEFAULT_HASH_TYPE,
-) {
+export function generateConfigHash(config: Config.Options, hashType = DEFAULT_HASH_TYPE) {
   // create a nested copy of the object
-  const configCopy = { ...JSON.parse(JSON.stringify(config)) as RecursivePartial<Config.Options>};
+  const configCopy = { ...(JSON.parse(JSON.stringify(config)) as RecursivePartial<Config.Options>) };
 
   // remove the "signature" key
   delete configCopy.meta!.signature;
@@ -51,8 +48,7 @@ export function generateConfigHash(
 
   // generate a stable JSON representation
   const stableJson = stableStringify(configCopy);
-  if (typeof stableJson !== 'string')
-    throw new Error(`Unable to serialise config object to JSON.`);
+  if (typeof stableJson !== 'string') throw new Error(`Unable to serialise config object to JSON.`);
 
   // generate the hash
   const hash = createHash(hashType).update(stableJson).digest(HASH_DIGEST_TYPE);

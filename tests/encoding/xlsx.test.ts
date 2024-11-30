@@ -44,10 +44,7 @@ test('makeXlsxEncoder creation', () => {
   const e = makeXlsxEncoder(TEST_MAPPING);
 
   const test_output_path = join(__dirname, 'xlsx_encoder_test');
-  const test_output_path_postfixed = join(
-    __dirname,
-    'xlsx_encoder_test_POSTFIX.xlsx',
-  );
+  const test_output_path_postfixed = join(__dirname, 'xlsx_encoder_test_POSTFIX.xlsx');
 
   if (existsSync(test_output_path_postfixed)) {
     unlinkSync(test_output_path_postfixed);

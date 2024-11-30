@@ -21,9 +21,7 @@ import base32 from 'hi-base32';
 import type { Config } from '../config/Config.js';
 import type { Validation } from '../validation/Validation.js';
 
-export type makeHasherFunction = (
-  config: Config.Options['algorithm'],
-) => BaseHasher;
+export type makeHasherFunction = (config: Config.Options['algorithm']) => BaseHasher;
 
 export abstract class BaseHasher {
   config: Config.Options['algorithm'];

@@ -17,12 +17,7 @@
 import { SUPPORTED_VALIDATORS } from '../Validation.js';
 import type { Validator } from '../Validation.js';
 
-import {
-  parseDateDiff,
-  isValidDateDiff,
-  attemptToParseDate,
-  isDateInRange,
-} from './date_shared.js';
+import { parseDateDiff, isValidDateDiff, attemptToParseDate, isDateInRange } from './date_shared.js';
 import type { ParsedDateDiff } from './date_shared.js';
 
 export class DateDiffValidator implements Validator.Base {
@@ -49,23 +44,19 @@ export class DateDiffValidator implements Validator.Base {
   message = () => {
     if (this.opts.message) return this.opts.message;
 
-    if (!this.parsedDateDiff)
-      return `: no date diff specified in configuration`;
+    if (!this.parsedDateDiff) return `: no date diff specified in configuration`;
     const left = this.parsedDateDiff[0];
     const right = this.parsedDateDiff[1];
 
-    if (left._value === 0)
-      return `must be between today and ${right._value} ${right._key}`;
-    if (right._value === 0)
-      return `must be between ${left._value} ${left._key} and today`;
+    if (left._value === 0) return `must be between today and ${right._value} ${right._key}`;
+    if (right._value === 0) return `must be between ${left._value} ${left._key} and today`;
     return `must be within ${left._value} ${left._key} and ${right._value} ${right._key} of today`;
   };
 
   validate = (value: unknown): Validator.Result => {
     let parsedDate = attemptToParseDate(value);
 
-    if (!parsedDate)
-      return { ok: false, kind: this.kind, message: `must be a date` };
+    if (!parsedDate) return { ok: false, kind: this.kind, message: `must be a date` };
 
     if (!isDateInRange(this.parsedDateDiff!, parsedDate))
       return { ok: false, kind: this.kind, message: this.message() };

@@ -17,12 +17,7 @@
 import { SUPPORTED_VALIDATORS } from '../Validation.js';
 import type { Validation, Validator } from '../Validation.js';
 
-import {
-  parseDateDiff,
-  isValidDateDiff,
-  attemptToParseDate,
-  isDateInRange,
-} from './date_shared.js';
+import { parseDateDiff, isValidDateDiff, attemptToParseDate, isDateInRange } from './date_shared.js';
 import type { ParsedDateDiff } from './date_shared.js';
 
 export class DateFieldDiffValidator implements Validator.Base {
@@ -57,23 +52,17 @@ export class DateFieldDiffValidator implements Validator.Base {
   message = () => {
     if (this.opts.message) return this.opts.message;
 
-    if (!this.parsedDateDiff)
-      return `No date diff field specified in configuration.`;
+    if (!this.parsedDateDiff) return `No date diff field specified in configuration.`;
     const left = this.parsedDateDiff[0];
     const right = this.parsedDateDiff[1];
 
-    if (left._value === 0)
-      return `must be within ${this.opts.target} and ${right._value} ${right._key}`;
-    if (right._value === 0)
-      return `must be within ${left._value} ${left._key} and ${this.opts.target}`;
+    if (left._value === 0) return `must be within ${this.opts.target} and ${right._value} ${right._key}`;
+    if (right._value === 0) return `must be within ${left._value} ${left._key} and ${this.opts.target}`;
     return `must be within ${left._value} ${left._key} and ${right._value} ${right._key} of ${this.opts.target}`;
   };
 
   validate = (value: any, data?: Validation.Data): Validator.Result => {
-    if (!data)
-      throw new Error(
-        'This validator validate method must be provided with row context.',
-      );
+    if (!data) throw new Error('This validator validate method must be provided with row context.');
 
     let otherFieldValue = data.row[this.opts.target];
     // if there is no other field value fail
@@ -93,8 +82,7 @@ export class DateFieldDiffValidator implements Validator.Base {
       };
 
     let currentFieldDate = attemptToParseDate(value);
-    if (!currentFieldDate)
-      return { ok: false, kind: this.kind, message: 'must be a date' };
+    if (!currentFieldDate) return { ok: false, kind: this.kind, message: 'must be a date' };
 
     if (!isDateInRange(this.parsedDateDiff!, currentFieldDate, originDate)) {
       return { ok: false, kind: this.kind, message: this.message() };

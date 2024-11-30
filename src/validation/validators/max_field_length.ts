@@ -24,19 +24,13 @@ export class MaxFieldLengthValidator implements Validator.Base {
 
   constructor(opts: Validator.Options.MaxFieldLength) {
     if (typeof opts.value !== 'number') {
-      throw new Error(
-        `MaxFieldLength validator must have a 'value' with number -- ${JSON.stringify(opts)}`,
-      );
+      throw new Error(`MaxFieldLength validator must have a 'value' with number -- ${JSON.stringify(opts)}`);
     }
     this.opts = opts;
   }
 
   message = (msg?: string) =>
-    this.opts.message
-      ? this.opts.message
-      : msg
-        ? msg
-        : `must be shorter than ${this.opts.value} characters`;
+    this.opts.message ? this.opts.message : msg ? msg : `must be shorter than ${this.opts.value} characters`;
 
   validate = (value: unknown): Validator.Result => {
     if (typeof value !== 'string' && typeof value !== 'number') {
@@ -47,8 +41,7 @@ export class MaxFieldLengthValidator implements Validator.Base {
       };
     }
 
-    if (`${value}`.length > this.opts.value)
-      return { ok: false, kind: this.kind, message: this.message() };
+    if (`${value}`.length > this.opts.value) return { ok: false, kind: this.kind, message: this.message() };
     return { ok: true, kind: this.kind };
   };
 }

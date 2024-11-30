@@ -44,17 +44,11 @@ type LoadConfigResult =
 // - { success: false, error: "string" } if there are errors
 // - { success: false, isSaltFileError: true, error: "string"}
 //     if there is something wrong with the salt file
-export function loadConfig(
-  configPath: string,
-  region: string,
-): LoadConfigResult {
+export function loadConfig(configPath: string, region: string): LoadConfigResult {
   log('Loading config from', configPath);
 
   // attempt to read the file
-  const configData = attemptToReadTOMLData<Config.Options>(
-    configPath,
-    CONFIG_FILE_ENCODING,
-  );
+  const configData = attemptToReadTOMLData<Config.Options>(configPath, CONFIG_FILE_ENCODING);
 
   // if cannot be read, we have an error
   if (!configData) {
@@ -92,12 +86,9 @@ export function loadConfig(
 
   // alphabetically sort the process, static, and reference fields to standardise and prevent
   // different ordering in config producing different results in output.
-  configData.algorithm.columns.process =
-    configData.algorithm.columns.process.sort();
-  configData.algorithm.columns.reference =
-    configData.algorithm.columns.reference.sort();
-  configData.algorithm.columns.static =
-    configData.algorithm.columns.static.sort();
+  configData.algorithm.columns.process = configData.algorithm.columns.process.sort();
+  configData.algorithm.columns.reference = configData.algorithm.columns.reference.sort();
+  configData.algorithm.columns.static = configData.algorithm.columns.static.sort();
 
   // check if we need to inject the salt data into the config
   // if not, the config loading is finished

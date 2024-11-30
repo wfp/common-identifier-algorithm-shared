@@ -15,11 +15,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import {
-  extractAlgoColumnsFromObject,
-  joinFieldsForHash,
-  cleanValueList,
-} from '../../src/hashing/utils.js';
+import { extractAlgoColumnsFromObject, joinFieldsForHash, cleanValueList } from '../../src/hashing/utils.js';
 
 test('extractAlgoColumnsFromObject', () => {
   // expect(() => { extractAlgoColumnsFromObject("", {}) }).toThrow()
@@ -86,12 +82,5 @@ test('joinFieldsForHash', () => {
 test('cleanValueList', () => {
   expect(cleanValueList([])).toEqual([]);
   expect(cleanValueList(['a', 'b'])).toEqual(['a', 'b']);
-  expect(cleanValueList(['a', 'b', 10, 'c', null, 'd'])).toEqual([
-    'a',
-    'b',
-    '',
-    'c',
-    '',
-    'd',
-  ]);
+  expect(cleanValueList(['a', 'b', 10, 'c', null, 'd'])).toEqual(['a', 'b', '', 'c', '', 'd']);
 });

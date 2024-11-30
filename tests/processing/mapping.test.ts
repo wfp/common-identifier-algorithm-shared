@@ -17,30 +17,17 @@
 
 import type { Config } from '../../src/config/Config.js';
 import type { CidDocument } from '../../src/document.js';
-import {
-  mapRequiredColumns,
-  isMappingOnlyDocument,
-} from '../../src/processing/mapping.js';
+import { mapRequiredColumns, isMappingOnlyDocument } from '../../src/processing/mapping.js';
 
 test('mapping::mapRequiredColumns', () => {
   expect(
-    mapRequiredColumns(
-      { process: [], static: [], reference: [] },
-      { columns: [] },
-      { columns: [] },
-    ),
+    mapRequiredColumns({ process: [], static: [], reference: [] }, { columns: [] }, { columns: [] }),
   ).toEqual([]);
 
   expect(
     mapRequiredColumns(
       {
-        process: [
-          'first_name',
-          'last_name',
-          'father_first_name',
-          'father_last_name',
-          'mother_first_name',
-        ],
+        process: ['first_name', 'last_name', 'father_first_name', 'father_last_name', 'mother_first_name'],
         static: ['dob_year'],
         reference: ['document_type', 'document_id'],
       },

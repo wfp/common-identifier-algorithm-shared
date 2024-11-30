@@ -24,9 +24,7 @@ export class LinkedFieldValidator implements Validator.Base {
 
   constructor(opts: Validator.Options.LinkedField) {
     if (typeof opts.target !== 'string') {
-      throw new Error(
-        'LinkedFieldValidator must be provided with target field as a string.',
-      );
+      throw new Error('LinkedFieldValidator must be provided with target field as a string.');
     }
     this.opts = opts;
   }
@@ -40,10 +38,7 @@ export class LinkedFieldValidator implements Validator.Base {
         : `is linked with '${this.opts.target},' both must have valid values`;
 
   validate(value: unknown, data?: Validation.Data): Validator.Result {
-    if (!data)
-      throw new Error(
-        'This validator validate method must be provided with row context.',
-      );
+    if (!data) throw new Error('This validator validate method must be provided with row context.');
 
     // if no value in this field, no need to check the linked one
     if (!value) return { ok: true, kind: this.kind };
@@ -53,9 +48,7 @@ export class LinkedFieldValidator implements Validator.Base {
       return {
         ok: false,
         kind: this.kind,
-        message: this.message(
-          `is linked with field '${this.opts.target}' which cannot be empty`,
-        ),
+        message: this.message(`is linked with field '${this.opts.target}' which cannot be empty`),
       };
 
     return { ok: true, kind: this.kind };

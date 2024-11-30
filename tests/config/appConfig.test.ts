@@ -18,11 +18,7 @@ import { fileURLToPath } from 'node:url';
 import { join, dirname } from 'node:path';
 import { readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import {
-  loadAppConfig,
-  saveAppConfig,
-  DEFAULT_APP_CONFIG,
-} from '../../src/config/appConfig.js';
+import { loadAppConfig, saveAppConfig, DEFAULT_APP_CONFIG } from '../../src/config/appConfig.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -32,9 +28,7 @@ test('appConfig load', () => {
 
   expect(loadAppConfig('Some invalid path')).toEqual(DEFAULT_APP_CONFIG);
 
-  expect(loadAppConfig(join(__dirname, 'files', 'test-config.json'))).toEqual(
-    DEFAULT_APP_CONFIG,
-  );
+  expect(loadAppConfig(join(__dirname, 'files', 'test-config.json'))).toEqual(DEFAULT_APP_CONFIG);
 });
 
 test('appConfig save', () => {

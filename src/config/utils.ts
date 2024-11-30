@@ -22,10 +22,7 @@ import toml from 'toml';
 import type { Config } from './Config.js';
 
 // Tries to read the file data, returns null if unsuccessful
-export function attemptToReadFileData(
-  filePath: string,
-  encoding: fs.EncodingOption = 'utf-8',
-) {
+export function attemptToReadFileData(filePath: string, encoding: fs.EncodingOption = 'utf-8') {
   try {
     return fs.readFileSync(filePath, encoding) as string;
   } catch (e) {
@@ -34,10 +31,7 @@ export function attemptToReadFileData(
 }
 
 // Tries to read the file data decoded from TOML, returns null if unsuccessful
-export function attemptToReadTOMLData<T>(
-  filePath: string,
-  encoding: fs.EncodingOption,
-): T | null {
+export function attemptToReadTOMLData<T>(filePath: string, encoding: fs.EncodingOption): T | null {
   try {
     const fileData = fs.readFileSync(filePath, encoding) as string;
 
@@ -61,30 +55,23 @@ export function attemptToReadTOMLData<T>(
 
 // takes into consideration the platform and the type of value provided by the config
 // to return an actual, absolute salt file path
-export function getSaltFilePath(
-  saltValueConfig: Config.Options['algorithm']['salt']['value'],
-) {
+export function getSaltFilePath(saltValueConfig: Config.Options['algorithm']['salt']['value']) {
   // if the value is a string always use it
   if (typeof saltValueConfig === 'string') return saltValueConfig;
 
   // no salt path means the config does not have our platform
   /* istanbul ignore next */
   if (process.platform in saltValueConfig === false) {
-    throw new Error(
-      `Unsupported platform for salt file location: ${process.platform}`,
-    );
+    throw new Error(`Unsupported platform for salt file location: ${process.platform}`);
   }
   const platform = process.platform as keyof typeof saltValueConfig;
   const platformSaltPath = saltValueConfig[platform];
 
-  if (!platformSaltPath)
-    throw new Error(`Salt path not provided for platform: ${process.platform}`);
+  if (!platformSaltPath) throw new Error(`Salt path not provided for platform: ${process.platform}`);
 
   // token replacement
   return path.resolve(
-    platformSaltPath
-      .replaceAll('$HOME', os.homedir())
-      .replaceAll('$APPDATA', appDataLocation()),
+    platformSaltPath.replaceAll('$HOME', os.homedir()).replaceAll('$APPDATA', appDataLocation()),
   );
 }
 
@@ -98,8 +85,6 @@ export function appDataLocation() {
     case 'linux':
       return process.env.HOME + '/.local/share';
     default:
-      throw new Error(
-        `Unsupported platform for salt file location: ${process.platform}`,
-      );
+      throw new Error(`Unsupported platform for salt file location: ${process.platform}`);
   }
 }

@@ -41,9 +41,7 @@ export class FieldTypeValidator implements Validator.Base {
     const matched = SUPPORTED_FIELD_TYPES.find((t) => t.type === fieldType);
 
     if (!matched) {
-      throw new Error(
-        `Cannot find field type: '${fieldType}' for field_type validator`,
-      );
+      throw new Error(`Cannot find field type: '${fieldType}' for field_type validator`);
     }
 
     this.fieldType = fieldType;
@@ -54,10 +52,8 @@ export class FieldTypeValidator implements Validator.Base {
   message = (msg: string = '') => (this.opts.message ? this.opts.message : msg);
 
   validate = (value: unknown): Validator.Result => {
-    if (typeof value === 'string' && this.fieldType === 'string')
-      return { ok: true, kind: this.kind };
-    if (typeof value === 'number' && this.fieldType === 'number')
-      return { ok: true, kind: this.kind };
+    if (typeof value === 'string' && this.fieldType === 'string') return { ok: true, kind: this.kind };
+    if (typeof value === 'number' && this.fieldType === 'number') return { ok: true, kind: this.kind };
 
     return {
       ok: false,

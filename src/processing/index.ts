@@ -30,11 +30,7 @@ import {
   validateDocumentWithListDict,
 } from '../validation/index.js';
 
-import {
-  keepOutputColumns,
-  isMappingOnlyDocument,
-  keepValidatorsForColumns,
-} from './mapping.js';
+import { keepOutputColumns, isMappingOnlyDocument, keepValidatorsForColumns } from './mapping.js';
 import type { Config } from '../config/Config.js';
 import { BaseHasher } from '../hashing/base.js';
 import type { makeHasherFunction } from '../hashing/base.js';
@@ -65,17 +61,13 @@ export function validateDocument(
   let validatorDict = makeValidatorListDict(config.validations);
 
   // if this is a mapping document leave only the validators for the algorithm columns
-  if (isMapping)
-    validatorDict = keepValidatorsForColumns(config, validatorDict);
+  if (isMapping) validatorDict = keepValidatorsForColumns(config, validatorDict);
 
   // do the actual validation
   return validateDocumentWithListDict(validatorDict, decoded);
 }
 
-export const generateHashesForDocument = (
-  hasher: BaseHasher,
-  document: CidDocument,
-): CidDocument => {
+export const generateHashesForDocument = (hasher: BaseHasher, document: CidDocument): CidDocument => {
   // generate for all rows
   let rows = document.data.map((row) => {
     const generatedHashes = hasher.generateHashForObject(row);
@@ -83,9 +75,9 @@ export const generateHashesForDocument = (
   });
   return {
     name: 'hashedDocument',
-    data: rows
+    data: rows,
   };
-}
+};
 
 // helper to output a document with a specific config
 export function writeFileWithConfig(
@@ -130,12 +122,7 @@ export async function preprocessFile({
 
   // DECODE
   // ======
-  const decoded = await readFile(
-    inputFileType,
-    config.source,
-    inputFilePath,
-    limit,
-  );
+  const decoded = await readFile(inputFileType, config.source, inputFilePath, limit);
 
   // VALIDATION
   // ==========
@@ -156,23 +143,12 @@ export async function preprocessFile({
     let validationResultBaseConfig = config.source;
 
     // but if this is a mapping document we only show the mapping columns in the validation output document
-    if (isMappingDocument)
-      validationResultBaseConfig = keepOutputColumns(
-        config,
-        validationResultBaseConfig,
-      );
+    if (isMappingDocument) validationResultBaseConfig = keepOutputColumns(config, validationResultBaseConfig);
 
-    validationResultDocument = makeValidationResultDocument(
-      validationResultBaseConfig,
-      validationResult,
-    );
+    validationResultDocument = makeValidationResultDocument(validationResultBaseConfig, validationResult);
 
     // The error file is output to the OS's temporary directory
-    if (!errorFileOutputPath)
-      errorFileOutputPath = path.join(
-        os.tmpdir(),
-        path.basename(inputFilePath),
-      );
+    if (!errorFileOutputPath) errorFileOutputPath = path.join(os.tmpdir(), path.basename(inputFilePath));
 
     validationErrorsOutputFile = writeFileWithConfig(
       inputFileType,
@@ -224,12 +200,7 @@ export async function processFile({
 
   // DECODE
   // ======
-  const decoded = await readFile(
-    inputFileType,
-    config.source,
-    inputFilePath,
-    limit,
-  );
+  const decoded = await readFile(inputFileType, config.source, inputFilePath, limit);
 
   // HASHING
   // =======
@@ -251,19 +222,9 @@ export async function processFile({
   // output the base document
   const mainOutputFile = isMappingDocument
     ? undefined
-    : writeFileWithConfig(
-        outputFileType,
-        config.destination,
-        result,
-        outputPath,
-      );
+    : writeFileWithConfig(outputFileType, config.destination, result, outputPath);
   // output the mapping document
-  const mappingFilePath = writeFileWithConfig(
-    outputFileType,
-    config.destination_map,
-    result,
-    outputPath,
-  );
+  const mappingFilePath = writeFileWithConfig(outputFileType, config.destination_map, result, outputPath);
 
   return {
     isMappingDocument,

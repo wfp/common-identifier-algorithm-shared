@@ -57,11 +57,7 @@ test('Decoderbase::sheetFromRawData', () => {
 test('Decoderbase::mapColumnNamesToIds', () => {
   const d = makeDecoderBase();
 
-  expect(d.mapColumnNamesToIds(['A', 'B', 'C'])).toEqual([
-    'col_a',
-    'col_b',
-    'C',
-  ]);
+  expect(d.mapColumnNamesToIds(['A', 'B', 'C'])).toEqual(['col_a', 'col_b', 'C']);
 });
 
 test('Decoderbase::convertSheetRowsToObjects', () => {

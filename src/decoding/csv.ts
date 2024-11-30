@@ -38,9 +38,6 @@ class CsvDecoder extends DecoderBase {
   }
 }
 
-export function makeCsvDecoder(
-  sourceConfig: Config.Options['source'],
-  limit?: number,
-) {
+export function makeCsvDecoder(sourceConfig: Config.Options['source'], limit?: number) {
   return new CsvDecoder(sourceConfig, limit);
 }

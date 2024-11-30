@@ -38,10 +38,7 @@ export function loadAppConfig(configPath: string) {
   log('Loading Application config from', configPath);
 
   // attempt to read the file
-  const configData = attemptToReadTOMLData<AppConfigData>(
-    configPath,
-    APP_CONFIG_ENCODING,
-  );
+  const configData = attemptToReadTOMLData<AppConfigData>(configPath, APP_CONFIG_ENCODING);
 
   // if cannot be read we assume default application configuration
   if (!configData) {

@@ -129,7 +129,5 @@ test('MaxValueValidator::dateString [month]', () => {
 
 test('MaxValueValidator fails for invalid options', () => {
   // @ts-ignore
-  expect(
-    () => new MaxValueValidator({ op: 'max_value', value: '[[[' }),
-  ).toThrow();
+  expect(() => new MaxValueValidator({ op: 'max_value', value: '[[[' })).toThrow();
 });

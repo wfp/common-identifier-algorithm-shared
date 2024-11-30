@@ -52,7 +52,6 @@ test('XLSXDecoder::multipleSheets', async () => {
   const d = makeXlsxDecoder(BASE_CFG, limit);
 
   expect(
-    async () =>
-      await d.decodeFile(join(__dirname, 'files', 'test_multiple_sheets.xlsx')),
+    async () => await d.decodeFile(join(__dirname, 'files', 'test_multiple_sheets.xlsx')),
   ).rejects.toThrow();
 });

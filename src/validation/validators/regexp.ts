@@ -36,9 +36,7 @@ export class RegexpValidator implements Validator.Base {
     try {
       this.rx = new RegExp(this.wrapRegexpString(opts.value));
     } catch (e) {
-      throw new Error(
-        `Error while compiling regular expression: "${opts.value}": ${e}`,
-      );
+      throw new Error(`Error while compiling regular expression: "${opts.value}": ${e}`);
     }
 
     this.opts = opts;

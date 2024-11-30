@@ -194,9 +194,7 @@ class TestHasher extends BaseHasher {
   }
 }
 
-const makeTestHasher: makeHasherFunction = (
-  config: Config.Options['algorithm'],
-) => {
+const makeTestHasher: makeHasherFunction = (config: Config.Options['algorithm']) => {
   return new TestHasher(config);
 };
 

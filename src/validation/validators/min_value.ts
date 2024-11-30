@@ -23,19 +23,13 @@ export class MinValueValidator implements Validator.Base {
 
   constructor(opts: Validator.Options.MinValue) {
     if (typeof opts.value !== 'number') {
-      throw new Error(
-        `MinValue validator must have a 'value' with a number -- ${JSON.stringify(opts)}`,
-      );
+      throw new Error(`MinValue validator must have a 'value' with a number -- ${JSON.stringify(opts)}`);
     }
     this.opts = opts;
   }
 
   message = (msg?: string) =>
-    this.opts.message
-      ? this.opts.message
-      : msg
-        ? msg
-        : `must be at least ${this.opts.value}`;
+    this.opts.message ? this.opts.message : msg ? msg : `must be at least ${this.opts.value}`;
 
   validate = (value: unknown): Validator.Result => {
     if (typeof value !== 'string' && typeof value !== 'number') {

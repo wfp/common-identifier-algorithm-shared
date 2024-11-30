@@ -44,10 +44,7 @@ test('makeCsvEncoder creation', () => {
   const e = makeCsvEncoder(TEST_MAPPING);
 
   const test_output_path = join(__dirname, 'csv_encoder_test');
-  const test_output_path_postfixed = join(
-    __dirname,
-    'csv_encoder_test_POSTFIX.csv',
-  );
+  const test_output_path_postfixed = join(__dirname, 'csv_encoder_test_POSTFIX.csv');
 
   if (existsSync(test_output_path_postfixed)) {
     unlinkSync(test_output_path_postfixed);
@@ -55,9 +52,7 @@ test('makeCsvEncoder creation', () => {
 
   e.encodeDocument(TEST_DOC, test_output_path);
 
-  expect(readFileSync(test_output_path_postfixed, 'utf-8')).toEqual(
-    'A,B\nA0,B0\nA1,B1\n',
-  );
+  expect(readFileSync(test_output_path_postfixed, 'utf-8')).toEqual('A,B\nA0,B0\nA1,B1\n');
 
   if (existsSync(test_output_path_postfixed)) {
     unlinkSync(test_output_path_postfixed);

@@ -63,9 +63,7 @@ test('EncoderBase::getOutputNameFor', () => {
   BASE_CFG.postfix = '_PF_{{yyyy}}';
   e = makeEncoderBase(BASE_CFG);
   const d = new Date();
-  expect(e.test__getOutputNameFor('output')).toEqual(
-    `output_PF_${d.getFullYear()}`,
-  );
+  expect(e.test__getOutputNameFor('output')).toEqual(`output_PF_${d.getFullYear()}`);
 });
 
 test('EncoderBase::generateHeaderRow', () => {

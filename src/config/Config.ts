@@ -19,7 +19,7 @@ export namespace Config {
     static: string[];
     reference: string[];
   }
-  export type StringBasedSalt = { source: 'STRING'; value: string }
+  export type StringBasedSalt = { source: 'STRING'; value: string };
   export type FileBasedSalt = {
     source: 'FILE';
     validator_regex?: string;
@@ -27,7 +27,7 @@ export namespace Config {
       win32?: string;
       darwin?: string;
       linux?: string;
-    }
+    };
   };
   export interface Options {
     isBackup?: boolean;
@@ -46,9 +46,9 @@ export namespace Config {
     algorithm: {
       columns: AlgorithmColumns;
       hash: {
-        strategy: 'SHA256'
+        strategy: 'SHA256';
       };
-      salt: StringBasedSalt | FileBasedSalt
+      salt: StringBasedSalt | FileBasedSalt;
     };
     destination: ColumnMap;
     destination_map: ColumnMap;

@@ -74,56 +74,33 @@ export function isMappingOnlyDocument(
     xs.size === ys.size && [...xs].every((x) => ys.has(x));
 
   // build list of column names either in configConfig or BOTH configSource and configDestination
-  const mappingDocumentColumns = mapRequiredColumns(
-    configAlgo,
-    configSource,
-    configDestination,
-  );
-  const documentColumns =
-    document.data.length > 0 ? Object.keys(document.data[0]) : [];
+  const mappingDocumentColumns = mapRequiredColumns(configAlgo, configSource, configDestination);
+  const documentColumns = document.data.length > 0 ? Object.keys(document.data[0]) : [];
 
-  const isMappingDocument = areSetsEqual(
-    new Set(mappingDocumentColumns),
-    new Set(documentColumns),
-  );
+  const isMappingDocument = areSetsEqual(new Set(mappingDocumentColumns), new Set(documentColumns));
 
   return isMappingDocument;
 }
 
 // Returns a new validator dictionary, keeps only the columns needed by the
 // algorithm (so only columns relevant for mapping files are checked)
-export function keepValidatorsForColumns(
-  config: Config.Options,
-  validatorDict: { [key: string]: any[] },
-) {
+export function keepValidatorsForColumns(config: Config.Options, validatorDict: { [key: string]: any[] }) {
   const keepColumnList = mapRequiredColumns(
     config.algorithm['columns'],
     config.source,
     config.destination_map,
   );
-  return keepColumnList.reduce(
-    (memo, col) => Object.assign(memo, { [col]: validatorDict[col] }),
-    {},
-  );
+  return keepColumnList.reduce((memo, col) => Object.assign(memo, { [col]: validatorDict[col] }), {});
 }
 
 // Returns a new output configuration with only the columns needed by the
 // algorithm (so the validation result of a mapping document only has the mapping columns present)
-export function keepOutputColumns(
-  config: Config.Options,
-  outputConfig: Config.ColumnMap,
-) {
+export function keepOutputColumns(config: Config.Options, outputConfig: Config.ColumnMap) {
   const keepColumnSet = new Set(
-    mapRequiredColumns(
-      config.algorithm['columns'],
-      config.source,
-      config.destination_map,
-    ),
+    mapRequiredColumns(config.algorithm['columns'], config.source, config.destination_map),
   );
 
   return Object.assign({}, outputConfig, {
-    columns: outputConfig.columns.filter(({ alias }) =>
-      keepColumnSet.has(alias),
-    ),
+    columns: outputConfig.columns.filter(({ alias }) => keepColumnSet.has(alias)),
   });
 }

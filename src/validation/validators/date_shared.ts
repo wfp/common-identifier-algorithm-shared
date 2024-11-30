@@ -77,9 +77,7 @@ export function isValidDateDiff(dateDiffString: string) {
   return dateDiff;
 }
 
-export function attemptToParseDate(
-  value: unknown,
-): UTCDate | Date | null | undefined {
+export function attemptToParseDate(value: unknown): UTCDate | Date | null | undefined {
   // check for emptyness / falseness
   if (!value) {
     return;
@@ -88,12 +86,7 @@ export function attemptToParseDate(
   if (typeof value !== 'string') {
     value = value.toString();
   }
-  const parsedDate = date_parse(
-    value as string,
-    DEFAULT_FORMAT_STR,
-    new UTCDate(),
-    { in: utc },
-  );
+  const parsedDate = date_parse(value as string, DEFAULT_FORMAT_STR, new UTCDate(), { in: utc });
 
   if (date_isValid(parsedDate)) return parsedDate;
 
@@ -115,10 +108,6 @@ export function isDateInRange(
   const offsetLeft = date_add(originDate, diff[0] as Duration, { in: utc });
   const offsetRight = date_add(originDate, diff[1] as Duration, { in: utc });
 
-  const inRange = isWithinInterval(
-    value,
-    { start: offsetLeft, end: offsetRight },
-    { in: utc },
-  );
+  const inRange = isWithinInterval(value, { start: offsetLeft, end: offsetRight }, { in: utc });
   return inRange;
 }

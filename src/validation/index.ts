@@ -101,9 +101,7 @@ function makeValidator(opts: Config.ColumnValidation) {
   // check if there is an 'op' in the object
   let op = opts.op as SUPPORTED_VALIDATORS;
   if (typeof op !== 'string') {
-    throw new Error(
-      `Validator configuration is missing the 'op' field: ${JSON.stringify(opts)}`,
-    );
+    throw new Error(`Validator configuration is missing the 'op' field: ${JSON.stringify(opts)}`);
   }
   switch (op) {
     case 'regex_match':
@@ -116,17 +114,11 @@ function makeValidator(opts: Config.ColumnValidation) {
       return new LinkedFieldValidator(opts as Validator.Options.LinkedField);
 
     case 'language_check':
-      return new LanguageCheckValidator(
-        opts as Validator.Options.LanguageCheck,
-      );
+      return new LanguageCheckValidator(opts as Validator.Options.LanguageCheck);
     case 'min_field_length':
-      return new MinFieldLengthValidator(
-        opts as Validator.Options.MinFieldLength,
-      );
+      return new MinFieldLengthValidator(opts as Validator.Options.MinFieldLength);
     case 'max_field_length':
-      return new MaxFieldLengthValidator(
-        opts as Validator.Options.MaxFieldLength,
-      );
+      return new MaxFieldLengthValidator(opts as Validator.Options.MaxFieldLength);
     case 'min_value':
       return new MinValueValidator(opts as Validator.Options.MinValue);
     case 'max_value':
@@ -135,14 +127,10 @@ function makeValidator(opts: Config.ColumnValidation) {
     case 'date_diff':
       return new DateDiffValidator(opts as Validator.Options.DateDiff);
     case 'date_field_diff':
-      return new DateFieldDiffValidator(
-        opts as Validator.Options.DateFieldDiff,
-      );
+      return new DateFieldDiffValidator(opts as Validator.Options.DateFieldDiff);
 
     case 'same_value_for_all_rows':
-      return new SameValueForAllRowsValidator(
-        opts as Validator.Options.SameValueForAllRows,
-      );
+      return new SameValueForAllRowsValidator(opts as Validator.Options.SameValueForAllRows);
     default:
       throw new Error(`Cannot find validator for type: '${op}'`);
   }
@@ -157,10 +145,8 @@ function makeValidatorList(optsList: Config.ColumnValidation[]) {
 // returns a map of <field name> => <validator list>.
 //
 // This function merges the "*" field validations into each field's validator list
-export function makeValidatorListDict(
-  validationOpts: Config.Options['validations'],
-) {
-  if (!validationOpts) return {}
+export function makeValidatorListDict(validationOpts: Config.Options['validations']) {
+  if (!validationOpts) return {};
 
   // the "*" field denotes validators targeting all fields
   let allFieldValidators = validationOpts['*'];
@@ -238,14 +224,12 @@ export const makeValidationResultDocument = (
     {} as { [key: string]: string },
   );
 
-  const documentData: CidDocument["data"] = documentResult.results.map((rowResult, rowIdx) => {
+  const documentData: CidDocument['data'] = documentResult.results.map((rowResult, rowIdx) => {
     // build an error message
     let errorList = rowResult.errors.map((error) => {
       // find the column name
       let columnHumanName = fieldNameMapping[error.column] || error.column;
-      return error.errors
-        .map(({ message }) => `${columnHumanName} ${message};`)
-        .join('\n');
+      return error.errors.map(({ message }) => `${columnHumanName} ${message};`).join('\n');
     });
 
     // combine with the row onject
@@ -259,10 +243,10 @@ export const makeValidationResultDocument = (
       },
       rowResult.row,
     );
-  })
+  });
 
   return {
     name: 'validationResult',
-    data: documentData
+    data: documentData,
   };
-}
+};

@@ -32,13 +32,11 @@ test('loadConfig ok', () => {
 
   expect(loadResult.success).toEqual(true);
   if (!loadResult.success) throw new TypeError();
-  expect(loadResult.lastUpdated).toEqual(
-    new Date(statSync(TEST_FILE_PATH).mtime),
-  );
+  expect(loadResult.lastUpdated).toEqual(new Date(statSync(TEST_FILE_PATH).mtime));
 
   const expected = JSON.parse(readFileSync(TEST_FILE_PATH, 'utf-8'));
   // check that the columns are actually sorted alphabetically.
-  expected.algorithm.columns.process = ['col_a', 'col_b', 'col_c', 'col_d', 'col_e',];
+  expected.algorithm.columns.process = ['col_a', 'col_b', 'col_c', 'col_d', 'col_e'];
   expected.algorithm.columns.reference = ['col_1', 'col_2', 'col_3'];
   expect(loadResult.config).toEqual(expected);
 });
@@ -55,9 +53,7 @@ test('loadConfig invalid', () => {
 test('loadConfig salt', () => {
   const SALT_FILE_PATH = join(FILES_PATH, 'test.salt');
   const TEST_FILE_PATH = join(tmpdir(), 'salt-config.json');
-  const cfg = JSON.parse(
-    readFileSync(join(FILES_PATH, 'test-salt-loading-config.json'), 'utf-8'),
-  );
+  const cfg = JSON.parse(readFileSync(join(FILES_PATH, 'test-salt-loading-config.json'), 'utf-8'));
 
   cfg.algorithm.salt.value.darwin = SALT_FILE_PATH;
   cfg.algorithm.salt.value.win32 = SALT_FILE_PATH;
@@ -73,17 +69,13 @@ test('loadConfig salt', () => {
   if (!loadResult.success) throw new TypeError();
   const config = loadResult.config;
   expect(config.algorithm.salt.source).toEqual('STRING');
-  expect(config.algorithm.salt.value).toEqual(
-    readFileSync(SALT_FILE_PATH, 'utf-8'),
-  );
+  expect(config.algorithm.salt.value).toEqual(readFileSync(SALT_FILE_PATH, 'utf-8'));
 });
 
 test('loadConfig salt error', () => {
   const SALT_FILE_PATH = 'INVALID SALT PATH';
   const TEST_FILE_PATH = join(tmpdir(), 'salt-config.json');
-  const cfg = JSON.parse(
-    readFileSync(join(FILES_PATH, 'test-salt-loading-config.json'), 'utf-8'),
-  );
+  const cfg = JSON.parse(readFileSync(join(FILES_PATH, 'test-salt-loading-config.json'), 'utf-8'));
 
   cfg.algorithm.salt.value.darwin = SALT_FILE_PATH;
   cfg.algorithm.salt.value.win32 = SALT_FILE_PATH;

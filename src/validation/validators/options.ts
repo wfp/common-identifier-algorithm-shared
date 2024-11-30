@@ -28,9 +28,7 @@ export class OptionsValidator implements Validator.Base {
       );
     }
     // all items in the array must either be string | number
-    const unsupportedTypes = opts.value.filter(
-      (t) => typeof t !== 'string' && typeof t !== 'number',
-    );
+    const unsupportedTypes = opts.value.filter((t) => typeof t !== 'string' && typeof t !== 'number');
     if (unsupportedTypes.length > 0) {
       throw new Error(
         `Options validator array must contain only strings or numbers -- options are: ${JSON.stringify(opts)}`,

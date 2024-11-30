@@ -24,16 +24,11 @@ const CONFIG_PATH = join(__dirname, './config.toml');
 
 const INPUT_PATH = join(__dirname, 'files', 'input_data.csv');
 const OUTPUT_PATH = join(__dirname, 'output', 'output.csv');
-const VALIDATION_ERRORS_PATH = join(
-  __dirname,
-  'output',
-  'validation_errors.csv',
-);
+const VALIDATION_ERRORS_PATH = join(__dirname, 'output', 'validation_errors.csv');
 
 // load configuration file
 const configLoadResult = loadConfig(CONFIG_PATH, REGION);
-if (!configLoadResult.success)
-  throw new Error('unable to load configuration file.');
+if (!configLoadResult.success) throw new Error('unable to load configuration file.');
 
 const config = configLoadResult.config;
 
@@ -46,9 +41,7 @@ const preprocessResult = await preprocessFile({
 });
 
 if (!preprocessResult.isValid)
-  throw new Error(
-    'Validation errors found in input file, review error file output.',
-  );
+  throw new Error('Validation errors found in input file, review error file output.');
 
 // validate the input file against all configured validation rules.
 const processFileResult = await processFile({

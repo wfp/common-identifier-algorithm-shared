@@ -25,16 +25,10 @@ export class SameValueForAllRowsValidator implements Validator.Base {
     this.opts = opts;
   }
 
-  message = () =>
-    this.opts.message
-      ? this.opts.message
-      : 'must have identical values in the column';
+  message = () => (this.opts.message ? this.opts.message : 'must have identical values in the column');
 
   validate(value: unknown, data?: Validation.Data): Validator.Result {
-    if (!data)
-      throw new Error(
-        'This validator validate method must be provided with sheet context.',
-      );
+    if (!data) throw new Error('This validator validate method must be provided with sheet context.');
     // if this validation function is called there is at least one row of data
     // in the sheet, so we dont need to check for that
 

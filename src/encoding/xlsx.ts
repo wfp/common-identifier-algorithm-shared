@@ -105,10 +105,7 @@ class XlsxEncoder extends EncoderBase {
     });
 
     // Set up the widths of the columns
-    let columnWidths = this._generateColumnWidthConfig(
-      headers.names,
-      fullData,
-    ).map((w) => ({ wch: w }));
+    let columnWidths = this._generateColumnWidthConfig(headers.names, fullData).map((w) => ({ wch: w }));
     // update the column widths
     worksheet['!cols'] = columnWidths;
 

@@ -50,21 +50,9 @@
   },
   "algorithm": {
     "columns": {
-      "process": [
-        "col_a",
-        "col_c",
-        "col_e",
-        "col_b",
-        "col_d"
-      ],
-      "static": [
-        "col_a"
-      ],
-      "reference": [
-        "col_3",
-        "col_1",
-        "col_2"
-      ]
+      "process": ["col_a", "col_c", "col_e", "col_b", "col_d"],
+      "static": ["col_a"],
+      "reference": ["col_3", "col_1", "col_2"]
     },
     "hash": {
       "strategy": "SHA256"

@@ -10,7 +10,7 @@ export {
 } from './processing/index.js';
 export { SUPPORTED_FILE_TYPES } from './document.js';
 export { makeValidationResultDocument } from './validation/index.js';
-export { keepOutputColumns } from './processing/mapping.js'; 
+export { keepOutputColumns } from './processing/mapping.js';
 
 export { joinFieldsForHash, cleanValueList, extractAlgoColumnsFromObject } from './hashing/utils.js';
 export { BaseHasher } from './hashing/base.js';

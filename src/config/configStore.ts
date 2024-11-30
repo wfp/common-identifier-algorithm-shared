@@ -22,11 +22,7 @@ import Debug from 'debug';
 const log = Debug('CID:ConfigStore');
 
 import { loadConfig, CONFIG_FILE_ENCODING } from './loadConfig.js';
-import {
-  loadAppConfig,
-  saveAppConfig,
-  DEFAULT_APP_CONFIG,
-} from './appConfig.js';
+import { loadAppConfig, saveAppConfig, DEFAULT_APP_CONFIG } from './appConfig.js';
 
 import type { AppConfigData, Config } from './Config.js';
 
@@ -109,10 +105,7 @@ export class ConfigStore {
     this.appConfig = loadAppConfig(this.getAppConfigFilePath());
 
     // attempt to load the default app config
-    const userConfigLoad = loadConfig(
-      this.getConfigFilePath(),
-      this.getRegion(),
-    );
+    const userConfigLoad = loadConfig(this.getConfigFilePath(), this.getRegion());
 
     // if the load succesds we have a valid config -- use it as a
     // user-provided one
@@ -122,15 +115,10 @@ export class ConfigStore {
       return;
     }
 
-    console.log(
-      'User config validation not successful - attempting to load backup config',
-    );
+    console.log('User config validation not successful - attempting to load backup config');
     // if the default config load failed use the backup default
     // from the app distribution
-    const backupConfigLoad = loadConfig(
-      this.getBackupConfigFilePath(),
-      this.getRegion(),
-    );
+    const backupConfigLoad = loadConfig(this.getBackupConfigFilePath(), this.getRegion());
 
     // if the load succesds we have a valid config -- use it as
     // a config-from-backup
@@ -190,9 +178,7 @@ export class ConfigStore {
   // This method does not save the backup as the user config, only deletes the user config file
   removeUserConfig() {
     // attempt to load the backup config
-    console.log(
-      '[removeUserConfig] Attempting to remove user configuration and replace with backup.',
-    );
+    console.log('[removeUserConfig] Attempting to remove user configuration and replace with backup.');
 
     // if the current config is already a backup config don't do anything
     if (this.isCurrentConfigBackup()) {
@@ -202,10 +188,7 @@ export class ConfigStore {
     }
 
     console.log('[removeUserConfig] Trying to load backup config file');
-    const backupConfigLoad = loadConfig(
-      this.getBackupConfigFilePath(),
-      this.getRegion(),
-    );
+    const backupConfigLoad = loadConfig(this.getBackupConfigFilePath(), this.getRegion());
 
     // if failed return the error message (do not delete the user config yet)
     if (!backupConfigLoad.success) {
@@ -220,9 +203,7 @@ export class ConfigStore {
     }
 
     // if successful use the loaded backup configuration
-    console.log(
-      '[removeUserConfig] Backup config validation success - using it as config',
-    );
+    console.log('[removeUserConfig] Backup config validation success - using it as config');
     backupConfigLoad.config.isBackup = true;
     this.useBackupConfig(backupConfigLoad.config);
 
@@ -284,11 +265,7 @@ export class ConfigStore {
   }
 
   _currentSignature() {
-    if (
-      this.data &&
-      this.data.signature &&
-      this.data.signature.config_signature
-    ) {
+    if (this.data && this.data.signature && this.data.signature.config_signature) {
       return this.data.signature.config_signature;
     }
     return 'INVALID CONFIG, NO SIGNATURE';
@@ -310,6 +287,6 @@ export class ConfigStore {
 }
 
 export function makeConfigStore(storeConfig: ConfigStorePaths) {
-  if (!storeConfig) throw new Error(`ConfigStore params MUST be provided.`)
+  if (!storeConfig) throw new Error(`ConfigStore params MUST be provided.`);
   return new ConfigStore(storeConfig);
 }

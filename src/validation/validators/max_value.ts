@@ -53,11 +53,7 @@ export class MaxValueValidator implements Validator.Base {
   }
 
   message = (msg?: string) =>
-    this.opts.message
-      ? this.opts.message
-      : msg
-        ? msg
-        : `must be at most ${this.maxValue}`;
+    this.opts.message ? this.opts.message : msg ? msg : `must be at most ${this.maxValue}`;
 
   validate = (value: unknown): Validator.Result => {
     if (typeof value !== 'string' && typeof value !== 'number') {
