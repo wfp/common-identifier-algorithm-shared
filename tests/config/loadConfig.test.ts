@@ -62,7 +62,6 @@ test('loadConfig salt', () => {
   writeFileSync(TEST_FILE_PATH, JSON.stringify(cfg), 'utf-8');
 
   const loadResult = loadConfig(TEST_FILE_PATH, REGION);
-  console.log(loadResult);
 
   expect(loadResult.success).toEqual(true);
   if (!loadResult.success) throw new TypeError();
