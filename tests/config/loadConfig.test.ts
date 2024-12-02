@@ -77,6 +77,7 @@ test('loadConfig salt error', () => {
 
   cfg.algorithm.salt.value.darwin = SALT_FILE_PATH;
   cfg.algorithm.salt.value.win32 = SALT_FILE_PATH;
+  cfg.algorithm.salt.value.linux = SALT_FILE_PATH;
   cfg.meta.signature = generateConfigHash(cfg);
 
   writeFileSync(TEST_FILE_PATH, JSON.stringify(cfg), 'utf-8');
