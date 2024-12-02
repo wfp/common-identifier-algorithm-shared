@@ -30,7 +30,7 @@ export function attemptToReadFileData(filePath: string, encoding: fs.EncodingOpt
 }
 
 // Tries to read the file data decoded from TOML, returns null if unsuccessful
-export function attemptToReadTOMLData<T>(filePath: string, encoding: fs.EncodingOption): T | null {
+export function attemptToReadTOMLData<T>(filePath: string, encoding: fs.EncodingOption="utf-8"): T | null {
   try {
     const fileData = fs.readFileSync(filePath, encoding) as string;
 
