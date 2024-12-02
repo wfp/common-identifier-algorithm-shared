@@ -48,5 +48,27 @@
   },
   "keywords": [
     "common-identifier"
-  ]
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./config": {
+      "types": "./dist/config/index.d.ts",
+      "default": "./dist/config/index.js"
+    },
+    "./validation": {
+      "types": "./dist/validation/index.d.ts",
+      "default": "./dist/validation/index.js"
+    },
+    "./processing": {
+      "types": "./dist/processing/index.d.ts",
+      "default": "./dist/processing/index.js"
+    },
+    "./hashing": {
+      "types": "./dist/hashing/index.d.ts",
+      "default": "./dist/hashing/index.js"
+    }
+  }
 }

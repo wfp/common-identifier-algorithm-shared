@@ -20,7 +20,7 @@ import { readFileSync, existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { parse } from 'csv-parse/sync';
 
-import { preprocessFile, processFile } from '../../src/processing/index.js';
+import { preprocessFile, processFile } from '../../src/processing';
 import { SUPPORTED_FILE_TYPES } from '../../src/document.js';
 import { BaseHasher } from '../../src/hashing/base.js';
 import type { makeHasherFunction } from '../../src/hashing/base.js';

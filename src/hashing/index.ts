@@ -14,10 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-export { SUPPORTED_FILE_TYPES } from './document.js';
-export type { CidDocument } from './document.js';
+export { joinFieldsForHash, cleanValueList, extractAlgoColumnsFromObject } from './utils.js';
+export { BaseHasher } from './base.js';
 
-export * from './config/index.js';
-export * from './validation/index.js';
-export * from './processing/index.js';
-export * from './hashing/index.js';
+export type { makeHasherFunction } from './base.js';
