@@ -16,6 +16,8 @@
 export { loadConfig } from './config/loadConfig.js';
 export { makeConfigStore, ConfigStore } from './config/configStore.js';
 export { appDataLocation, attemptToReadTOMLData } from './config/utils.js';
+export { validateConfig } from './config/validateConfig.js';
+
 export { generateConfigHash } from './config/generateConfigHash.js';
 export {
   generateHashesForDocument,
