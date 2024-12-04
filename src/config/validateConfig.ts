@@ -13,8 +13,6 @@
 
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-import { isRegExp } from 'util/types';
 import type { Config } from './Config.js';
 import { SUPPORTED_VALIDATORS } from '../validation/Validation.js';
 
@@ -29,10 +27,16 @@ const isNumber: ConfigValidator = (label: string, v: unknown) =>
   typeof v !== 'number' ? `${label} must be a number` : undefined;
 const isString: ConfigValidator = (label: string, v: unknown) =>
   typeof v !== 'string' ? `${label} must be a string` : undefined;
-const isRegexp: ConfigValidator = (label: string, v: unknown) =>
-  !isRegExp(v) ? `${label} is not a valid JavaScript Regular Expression` : undefined;
 const isNotEmptyString: ConfigValidator = (label: string, v: unknown) =>
   typeof v === 'string' && v.length === 0 ? `${label} cannot be an empty string` : undefined;
+const isRegexp: ConfigValidator = (label: string, v: unknown) => {
+  try {
+    const _ = RegExp(v as string);
+    return;
+  } catch {
+    return `${label} is not a valid JavaScript Regular Expression`
+  }
+}
 
 const isOneOf = (label: string, vs: unknown[], v: unknown) =>
   !vs.includes(v) ? `${label} must be ${vs.join(' or ')}` : undefined;
@@ -199,6 +203,7 @@ const checkAlgorithm = (algorithm: Config.Options['algorithm'], sourceColumns: s
     check =
       isObject('[algorithm].salt.value', algorithm.salt.value) ||
       isOptional('[algorithm].salt.validator_regex', algorithm.salt.validator_regex, isString) ||
+      isOptional('[algorithm].salt.validator_regex', algorithm.salt!.validator_regex, isRegexp) ||
       isOptional('[algorithm].salt.value.win32', algorithm.salt.value!.win32, isString) ||
       isOptional('[algorithm].salt.value.darwin', algorithm.salt.value!.darwin, isString) ||
       isOptional('[algorithm].salt.value.linux', algorithm.salt.value!.linux, isString);
