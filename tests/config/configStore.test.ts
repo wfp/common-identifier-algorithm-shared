@@ -63,15 +63,16 @@ test('ConfigStore loading', () => {
 
   expect(config.algorithm.salt.source).toEqual('STRING');
 
-  delete config.algorithm.salt.source;
-  delete config.algorithm.salt.value;
+  config.algorithm.salt.source = "STRING"
+  config.algorithm.salt.value = "QWERTY"
 
   const originalConfig = JSON.parse(fs.readFileSync(join(__dirname, 'files', CONFIG_FILE_NAME), 'utf-8'));
   // check that the columns are actually sorted alphabetically.
   originalConfig.algorithm.columns.process = ['col_a', 'col_b', 'col_c', 'col_d', 'col_e'];
   originalConfig.algorithm.columns.reference = ['col_1', 'col_2', 'col_3'];
-  delete originalConfig.algorithm.salt.source;
-  delete originalConfig.algorithm.salt.value;
+
+  originalConfig.algorithm.salt.source = "STRING"
+  originalConfig.algorithm.salt.value = "QWERTY"
 
   expect(config).toEqual(originalConfig);
 });
@@ -93,8 +94,8 @@ test('ConfigStore backup loading', () => {
   expect(config.algorithm.salt.source).toEqual('STRING');
 
   delete config.isBackup;
-  delete config.algorithm.salt.source;
-  delete config.algorithm.salt.value;
+  config.algorithm.salt.source = "STRING"
+  config.algorithm.salt.value = "QWERTY"
 
   const originalConfig = toml.parse(
     fs.readFileSync(join(__dirname, 'files', BACKUP_CONFIG_FILE_NAME), 'utf-8'),
@@ -102,8 +103,9 @@ test('ConfigStore backup loading', () => {
   // check that the columns are actually sorted alphabetically.
   originalConfig.algorithm.columns.process = ['col_a', 'col_b', 'col_c', 'col_d', 'col_e'];
   originalConfig.algorithm.columns.reference = ['col_1', 'col_2', 'col_3'];
-  delete originalConfig.algorithm.salt.source;
-  delete originalConfig.algorithm.salt.value;
+
+  originalConfig.algorithm.salt.source = "STRING"
+  originalConfig.algorithm.salt.value = "QWERTY"
 
   expect(config).toEqual(originalConfig);
 });

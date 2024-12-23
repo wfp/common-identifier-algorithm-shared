@@ -51,7 +51,7 @@ interface ConfigStorePaths {
 }
 
 export class ConfigStore {
-  data: any = {};
+  data?: Config.Options = undefined;
   validationResult = {};
   hasConfigLoaded: Boolean = false;
   isValid: Boolean = false;
@@ -227,7 +227,7 @@ export class ConfigStore {
 
   // signal that there is no valid config loaded (and were unable to load anything)
   noValidConfig() {
-    this.data = {};
+    this.data = undefined;
     this.hasConfigLoaded = false;
     this.isValid = false;
   }
@@ -263,8 +263,8 @@ export class ConfigStore {
   }
 
   _currentSignature() {
-    if (this.data && this.data.signature && this.data.signature.config_signature) {
-      return this.data.signature.config_signature;
+    if (this.data && this.data.meta.signature) {
+      return this.data.meta.signature;
     }
     return 'INVALID CONFIG, NO SIGNATURE';
   }
