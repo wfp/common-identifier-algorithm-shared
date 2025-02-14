@@ -27,6 +27,10 @@ export const DEFAULT_APP_CONFIG: AppConfigData = {
   // that stores which config's termsAndConditions were accepted
   termsAndConditions: {},
   window: {
+    fullscreen: false,
+    //default windows position
+    x: 0,
+    y: 0,
     // default window sizing
     width: 1024,
     height: 800,

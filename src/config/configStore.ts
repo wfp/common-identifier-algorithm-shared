@@ -269,6 +269,13 @@ export class ConfigStore {
     return 'INVALID CONFIG, NO SIGNATURE';
   }
 
+  // Updates the appconfig file with the dimensions of the last used screen.
+  // Ensures that on next launch, the application has the same size and display.
+  updateDisplayConfig(windowConfig: AppConfigData["window"]) {
+    this.appConfig.window = windowConfig;
+    this._saveAppConfig();
+  }
+
   // Marks the terms and conditions as accepted for the curent config hash
   // and saves the application config so the user doesn't have to accept it
   // anymore

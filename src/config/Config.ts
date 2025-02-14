@@ -75,6 +75,9 @@ export namespace Config {
 export interface AppConfigData {
   termsAndConditions: { [key: string]: boolean };
   window: {
+    fullscreen: boolean;
+    x: number;
+    y: number;
     width: number;
     height: number;
   };
