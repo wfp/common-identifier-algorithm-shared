@@ -29,13 +29,19 @@ const log = Debug('CID:loadConfig');
 export const CONFIG_FILE_ENCODING: fs.EncodingOption = 'utf-8';
 
 type LoadConfigResult =
+  | { success: true; lastUpdated: Date; config: Config.Options }
   | {
       success: false;
       error: string;
-      isSaltFileError?: true;
-      config?: Config.Options;
+      isSaltFileError: false;
     }
-  | { success: true; lastUpdated: Date; config: Config.Options };
+  | {
+      success: false;
+      error: string;
+      isSaltFileError: true;
+      config: Config.Options;
+    };
+
 
 // Main entry point for loading a config file.
 // returns:
@@ -54,6 +60,7 @@ export function loadConfig(configPath: string, region: string): LoadConfigResult
     return {
       success: false,
       error: `Unable to read config file '${configPath}'`,
+      isSaltFileError: false
     };
   }
 
@@ -68,6 +75,7 @@ export function loadConfig(configPath: string, region: string): LoadConfigResult
     return {
       success: false,
       error: validationResult,
+      isSaltFileError: false,
     };
   }
 
@@ -80,6 +88,7 @@ export function loadConfig(configPath: string, region: string): LoadConfigResult
     return {
       success: false,
       error: `Configuration file signature mismatch -- required signature is '${configData.meta.signature}' but user configuration has '${configHash}' `,
+      isSaltFileError: false
     };
   }
 
