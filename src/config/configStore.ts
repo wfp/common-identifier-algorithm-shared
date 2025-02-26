@@ -53,9 +53,9 @@ interface ConfigStorePaths {
 export class ConfigStore {
   data?: Config.Options = undefined;
   validationResult = {};
-  hasConfigLoaded: Boolean = false;
-  isValid: Boolean = false;
-  isUsingBackupConfig: Boolean = false;
+  hasConfigLoaded: boolean = false;
+  isValid: boolean = false;
+  isUsingBackupConfig: boolean = false;
   lastUpdated: Date;
   loadError: string | undefined;
 
