@@ -138,6 +138,7 @@ export class ConfigStore {
 
     // if there is a salt file error store the config, but act like it's invalid
     // (this is needed to pick up error messages from the config file)
+    // TODO: this needs work - if the backup config is also corrupted, what should happen?
     if (backupConfigLoad.isSaltFileError) {
       this.data = backupConfigLoad.config;
       this.hasConfigLoaded = false;
