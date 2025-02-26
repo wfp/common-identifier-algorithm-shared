@@ -19,6 +19,6 @@ export {
   makeValidatorListDict,
   validateDocumentWithListDict,
   validateRowWithListDict
-} from './validateDocument.js';
+} from './validateDocument';
 
-export type { Validation } from './Validation.js';
+export type { Validation } from './Validation';

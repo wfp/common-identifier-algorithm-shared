@@ -13,8 +13,8 @@
 
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
-import type { Config } from './Config.js';
-import { SUPPORTED_VALIDATORS } from '../validation/Validation.js';
+import type { Config } from './Config';
+import { SUPPORTED_VALIDATORS } from '../validation/Validation';
 
 type ConfigValidatorResult = string | undefined;
 type ConfigValidator = (label: string, v: unknown) => ConfigValidatorResult;

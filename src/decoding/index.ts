@@ -14,10 +14,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { SUPPORTED_FILE_TYPES } from '../document.js';
+import { SUPPORTED_FILE_TYPES } from '../document';
 
-import { makeCsvDecoder } from './csv.js';
-import { makeXlsxDecoder } from './xlsx.js';
+import { makeCsvDecoder } from './csv';
+import { makeXlsxDecoder } from './xlsx';
 
 // Returns the file type based on the file name
 export function fileTypeOf(filePath: string) {

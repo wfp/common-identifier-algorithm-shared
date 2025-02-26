@@ -16,7 +16,7 @@
 import { fileURLToPath } from 'node:url';
 import { join, dirname } from 'node:path';
 import { readFileSync } from 'node:fs';
-import { loadSaltFile } from '../../src/config/loadSaltFile.js';
+import { loadSaltFile } from '../../src/config/loadSaltFile';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 

@@ -16,8 +16,8 @@
 
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
-import { attemptToReadTOMLData } from '../../src/config/utils.js';
-import type { Config } from '../../src/config/Config.js';
+import { attemptToReadTOMLData } from '../../src/config/utils';
+import type { Config } from '../../src/config/Config';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 

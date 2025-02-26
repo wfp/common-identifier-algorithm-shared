@@ -16,7 +16,7 @@
 
 import { fileURLToPath } from 'node:url';
 import { join, dirname } from 'path';
-import { makeCsvDecoder } from '../../src/decoding/csv.js';
+import { makeCsvDecoder } from '../../src/decoding/csv';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 

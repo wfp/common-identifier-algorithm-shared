@@ -18,13 +18,13 @@ import {
   makeValidatorListDict,
   validateDocumentWithListDict,
   makeValidationResultDocument,
-} from '../../src/validation/index.js';
-import { OptionsValidator } from '../../src/validation/validators/options.js';
-import { SUPPORTED_VALIDATORS } from '../../src/validation/Validation.js';
+} from '../../src/validation/index';
+import { OptionsValidator } from '../../src/validation/validators/options';
+import { SUPPORTED_VALIDATORS } from '../../src/validation/Validation';
 
-import type { Config } from '../../src/config/Config.js';
-import type { Validation } from '../../src/validation/Validation.js';
-import type { CidDocument } from '../../src/document.js';
+import type { Config } from '../../src/config/Config';
+import type { Validation } from '../../src/validation/Validation';
+import type { CidDocument } from '../../src/document';
 
 // get the class name
 const className = (obj: object) => obj.constructor.name;

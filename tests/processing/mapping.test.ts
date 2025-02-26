@@ -14,9 +14,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import type { Config } from '../../src/config/Config.js';
-import type { CidDocument } from '../../src/document.js';
-import { mapRequiredColumns, isMappingOnlyDocument } from '../../src/processing/mapping.js';
+import type { Config } from '../../src/config/Config';
+import type { CidDocument } from '../../src/document';
+import { mapRequiredColumns, isMappingOnlyDocument } from '../../src/processing/mapping';
 
 test('mapping::mapRequiredColumns', () => {
   expect(

@@ -13,8 +13,8 @@
 
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
-import type { Validation } from '../../src/validation/Validation.js';
-import { SameValueForAllRowsValidator } from '../../src/validation/validators/same_value_for_all_rows.js';
+import type { Validation } from '../../src/validation/Validation';
+import { SameValueForAllRowsValidator } from '../../src/validation/validators/same_value_for_all_rows';
 
 const TEST_DOCUMENT = {
   name: 'TEST',

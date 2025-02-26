@@ -23,9 +23,9 @@ XLSX.set_cptable(cpexcel);
 import Debug from 'debug';
 const log = Debug('CID:XLSXDecoder');
 
-import { DecoderBase } from './base.js';
-import type { Config } from '../config/Config.js';
-import type { CidDocument } from '../document.js';
+import { DecoderBase } from './base';
+import type { Config } from '../config/Config';
+import type { CidDocument } from '../document';
 
 // A decoder for CSVs
 class XlsxDecoder extends DecoderBase {

@@ -18,8 +18,8 @@ import fs from 'node:fs';
 import { parse as csv_parse } from 'csv-parse/sync';
 import type { Options as CsvOptions } from 'csv-parse/sync';
 
-import { DecoderBase } from './base.js';
-import type { Config } from '../config/Config.js';
+import { DecoderBase } from './base';
+import type { Config } from '../config/Config';
 
 // A decoder for CSVs
 class CsvDecoder extends DecoderBase {

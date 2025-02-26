@@ -19,5 +19,5 @@ export {
   preprocessFile,
   processFile,
   validateDocument,
-} from './processing.js';
-export { keepOutputColumns } from './mapping.js';
+} from './processing';
+export { keepOutputColumns } from './mapping';

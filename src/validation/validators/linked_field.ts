@@ -13,8 +13,8 @@
 
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
-import { SUPPORTED_VALIDATORS } from '../Validation.js';
-import type { Validation, Validator } from '../Validation.js';
+import { SUPPORTED_VALIDATORS } from '../Validation';
+import type { Validation, Validator } from '../Validation';
 
 /* Linked Field validator checks that if source column has a value, the other linked column also contains a value */
 export class LinkedFieldValidator implements Validator.Base {

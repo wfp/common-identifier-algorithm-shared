@@ -14,9 +14,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { BaseHasher } from '../../src/hashing/base.js';
-import type { Config } from '../../src/config/Config.js';
-import type { Validation } from '../../src/validation/Validation.js';
+import { BaseHasher } from '../../src/hashing/base';
+import type { Config } from '../../src/config/Config';
+import type { Validation } from '../../src/validation/Validation';
 
 const BASE_CFG: Config.Options['algorithm'] = {
   columns: { static: [], process: [], reference: [] },

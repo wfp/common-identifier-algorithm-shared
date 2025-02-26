@@ -17,23 +17,23 @@
 import path from 'node:path';
 import os from 'node:os';
 
-import { SUPPORTED_FILE_TYPES } from '../document.js';
-import type { CidDocument } from '../document.js';
+import { SUPPORTED_FILE_TYPES } from '../document';
+import type { CidDocument } from '../document';
 
-import { encoderForFile } from '../encoding/index.js';
-import { decoderForFile, fileTypeOf } from '../decoding/index.js';
+import { encoderForFile } from '../encoding/index';
+import { decoderForFile, fileTypeOf } from '../decoding/index';
 
 import {
   makeValidationResultDocument,
   makeValidatorListDict,
   validateDocumentWithListDict,
-} from '../validation/index.js';
+} from '../validation/index';
 
-import { keepOutputColumns, isMappingOnlyDocument, keepValidatorsForColumns } from './mapping.js';
-import type { Config } from '../config/Config.js';
-import { BaseHasher } from '../hashing/base.js';
-import type { makeHasherFunction } from '../hashing/base.js';
-import type { Validation } from '../validation/Validation.js';
+import { keepOutputColumns, isMappingOnlyDocument, keepValidatorsForColumns } from './mapping';
+import type { Config } from '../config/Config';
+import { BaseHasher } from '../hashing/base';
+import type { makeHasherFunction } from '../hashing/base';
+import type { Validation } from '../validation/Validation';
 
 import Debug from 'debug';
 const log = Debug('CID:Processing');

@@ -14,10 +14,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { SUPPORTED_FILE_TYPES } from '../document.js';
+import { SUPPORTED_FILE_TYPES } from '../document';
 
-import { makeCsvEncoder } from './csv.js';
-import { makeXlsxEncoder } from './xlsx.js';
+import { makeCsvEncoder } from './csv';
+import { makeXlsxEncoder } from './xlsx';
 
 export function encoderForFile(fileType: SUPPORTED_FILE_TYPES) {
   switch (fileType) {

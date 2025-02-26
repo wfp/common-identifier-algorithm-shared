@@ -19,10 +19,10 @@ import fs from 'node:fs';
 import Debug from 'debug';
 const log = Debug('CID:ConfigStore');
 
-import { loadConfig, CONFIG_FILE_ENCODING } from './loadConfig.js';
-import { loadAppConfig, saveAppConfig, DEFAULT_APP_CONFIG } from './appConfig.js';
+import { loadConfig, CONFIG_FILE_ENCODING } from './loadConfig';
+import { loadAppConfig, saveAppConfig, DEFAULT_APP_CONFIG } from './appConfig';
 
-import type { AppConfigData, Config } from './Config.js';
+import type { AppConfigData, Config } from './Config';
 
 // Ensure the application's config file directory exists
 function ensureAppDirectoryExists(appDir: string) {

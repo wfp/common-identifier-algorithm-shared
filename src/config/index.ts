@@ -1,7 +1,7 @@
-export { loadConfig } from './loadConfig.js';
-export { validateConfig } from './validateConfig.js';
-export { generateConfigHash } from './generateConfigHash.js';
-export { makeConfigStore, ConfigStore } from './configStore.js';
-export { appDataLocation, attemptToReadTOMLData } from './utils.js';
+export { loadConfig } from './loadConfig';
+export { validateConfig } from './validateConfig';
+export { generateConfigHash } from './generateConfigHash';
+export { makeConfigStore, ConfigStore } from './configStore';
+export { appDataLocation, attemptToReadTOMLData } from './utils';
 
-export type { Config } from './Config.js';
+export type { Config } from './Config';

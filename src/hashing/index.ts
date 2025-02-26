@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-export { joinFieldsForHash, cleanValueList, extractAlgoColumnsFromObject } from './utils.js';
-export { BaseHasher } from './base.js';
+export { joinFieldsForHash, cleanValueList, extractAlgoColumnsFromObject } from './utils';
+export { BaseHasher } from './base';
 
-export type { makeHasherFunction } from './base.js';
+export type { makeHasherFunction } from './base';

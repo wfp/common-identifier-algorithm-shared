@@ -18,7 +18,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import toml from 'toml';
-import type { Config } from './Config.js';
+import type { Config } from './Config';
 
 // Tries to read the file data, returns null if unsuccessful
 export function attemptToReadFileData(filePath: string, encoding: fs.EncodingOption = 'utf-8') {

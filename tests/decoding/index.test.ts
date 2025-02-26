@@ -14,10 +14,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { SUPPORTED_FILE_TYPES } from '../../src/document.js';
-import { decoderForFile, fileTypeOf } from '../../src/decoding/index.js';
-import { makeCsvDecoder } from '../../src/decoding/csv.js';
-import { makeXlsxDecoder } from '../../src/decoding/xlsx.js';
+import { SUPPORTED_FILE_TYPES } from '../../src/document';
+import { decoderForFile, fileTypeOf } from '../../src/decoding/index';
+import { makeCsvDecoder } from '../../src/decoding/csv';
+import { makeXlsxDecoder } from '../../src/decoding/xlsx';
 
 test('decoderForFile', () => {
   expect(decoderForFile(SUPPORTED_FILE_TYPES.CSV)).toEqual(makeCsvDecoder);

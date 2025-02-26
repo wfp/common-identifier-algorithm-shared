@@ -23,9 +23,9 @@ XLSX.set_cptable(cpexcel);
 import Debug from 'debug';
 const log = Debug('CID:XLSXEncoder');
 
-import { EncoderBase } from './base.js';
-import type { Config } from '../config/Config.js';
-import type { CidDocument } from '../document.js';
+import { EncoderBase } from './base';
+import type { Config } from '../config/Config';
+import type { CidDocument } from '../document';
 
 // The longest allowed sheet name length
 const MAX_EXCEL_SHEET_NAME_LENGTH = 31;

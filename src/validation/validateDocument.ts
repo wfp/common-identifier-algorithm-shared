@@ -26,11 +26,11 @@ import {
     OptionsValidator,
     RegexpValidator,
     SameValueForAllRowsValidator,
-  } from './validators/index.js';
-  import { SUPPORTED_VALIDATORS } from './Validation.js';
-  import type { Validation, Validator } from './Validation.js';
-  import type { CidDocument } from '../document.js';
-  import type { Config } from '../config/Config.js';
+  } from './validators/index';
+  import { SUPPORTED_VALIDATORS } from './Validation';
+  import type { Validation, Validator } from './Validation';
+  import type { CidDocument } from '../document';
+  import type { Config } from '../config/Config';
   
   // MAIN VALIDATION
   // ---------------

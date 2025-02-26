@@ -17,9 +17,9 @@
 import Debug from 'debug';
 const log = Debug('CID:Decoder');
 
-import type { Config } from '../config/Config.js';
-import type { CidDocument } from '../document.js';
-import type { RawData, MappedData } from '../document.js';
+import type { Config } from '../config/Config';
+import type { CidDocument } from '../document';
+import type { RawData, MappedData } from '../document';
 
 export abstract class DecoderBase {
   sourceConfig: Config.Options['source'];

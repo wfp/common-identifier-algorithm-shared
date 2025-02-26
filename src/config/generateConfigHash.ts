@@ -16,7 +16,7 @@
 
 import stableStringify from 'safe-stable-stringify';
 import { createHash } from 'node:crypto';
-import type { Config } from './Config.js';
+import type { Config } from './Config';
 
 const DEFAULT_HASH_TYPE = 'md5';
 const HASH_DIGEST_TYPE = 'hex';

@@ -17,7 +17,7 @@ import { fileURLToPath } from 'node:url';
 import { join, dirname } from 'node:path';
 import { readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { loadAppConfig, saveAppConfig, DEFAULT_APP_CONFIG } from '../../src/config/appConfig.js';
+import { loadAppConfig, saveAppConfig, DEFAULT_APP_CONFIG } from '../../src/config/appConfig';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 

@@ -14,8 +14,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { EncoderBase } from '../../src/encoding/base.js';
-import type { Config } from '../../src/config/Config.js';
+import { EncoderBase } from '../../src/encoding/base';
+import type { Config } from '../../src/config/Config';
 
 const BASE_CFG: Config.ColumnMap = {
   postfix: '_POSTFIX',

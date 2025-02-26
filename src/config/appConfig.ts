@@ -15,8 +15,8 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import fs from 'node:fs';
-import { attemptToReadTOMLData } from './utils.js';
-import type { AppConfigData } from './Config.js';
+import { attemptToReadTOMLData } from './utils';
+import type { AppConfigData } from './Config';
 import Debug from 'debug';
 const log = Debug('CID:appConfig');
 

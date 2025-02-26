@@ -19,8 +19,8 @@ import {
   isValidDateDiff,
   attemptToParseDate,
   formatDateWithDefaultFormat,
-} from '../../src/validation/validators/date_shared.js';
-import type { ParsedDateDiff } from '../../src/validation/validators/date_shared.js';
+} from '../../src/validation/validators/date_shared';
+import type { ParsedDateDiff } from '../../src/validation/validators/date_shared';
 import { UTCDate } from '@date-fns/utc';
 
 test('parseDateRangeDiff', () => {

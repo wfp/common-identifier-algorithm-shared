@@ -14,8 +14,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { SUPPORTED_VALIDATORS } from '../Validation.js';
-import type { Validator } from '../Validation.js';
+import { SUPPORTED_VALIDATORS } from '../Validation';
+import type { Validator } from '../Validation';
 
 export class MaxFieldLengthValidator implements Validator.Base {
   kind = SUPPORTED_VALIDATORS.MAX_FIELD_LENGTH;

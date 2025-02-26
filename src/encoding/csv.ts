@@ -17,9 +17,9 @@
 import fs from 'node:fs';
 
 import { stringify } from 'csv-stringify/sync';
-import { EncoderBase } from './base.js';
-import type { Config } from '../config/Config.js';
-import type { CidDocument } from '../document.js';
+import { EncoderBase } from './base';
+import type { Config } from '../config/Config';
+import type { CidDocument } from '../document';
 
 import Debug from 'debug';
 const log = Debug('CID:CSVEncoder');

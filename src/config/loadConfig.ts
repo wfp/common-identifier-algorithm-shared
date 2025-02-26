@@ -16,12 +16,12 @@
 
 import fs from 'node:fs';
 
-import { validateConfig } from './validateConfig.js';
-import { loadSaltFile } from './loadSaltFile.js';
-import { generateConfigHash } from './generateConfigHash.js';
+import { validateConfig } from './validateConfig';
+import { loadSaltFile } from './loadSaltFile';
+import { generateConfigHash } from './generateConfigHash';
 
-import { getSaltFilePath, attemptToReadTOMLData } from './utils.js';
-import type { Config } from './Config.js';
+import { getSaltFilePath, attemptToReadTOMLData } from './utils';
+import type { Config } from './Config';
 import Debug from 'debug';
 const log = Debug('CID:loadConfig');
 

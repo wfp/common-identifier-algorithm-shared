@@ -19,7 +19,7 @@ import { existsSync, unlinkSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
 import { read, utils } from 'xlsx';
-import { makeXlsxEncoder } from '../../src/encoding/xlsx.js';
+import { makeXlsxEncoder } from '../../src/encoding/xlsx';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 

@@ -13,7 +13,7 @@
 
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
-import { LinkedFieldValidator } from '../../src/validation/validators/linked_field.js';
+import { LinkedFieldValidator } from '../../src/validation/validators/linked_field';
 
 let TEST_SHEET_PARAMS = {
   row: { col_a: 'b' },
