@@ -40,7 +40,6 @@
     "csv": "^6.3.9",
     "date-fns": "^4.1.0",
     "debug": "^4.3.7",
-    "electron-squirrel-startup": "^1.0.1",
     "hi-base32": "^0.5.1",
     "safe-stable-stringify": "^2.4.3",
     "toml": "^3.0.0",
