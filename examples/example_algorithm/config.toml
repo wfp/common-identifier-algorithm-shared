@@ -1,0 +1,56 @@
+[meta]
+region="ANY"
+version="1.0.0"
+signature="a5da7472f72da37a149ca37668c308ff"
+
+[source]
+columns = [
+    { name = "ID",       alias = "id"   },
+    { name = "Column 2", alias = "col2" },
+    { name = "Column 3", alias = "col3" },
+]
+
+[validations]
+
+"*" = [ { op = "max_field_length", value = 200 } ]
+
+id = [
+    { op = "field_type", value = "string" },
+    { op = "regex_match", value = '(\d{11})', message="must be 11 numeric digits" }
+]
+
+[algorithm]
+
+[algorithm.columns]
+process = []
+static = [
+    "id",
+]
+reference = []
+
+[algorithm.hash]
+strategy = "SHA256"
+
+[algorithm.salt]
+source = "STRING"
+value = "{{ some_random_salt_value }}"
+
+[destination]
+columns = [
+    { name = "Common Identifier", alias = "hashed_id" },
+]
+postfix = "-OUTPUT-{{yyyy-MM-dd--HH-mm-ss}}"
+
+[destination_map]
+columns = [
+    { name = "ID",       alias = "id" },
+    { name = "Common Identifier", alias = "hashed_id" }
+]
+postfix = "-MAPPING-{{yyyy-MM-dd--HH-mm-ss}}"
+
+[destination_errors]
+columns = [
+    { name = "Errors",            alias = "errors" },
+    { name = "ID",                alias = "id" },
+]
+postfix = "-ERRORS-{{yyyy-MM-dd--HH-mm-ss}}"
