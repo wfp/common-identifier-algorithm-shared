@@ -139,11 +139,8 @@ export const isOptionsValidator: ValidatorTypeGuard = (prefix, rule) => {
   else if (rule.value.length === 0) return `${prefix}.value must be an Array of numbers of strings, got empty Array`;
 
   for (let item of rule.value) {
-    if (typeof item === 'string') {
-      if (item.trim() === '') return `${prefix}.value does not support empty strings`;
-    } else if (typeof item !== 'number') {
+    if (typeof item !== 'string' && typeof item !== "number")
       return `${prefix}.value must be an Array of number or strings, got ${typeof item}`;
-    }
   };
 };
 
