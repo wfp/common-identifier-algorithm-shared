@@ -14,13 +14,13 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import { SUPPORTED_VALIDATORS } from '../Validation';
-import type { Validator } from '../Validation';
+import type { MinFieldLengthValidatorOptions, Validator } from '../Validation';
 
 export class MinFieldLengthValidator implements Validator.Base {
   kind = SUPPORTED_VALIDATORS.MIN_FIELD_LENGTH;
-  opts: Validator.Options.MinFieldLength;
+  opts: MinFieldLengthValidatorOptions;
 
-  constructor(opts: Validator.Options.MinFieldLength) {
+  constructor(opts: MinFieldLengthValidatorOptions) {
     if (typeof opts.value !== 'number') {
       throw new Error(`MinFieldLength validator must have a 'value' with number -- ${JSON.stringify(opts)}`);
     }

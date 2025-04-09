@@ -14,17 +14,17 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import { SUPPORTED_VALIDATORS } from '../Validation';
-import type { Validator } from '../Validation';
+import type { DateDiffValidatorOptions, Validator } from '../Validation';
 
 import { parseDateDiff, isValidDateDiff, attemptToParseDate, isDateInRange } from './date_shared';
 import type { ParsedDateDiff } from './date_shared';
 
 export class DateDiffValidator implements Validator.Base {
   kind = SUPPORTED_VALIDATORS.DATE_DIFF;
-  opts: Validator.Options.DateDiff;
+  opts: DateDiffValidatorOptions;
   parsedDateDiff: ParsedDateDiff[] | null;
 
-  constructor(opts: Validator.Options.DateDiff) {
+  constructor(opts: DateDiffValidatorOptions) {
     // check if there is a regexp value
     if (typeof opts.value !== 'string') {
       throw new Error(

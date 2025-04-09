@@ -32,37 +32,23 @@ export enum SUPPORTED_VALIDATORS {
   LINKED_FIELD = 'linked_field',
 }
 
-export namespace Validation {
-  export interface Data {
-    row: MappedData;
-    document: CidDocument;
-    column: string;
-  }
-  export interface ColumnResult {
-    column: string;
-    errors: any[];
-  }
-  export interface RowResult {
-    row: MappedData;
-    ok: Boolean;
-    errors: ColumnResult[];
-  }
-  export interface DocumentResult {
-    ok: boolean;
-    results: RowResult[];
-  }
-  export type FuncMap = { [key: string]: Validator.Base[] };
-  export type ErrorMap = { [key: string]: Validator.Result[] };
+export namespace Validated {
+  export interface Column { column: string; errors: any[]; }
+  export interface Row { row: MappedData; ok: Boolean; errors: Column[]; }
+  export interface Document { ok: boolean; results: Row[]; }
 }
 
 export namespace Validator {
   export interface Base {
     kind: SUPPORTED_VALIDATORS;
-    opts: Options._base;
+    opts: ValidationRule;
     message: (msg?: string) => string;
     validate(value: unknown): Result;
-    validate(value: unknown, data: Validation.Data): Result;
+    validate(value: unknown, data: InputData): Result;
   }
+
+  export interface InputData { row: MappedData; document: CidDocument; column: string; }
+
   export type Result = ResultGood | ResultBad;
   export type ResultGood = { ok: true; kind: SUPPORTED_VALIDATORS };
   export type ResultBad = {
@@ -70,62 +56,74 @@ export namespace Validator {
     kind: SUPPORTED_VALIDATORS;
     message: string;
   };
+  export type FuncMap = { [key: string]: Validator.Base[] };
+  export type ErrorMap = { [key: string]: Validator.Result[] };
+}
 
-  export namespace Options {
-    export interface _base {
-      op: string;
-      value?: any;
-      message?: string;
-      target?: string;
-    }
-    export interface Options extends _base {
-      op: 'options';
-      value: Array<string | number>;
-    }
-    export interface RegexMatch extends _base {
-      op: 'regex_match';
-      value: string;
-    }
-    export interface FieldType extends _base {
-      op: 'field_type';
-      value: 'string' | 'number';
-    }
-    export interface LinkedField extends _base {
-      op: 'linked_field';
-      target: string;
-    }
-    export interface LanguageCheck extends _base {
-      op: 'language_check';
-      value: string;
-    }
-    export interface MaxFieldLength extends _base {
-      op: 'max_field_length';
-      value: number;
-    }
-    export interface MinFieldLength extends _base {
-      op: 'min_field_length';
-      value: number;
-    }
+export type ValidationRule = |
+  OptionsValidatorOptions |
+  RegexMatchValidatorOptions |
+  FieldTypeValidatorOptions |
+  LinkedFieldValidatorOptions |
+  LanguageCheckValidatorOptions |
+  MaxFieldLengthValidatorOptions |
+  MinFieldLengthValidatorOptions |
+  MaxValueValidatorOptions |
+  MinValueValidatorOptions |
+  DateDiffValidatorOptions |
+  DateFieldDiffValidatorOptions |
+  SameValueForAllRowsValidatorOptions
 
-    export interface MaxValue extends _base {
-      op: 'max_value';
-      value: number | string;
-    }
-    export interface MinValue extends _base {
-      op: 'min_value';
-      value: number;
-    }
-    export interface DateDiff extends _base {
-      op: 'date_diff';
-      value: string;
-    }
-    export interface DateFieldDiff extends _base {
-      op: 'date_field_diff';
-      target: string;
-      value: string;
-    }
-    export interface SameValueForAllRows extends _base {
-      op: 'same_value_for_all_rows';
-    }
-  }
+
+interface ValidationRuleOptions {
+  op: SUPPORTED_VALIDATORS;
+  message?: string;
+}
+export interface OptionsValidatorOptions extends ValidationRuleOptions {
+  op: SUPPORTED_VALIDATORS.OPTIONS;
+  value: Array<string | number>;
+}
+export interface RegexMatchValidatorOptions extends ValidationRuleOptions {
+  op: SUPPORTED_VALIDATORS.REGEX_MATCH;
+  value: string;
+}
+export interface FieldTypeValidatorOptions extends ValidationRuleOptions {
+  op: SUPPORTED_VALIDATORS.FIELD_TYPE;
+  value: 'string' | 'number';
+}
+export interface LinkedFieldValidatorOptions extends ValidationRuleOptions {
+  op: SUPPORTED_VALIDATORS.LINKED_FIELD;
+  target: string;
+}
+export interface LanguageCheckValidatorOptions extends ValidationRuleOptions {
+  op: SUPPORTED_VALIDATORS.LANGUAGE_CHECK;
+  value: string;
+}
+export interface MaxFieldLengthValidatorOptions extends ValidationRuleOptions {
+  op: SUPPORTED_VALIDATORS.MAX_FIELD_LENGTH;
+  value: number;
+}
+export interface MinFieldLengthValidatorOptions extends ValidationRuleOptions {
+  op: SUPPORTED_VALIDATORS.MIN_FIELD_LENGTH;
+  value: number;
+}
+export interface MaxValueValidatorOptions extends ValidationRuleOptions {
+  op: SUPPORTED_VALIDATORS.MAX_VALUE;
+  value: number | string;
+}
+export interface MinValueValidatorOptions extends ValidationRuleOptions {
+  op: SUPPORTED_VALIDATORS.MIN_VALUE;
+  value: number;
+}
+export interface DateDiffValidatorOptions extends ValidationRuleOptions {
+  op: SUPPORTED_VALIDATORS.DATE_DIFF;
+  value: string;
+}
+export interface DateFieldDiffValidatorOptions extends ValidationRuleOptions {
+  op: SUPPORTED_VALIDATORS.DATE_FIELD_DIFF;
+  target: string;
+  value: string;
+}
+export interface SameValueForAllRowsValidatorOptions extends ValidationRuleOptions {
+  op: SUPPORTED_VALIDATORS.SAME_VALUE_FOR_ALL_ROWS;
 }

@@ -5,3 +5,5 @@ dist
 coverage
 
 /lib
+output/
+scratch.ts

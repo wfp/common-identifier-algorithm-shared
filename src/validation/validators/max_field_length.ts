@@ -15,13 +15,13 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { SUPPORTED_VALIDATORS } from '../Validation';
-import type { Validator } from '../Validation';
+import type { MaxFieldLengthValidatorOptions, Validator } from '../Validation';
 
 export class MaxFieldLengthValidator implements Validator.Base {
   kind = SUPPORTED_VALIDATORS.MAX_FIELD_LENGTH;
-  opts: Validator.Options.MaxFieldLength;
+  opts: MaxFieldLengthValidatorOptions;
 
-  constructor(opts: Validator.Options.MaxFieldLength) {
+  constructor(opts: MaxFieldLengthValidatorOptions) {
     if (typeof opts.value !== 'number') {
       throw new Error(`MaxFieldLength validator must have a 'value' with number -- ${JSON.stringify(opts)}`);
     }

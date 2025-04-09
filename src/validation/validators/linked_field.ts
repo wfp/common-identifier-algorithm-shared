@@ -14,14 +14,14 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import { SUPPORTED_VALIDATORS } from '../Validation';
-import type { Validation, Validator } from '../Validation';
+import type { LinkedFieldValidatorOptions, Validator } from '../Validation';
 
 /* Linked Field validator checks that if source column has a value, the other linked column also contains a value */
 export class LinkedFieldValidator implements Validator.Base {
   kind = SUPPORTED_VALIDATORS.LINKED_FIELD;
-  opts: Validator.Options.LinkedField;
+  opts: LinkedFieldValidatorOptions;
 
-  constructor(opts: Validator.Options.LinkedField) {
+  constructor(opts: LinkedFieldValidatorOptions) {
     if (typeof opts.target !== 'string') {
       throw new Error('LinkedFieldValidator must be provided with target field as a string.');
     }
@@ -36,7 +36,7 @@ export class LinkedFieldValidator implements Validator.Base {
         ? msg
         : `is linked with '${this.opts.target},' both must have valid values`;
 
-  validate(value: unknown, data?: Validation.Data): Validator.Result {
+  validate(value: unknown, data?: Validator.InputData): Validator.Result {
     if (!data) throw new Error('This validator validate method must be provided with row context.');
 
     // if no value in this field, no need to check the linked one

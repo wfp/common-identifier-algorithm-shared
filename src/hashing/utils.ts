@@ -15,13 +15,13 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import type { Config } from '../config/Config';
-import type { Validation } from '../validation/Validation';
+import type { Validator } from '../validation/Validation';
 
 // takes an row object and the "algorithm.columns" config and returns a new
 // object with { static: [<COL VALUES>], to_translate: [..], reference: [...] } columns
 export function extractAlgoColumnsFromObject(
   columnConfig: Config.Options['algorithm']['columns'],
-  obj: Validation.Data['row'],
+  obj: Validator.InputData['row'],
 ) {
   // check if we have an actual config
   if (typeof columnConfig !== 'object') {

@@ -25,7 +25,7 @@ import { SUPPORTED_FILE_TYPES } from '../../src/document';
 import { BaseHasher } from '../../src/hashing/base';
 import type { makeHasherFunction } from '../../src/hashing/base';
 import type { Config } from '../../src/config/Config';
-import type { Validation } from '../../src/validation/Validation';
+import { SUPPORTED_VALIDATORS, type Validator } from '../../src/validation/Validation';
 import { extractAlgoColumnsFromObject } from '../../src/hashing/utils';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -48,7 +48,7 @@ const CONFIG: Config.Options = {
     },
   },
   validations: {
-    col_a: [{ op: 'max_field_length', value: 2 }],
+    col_a: [{ op: SUPPORTED_VALIDATORS.MAX_FIELD_LENGTH, value: 2 }],
   },
   destination: {
     columns: [
@@ -185,7 +185,7 @@ class TestHasher extends BaseHasher {
   }
 
   // Builds the hash columns from the extracted row object
-  generateHashForObject(obj: Validation.Data['row']) {
+  generateHashForObject(obj: Validator.InputData['row']) {
     const extractedObj = extractAlgoColumnsFromObject(this.config.columns, obj);
     return {
       test: `TEST ${extractedObj.static.join(' ')}`,

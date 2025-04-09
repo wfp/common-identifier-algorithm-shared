@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import type { Config } from './Config';
-import { SUPPORTED_VALIDATORS } from '../validation/Validation';
+import { SUPPORTED_VALIDATORS, type ValidationRule } from '../validation/Validation';
 
 type ConfigValidatorResult = string | undefined;
 type ConfigValidator = (label: string, v: unknown) => ConfigValidatorResult;
@@ -120,16 +120,20 @@ const checkDestination = (label: string, destination: Config.Options['destinatio
   );
 };
 
-const checkValidationRule = (label: string, v: Config.ColumnValidation[]) => {
-  return isArrayOfCustomType<Config.ColumnValidation>(
+const checkValidationRule = (label: string, v: ValidationRule[]) => {
+  return isArrayOfCustomType<ValidationRule>(
     label,
     v,
     (v) =>
       isObject('', v) ||
       isString('.op', v.op) ||
-      isOptional(`.[${v.op}].value?`, v.value, isSupportedType) ||
-      isOptional(`.[${v.op}].message?`, v.message, isString) ||
-      isOptional(`.[${v.op}].target?`, v.target, isString),
+      isOptional(`.[${v.op}].message?`, v.message, isString)
+      // TODO check target and value properties on validators that require it.
+      //   each is specific to the implementation of the validator itself.
+      //   e.g. if regex_match validator, value must be provided and not empty.
+      //   e.g. if linked_field validator, target must be provided and not empty.
+      // isOptional(`.[${v.op}].value?`, v.value, isSupportedType) ||
+      // isOptional(`.[${v.op}].target?`, v.target, isString),
   );
 };
 
@@ -149,7 +153,7 @@ const checkValidations = (validations: Config.Options['validations'], sourceColu
 
     // check validation op is in supported list
     let unsupported = validations[key].find(
-      (v) => !Object.values(SUPPORTED_VALIDATORS).includes(v.op as SUPPORTED_VALIDATORS),
+      (v) => !Object.values(SUPPORTED_VALIDATORS).includes(v.op),
     );
     if (unsupported) return `[validations].${key}.[${unsupported.op}] is not a supported op function`;
   }

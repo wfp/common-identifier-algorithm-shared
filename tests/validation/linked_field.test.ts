@@ -13,6 +13,7 @@
 
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
+import { SUPPORTED_VALIDATORS } from '../../src/validation';
 import { LinkedFieldValidator } from '../../src/validation/validators/linked_field';
 
 let TEST_SHEET_PARAMS = {
@@ -22,7 +23,7 @@ let TEST_SHEET_PARAMS = {
 };
 
 test('LinkedFieldValidator', () => {
-  const v = new LinkedFieldValidator({ op: 'linked_field', target: 'col_a' });
+  const v = new LinkedFieldValidator({ op: SUPPORTED_VALIDATORS.LINKED_FIELD, target: 'col_a' });
 
   expect(v.validate('a', TEST_SHEET_PARAMS)).toEqual({
     ok: true,

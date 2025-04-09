@@ -1,6 +1,5 @@
 // Common Identifier Application
 // Copyright (C) 2024 World Food Programme
-
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
@@ -14,6 +13,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import type { ValidationRule } from "../validation/Validation";
+
 export namespace Config {
   export interface Column {
     name: string;
@@ -23,12 +24,6 @@ export namespace Config {
   export interface ColumnMap {
     columns: Column[];
     postfix?: string;
-  }
-  export interface ColumnValidation {
-    op: string;
-    value?: string | number | string[] | number[];
-    message?: string;
-    target?: string;
   }
   export interface AlgorithmColumns {
     process: string[];
@@ -58,7 +53,7 @@ export namespace Config {
       error_in_salt: string;
     };
     source: ColumnMap;
-    validations?: { [key: string]: ColumnValidation[] };
+    validations?: { [key: string]: ValidationRule[] };
     algorithm: {
       columns: AlgorithmColumns;
       hash: {

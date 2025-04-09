@@ -28,7 +28,7 @@ import {
     SameValueForAllRowsValidator,
   } from './validators/index';
   import { SUPPORTED_VALIDATORS } from './Validation';
-  import type { Validation, Validator } from './Validation';
+  import type { Validated, ValidationRule, Validator } from './Validation';
   import type { CidDocument } from '../document';
   import type { Config } from '../config/Config';
   
@@ -37,11 +37,7 @@ import {
   
   // Validates a single value with a list of validators.
   // The row is passed to allow for cross-column checks
-  function validateValueWithList(
-    validatorList: Validator.Base[],
-    value: any,
-    { row, document, column }: Validation.Data,
-  ) {
+  function validateValueWithList(validatorList: Validator.Base[], value: any, { row, document, column }: Validator.InputData) {
     return validatorList.reduce((memo, validator) => {
       // check if the validator says OK
       let result = validator.validate(value, { row, document, column });
@@ -52,10 +48,10 @@ import {
   }
   
   export function validateRowWithListDict(
-    validatorListDict: Validation.FuncMap,
-    row: Validation.Data['row'],
+    validatorListDict: Validator.FuncMap,
+    row: Validator.InputData['row'],
     document: CidDocument,
-  ): Validation.ErrorMap {
+  ): Validator.ErrorMap {
     // check if all expected columns are present
     let missingColumns = Object.keys(validatorListDict)
       .map((k) => (typeof row[k] === 'undefined' ? k : null))
@@ -90,53 +86,38 @@ import {
       });
   
       return memo;
-    }, {} as Validation.ErrorMap);
+    }, {} as Validator.ErrorMap);
   }
   
   // VALIDATOR FACTORY
   // ------------------
   
-  function makeValidator(opts: Config.ColumnValidation) {
+  function makeValidator(opts: ValidationRule) {
     // check if there is an 'op' in the object
-    let op = opts.op as SUPPORTED_VALIDATORS;
-    if (typeof op !== 'string') {
+    if (typeof opts.op !== 'string') {
       throw new Error(`Validator configuration is missing the 'op' field: ${JSON.stringify(opts)}`);
     }
-    switch (op) {
-      case 'regex_match':
-        return new RegexpValidator(opts as Validator.Options.RegexMatch);
-      case 'options':
-        return new OptionsValidator(opts as Validator.Options.Options);
-      case 'field_type':
-        return new FieldTypeValidator(opts as Validator.Options.FieldType);
-      case 'linked_field':
-        return new LinkedFieldValidator(opts as Validator.Options.LinkedField);
-  
-      case 'language_check':
-        return new LanguageCheckValidator(opts as Validator.Options.LanguageCheck);
-      case 'min_field_length':
-        return new MinFieldLengthValidator(opts as Validator.Options.MinFieldLength);
-      case 'max_field_length':
-        return new MaxFieldLengthValidator(opts as Validator.Options.MaxFieldLength);
-      case 'min_value':
-        return new MinValueValidator(opts as Validator.Options.MinValue);
-      case 'max_value':
-        return new MaxValueValidator(opts as Validator.Options.MaxValue);
-  
-      case 'date_diff':
-        return new DateDiffValidator(opts as Validator.Options.DateDiff);
-      case 'date_field_diff':
-        return new DateFieldDiffValidator(opts as Validator.Options.DateFieldDiff);
-  
-      case 'same_value_for_all_rows':
-        return new SameValueForAllRowsValidator(opts as Validator.Options.SameValueForAllRows);
+    switch (opts.op) {
+      case SUPPORTED_VALIDATORS.REGEX_MATCH: return new RegexpValidator(opts);
+      case SUPPORTED_VALIDATORS.OPTIONS: return new OptionsValidator(opts);
+      case SUPPORTED_VALIDATORS.FIELD_TYPE: return new FieldTypeValidator(opts);
+      case SUPPORTED_VALIDATORS.LINKED_FIELD: return new LinkedFieldValidator(opts);
+      case SUPPORTED_VALIDATORS.LANGUAGE_CHECK: return new LanguageCheckValidator(opts);
+      case SUPPORTED_VALIDATORS.MIN_FIELD_LENGTH: return new MinFieldLengthValidator(opts);
+      case SUPPORTED_VALIDATORS.MAX_FIELD_LENGTH: return new MaxFieldLengthValidator(opts);
+      case SUPPORTED_VALIDATORS.MIN_VALUE: return new MinValueValidator(opts);
+      case SUPPORTED_VALIDATORS.MAX_VALUE: return new MaxValueValidator(opts);
+      case SUPPORTED_VALIDATORS.DATE_DIFF: return new DateDiffValidator(opts);
+      case SUPPORTED_VALIDATORS.DATE_FIELD_DIFF: return new DateFieldDiffValidator(opts);
+      case SUPPORTED_VALIDATORS.SAME_VALUE_FOR_ALL_ROWS: return new SameValueForAllRowsValidator(opts);
       default:
-        throw new Error(`Cannot find validator for type: '${op}'`);
+        // @ts-expect-error Fallthrough for unknown validator type
+        throw new Error(`Cannot find validator for type: '${opts.op}'`);
     }
   }
   
   // Takes a list of validator options and creates a list of validators from it
-  function makeValidatorList(optsList: Config.ColumnValidation[]) {
+  function makeValidatorList(optsList: ValidationRule[]) {
     return optsList.map(makeValidator);
   }
   
@@ -188,10 +169,7 @@ import {
   //////////////////////////////////////////////////////////////////////
   
   // Validates a full document with the pre-generated validator list dict
-  export function validateDocumentWithListDict(
-    validatorDict: Validation.FuncMap,
-    document: CidDocument,
-  ): Validation.DocumentResult {
+  export function validateDocumentWithListDict(validatorDict: Validator.FuncMap, document: CidDocument): Validated.Document {
     let results = document.data.map((row) => {
       // do the actual validation
       let results = validateRowWithListDict(validatorDict, row, document);
@@ -201,9 +179,9 @@ import {
           memo.push({ column: col, errors: colResults });
         }
         return memo;
-      }, [] as Validation.ColumnResult[]);
+      }, [] as Validated.Column[]);
       return { row, ok: compactResults.length === 0, errors: compactResults };
-    }) as Validation.RowResult[];
+    }) as Validated.Row[];
     return {
       ok: !results.some((res) => !res.ok),
       results,
@@ -214,7 +192,7 @@ import {
   // sourceConfig is required to map the original column names in the error messages
   export const makeValidationResultDocument = (
     sourceConfig: Config.Options['source'],
-    documentResult: Validation.DocumentResult,
+    documentResult: Validated.Document,
   ): CidDocument => {
     let fieldNameMapping = sourceConfig.columns.reduce(
       (memo, col) => {

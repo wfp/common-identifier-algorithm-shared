@@ -13,11 +13,12 @@
 
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
+import { SUPPORTED_VALIDATORS } from '../../src/validation/Validation';
 import { FieldTypeValidator } from '../../src/validation/validators/field_type';
 
 test('FieldTypeValidator', () => {
   {
-    let v = new FieldTypeValidator({ op: 'field_type', value: 'string' });
+    let v = new FieldTypeValidator({ op: SUPPORTED_VALIDATORS.FIELD_TYPE, value: 'string' });
     expect(v.validate(123)).toEqual({
       ok: false,
       kind: 'field_type',
@@ -26,7 +27,7 @@ test('FieldTypeValidator', () => {
     expect(v.validate('123')).toEqual({ ok: true, kind: 'field_type' });
   }
   {
-    const v = new FieldTypeValidator({ op: 'field_type', value: 'number' });
+    const v = new FieldTypeValidator({ op: SUPPORTED_VALIDATORS.FIELD_TYPE, value: 'number' });
     expect(v.validate(123)).toEqual({ ok: true, kind: 'field_type' });
     expect(v.validate('123')).toEqual({
       ok: false,
@@ -37,12 +38,8 @@ test('FieldTypeValidator', () => {
 });
 
 test('FieldTypeValidator fails for invalid option value', () => {
-  expect(
-    // @ts-ignore
-    () => new FieldTypeValidator({ op: 'field_type', value: 123 }),
-  ).toThrow();
-  expect(
-    // @ts-ignore
-    () => new FieldTypeValidator({ op: 'field_type', value: '[[[' }),
-  ).toThrow();
+  // @ts-expect-error
+  expect(() => new FieldTypeValidator({ op: SUPPORTED_VALIDATORS.FIELD_TYPE, value: 123 })).toThrow();
+  // @ts-expect-error
+  expect(() => new FieldTypeValidator({ op: SUPPORTED_VALIDATORS.FIELD_TYPE, value: "[[[" })).toThrow();
 });

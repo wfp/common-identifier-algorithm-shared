@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import { SUPPORTED_VALIDATORS } from '../Validation';
-import type { Validator } from '../Validation';
+import type { LanguageCheckValidatorOptions, Validator } from '../Validation';
 
 function checkArabicUtf8(v: string) {
   // As of Unicode 15.1, the Arabic script is contained in the following blocks:[3]
@@ -72,11 +72,11 @@ const SUPPORTED_LANGUAGES = [
 
 export class LanguageCheckValidator implements Validator.Base {
   kind = SUPPORTED_VALIDATORS.LANGUAGE_CHECK;
-  opts: Validator.Options.LanguageCheck;
+  opts: LanguageCheckValidatorOptions;
   language: string;
   languageName: string;
 
-  constructor(opts: Validator.Options.LanguageCheck) {
+  constructor(opts: LanguageCheckValidatorOptions) {
     if (typeof opts.value !== 'string') {
       throw new Error(
         `LanguageCheck validator must have a 'value' with language name as string -- ${JSON.stringify(opts)}`,

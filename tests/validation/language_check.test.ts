@@ -15,12 +15,10 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { LanguageCheckValidator } from '../../src/validation/validators/language_check';
+import { SUPPORTED_VALIDATORS } from '../../src/validation';
 
 test('LanguageCheckValidator', () => {
-  const v = new LanguageCheckValidator({
-    op: 'language_check',
-    value: 'arabic',
-  });
+  const v = new LanguageCheckValidator({ op: SUPPORTED_VALIDATORS.LANGUAGE_CHECK, value: 'arabic' });
 
   expect(v.validate('ABCD')).toEqual({
     ok: false,
@@ -38,11 +36,11 @@ test('LanguageCheckValidator', () => {
 test('LanguageCheckValidator fails for invalid options', () => {
   expect(
     // @ts-ignore
-    () => new LanguageCheckValidator({ op: 'language_check', value: 123 }),
+    () => new LanguageCheckValidator({ op: SUPPORTED_VALIDATORS.LANGUAGE_CHECK, value: 123 }),
   ).toThrow();
   expect(
     () =>
       // @ts-ignore
-      new LanguageCheckValidator({ op: 'language_check', value: 'nothing' }),
+      new LanguageCheckValidator({ op: SUPPORTED_VALIDATORS.LANGUAGE_CHECK, value: 'nothing' }),
   ).toThrow();
 });

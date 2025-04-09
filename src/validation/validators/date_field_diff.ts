@@ -14,18 +14,18 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import { SUPPORTED_VALIDATORS } from '../Validation';
-import type { Validation, Validator } from '../Validation';
+import type { DateFieldDiffValidatorOptions, Validator } from '../Validation';
 
 import { parseDateDiff, isValidDateDiff, attemptToParseDate, isDateInRange } from './date_shared';
 import type { ParsedDateDiff } from './date_shared';
 
 export class DateFieldDiffValidator implements Validator.Base {
   kind = SUPPORTED_VALIDATORS.DATE_FIELD_DIFF;
-  opts: Validator.Options.DateFieldDiff;
+  opts: DateFieldDiffValidatorOptions;
 
   parsedDateDiff: ParsedDateDiff[] | null;
 
-  constructor(opts: Validator.Options.DateFieldDiff) {
+  constructor(opts: DateFieldDiffValidatorOptions) {
     // check if there is a target field specified
     if (typeof opts.target !== 'string') {
       throw new Error(
@@ -60,7 +60,7 @@ export class DateFieldDiffValidator implements Validator.Base {
     return `must be within ${left._value} ${left._key} and ${right._value} ${right._key} of ${this.opts.target}`;
   };
 
-  validate = (value: any, data?: Validation.Data): Validator.Result => {
+  validate = (value: any, data?: Validator.InputData): Validator.Result => {
     if (!data) throw new Error('This validator validate method must be provided with row context.');
 
     let otherFieldValue = data.row[this.opts.target];

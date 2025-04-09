@@ -14,10 +14,11 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import { SUPPORTED_VALIDATORS } from '../../src/validation';
 import { OptionsValidator } from '../../src/validation/validators/options';
 
 test('OptionsValidator', () => {
-  const v = new OptionsValidator({ op: 'options', value: ['A', 'B', 'AB'] });
+  const v = new OptionsValidator({ op: SUPPORTED_VALIDATORS.OPTIONS, value: ['A', 'B', 'AB'] });
   expect(v.validate('')).toEqual({
     ok: false,
     kind: 'options',
@@ -57,16 +58,10 @@ test('OptionsValidator', () => {
 });
 
 test('OptionsValidator fails for invalid options', () => {
-  // @ts-ignore
-  expect(() => new OptionsValidator({ op: 'options', value: 123 })).toThrow();
-  // @ts-ignore
-  expect(() => new OptionsValidator({ op: 'options', value: '[[[' })).toThrow();
-  expect(
-    () =>
-      new OptionsValidator({
-        op: 'options',
-        // @ts-ignore
-        value: [null, 'qwerty', new Date()],
-      }),
-  ).toThrow();
+  // @ts-expect-error
+  expect(() => new OptionsValidator({ op: SUPPORTED_VALIDATORS.OPTIONS, value: 123 })).toThrow();
+  // @ts-expect-error
+  expect(() => new OptionsValidator({ op: SUPPORTED_VALIDATORS.OPTIONS, value: '[[[' })).toThrow();
+  // @ts-expect-error
+  expect(() => new OptionsValidator({op: SUPPORTED_VALIDATORS.OPTIONS,value: [null, 'qwerty', new Date()]})).toThrow();
 });

@@ -15,16 +15,16 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { SUPPORTED_VALIDATORS } from '../Validation';
-import type { Validator } from '../Validation';
+import type { RegexMatchValidatorOptions, Validator } from '../Validation';
 
 export class RegexpValidator implements Validator.Base {
   kind = SUPPORTED_VALIDATORS.REGEX_MATCH;
-  opts: Validator.Options.RegexMatch;
+  opts: RegexMatchValidatorOptions;
 
   rx: RegExp;
   regexp: string;
 
-  constructor(opts: Validator.Options.RegexMatch) {
+  constructor(opts: RegexMatchValidatorOptions) {
     if (typeof opts.value !== 'string') {
       throw new Error(
         `Regexp validator must have a 'value' with a regexp -- options are: ${JSON.stringify(opts)}`,

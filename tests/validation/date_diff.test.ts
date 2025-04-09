@@ -15,6 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import * as dateFns from 'date-fns';
 import { DateDiffValidator } from '../../src/validation/validators/date_diff';
+import { SUPPORTED_VALIDATORS } from '../../src/validation/Validation';
 
 function toDateStr(offset: dateFns.Duration) {
   const d = dateFns.add(new Date(), offset);
@@ -23,7 +24,7 @@ function toDateStr(offset: dateFns.Duration) {
 }
 
 test('DateDiffValidator::future case', () => {
-  let v = new DateDiffValidator({ op: 'date_diff', value: ':3M' });
+  let v = new DateDiffValidator({ op: SUPPORTED_VALIDATORS.DATE_DIFF, value: ':3M' });
 
   expect(v.validate(toDateStr({ months: -10 }))).toEqual({
     ok: false,
@@ -51,7 +52,7 @@ test('DateDiffValidator::future case', () => {
 });
 
 test('DateDiffValidator::past case', () => {
-  let v = new DateDiffValidator({ op: 'date_diff', value: '-3M:' });
+  let v = new DateDiffValidator({ op: SUPPORTED_VALIDATORS.DATE_DIFF, value: '-3M:' });
 
   expect(v.validate(toDateStr({ months: -10 }))).toEqual({
     ok: false,
@@ -93,7 +94,7 @@ test('DateDiffValidator::past case', () => {
 });
 
 test('DateDiffValidator::invalid', () => {
-  let v = new DateDiffValidator({ op: 'date_diff', value: '-3M:' });
+  let v = new DateDiffValidator({ op: SUPPORTED_VALIDATORS.DATE_DIFF, value: '-3M:' });
   expect(v.validate('20241131')).toEqual({
     ok: false,
     kind: 'date_diff',
@@ -122,7 +123,7 @@ test('DateDiffValidator::invalid', () => {
 });
 
 test('DateDiffValidator::inRange', () => {
-  let a = new DateDiffValidator({ op: 'date_diff', value: '-12M:+2M' });
+  let a = new DateDiffValidator({ op: SUPPORTED_VALIDATORS.DATE_DIFF, value: '-12M:+2M' });
 
   let left = toDateStr({ months: 2 });
   expect(a.validate(left)).toEqual({ ok: true, kind: 'date_diff' });
@@ -153,11 +154,10 @@ test('DateDiffValidator::inRange', () => {
 
 test('DateDiffValidator fails for invalid options', () => {
   expect(
-    // @ts-ignore
-    () => new DateDiffValidator({ op: 'date_diff', value: 123 }),
+    // @ts-expect-error only string values are supported
+    () => new DateDiffValidator({ op: SUPPORTED_VALIDATORS.DATE_DIFF, value: 123 }),
   ).toThrow();
   expect(
-    // @ts-ignore
-    () => new DateDiffValidator({ op: 'date_diff', value: '[[[' }),
+    () => new DateDiffValidator({ op: SUPPORTED_VALIDATORS.DATE_DIFF, value: '[[[' }),
   ).toThrow();
 });

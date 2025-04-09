@@ -33,7 +33,7 @@ import { keepOutputColumns, isMappingOnlyDocument, keepValidatorsForColumns } fr
 import type { Config } from '../config/Config';
 import { BaseHasher } from '../hashing/base';
 import type { makeHasherFunction } from '../hashing/base';
-import type { Validation } from '../validation/Validation';
+import type { Validated } from '../validation/Validation';
 
 import Debug from 'debug';
 const log = Debug('CID:Processing');
@@ -56,7 +56,7 @@ export function validateDocument(
   config: Config.Options,
   decoded: CidDocument,
   isMapping: boolean = false,
-): Validation.DocumentResult {
+): Validated.Document {
   let validatorDict = makeValidatorListDict(config.validations);
 
   // if this is a mapping document leave only the validators for the algorithm columns

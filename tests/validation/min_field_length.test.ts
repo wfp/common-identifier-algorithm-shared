@@ -13,10 +13,11 @@
 
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
+import { SUPPORTED_VALIDATORS } from '../../src/validation';
 import { MinFieldLengthValidator } from '../../src/validation/validators/min_field_length';
 
 test('MinFieldLengthValidator', () => {
-  const v = new MinFieldLengthValidator({ op: 'min_field_length', value: 2 });
+  const v = new MinFieldLengthValidator({ op: SUPPORTED_VALIDATORS.MIN_FIELD_LENGTH, value: 2 });
 
   expect(v.validate('')).toEqual({
     ok: false,
@@ -60,8 +61,6 @@ test('MinFieldLengthValidator', () => {
 });
 
 test('MinFieldLengthValidator fails for invalid options', () => {
-  expect(
-    // @ts-ignore
-    () => new MinFieldLengthValidator({ op: 'min_field_length', value: '[[[' }),
-  ).toThrow();
+  // @ts-expect-error
+  expect(() => new MinFieldLengthValidator({ op: SUPPORTED_VALIDATORS.MIN_FIELD_LENGTH, value: '[[[' })).toThrow();
 });

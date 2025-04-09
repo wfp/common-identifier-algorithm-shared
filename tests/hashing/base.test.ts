@@ -16,7 +16,7 @@
 
 import { BaseHasher } from '../../src/hashing/base';
 import type { Config } from '../../src/config/Config';
-import type { Validation } from '../../src/validation/Validation';
+import type { Validator } from '../../src/validation/Validation';
 
 const BASE_CFG: Config.Options['algorithm'] = {
   columns: { static: [], process: [], reference: [] },
@@ -29,9 +29,7 @@ function makeBaseHasher(cfg = BASE_CFG) {
     constructor() {
       super(cfg);
     }
-    generateHashForObject(obj: Validation.Data['row']): {
-      [key: string]: string;
-    } {
+    generateHashForObject(_: Validator.InputData['row']) {
       return {};
     }
   }

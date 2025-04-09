@@ -14,13 +14,13 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import { SUPPORTED_VALIDATORS } from '../Validation';
-import type { Validator } from '../Validation';
+import type { MinValueValidatorOptions, Validator } from '../Validation';
 
 export class MinValueValidator implements Validator.Base {
   kind = SUPPORTED_VALIDATORS.MIN_VALUE;
-  opts: Validator.Options.MinValue;
+  opts: MinValueValidatorOptions;
 
-  constructor(opts: Validator.Options.MinValue) {
+  constructor(opts: MinValueValidatorOptions) {
     if (typeof opts.value !== 'number') {
       throw new Error(`MinValue validator must have a 'value' with a number -- ${JSON.stringify(opts)}`);
     }

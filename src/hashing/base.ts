@@ -18,7 +18,7 @@ import crypto from 'node:crypto';
 // USCADI uses RFC4648 base32 -- NodeJs has no default implementation for that
 import base32 from 'hi-base32';
 import type { Config } from '../config/Config';
-import type { Validation } from '../validation/Validation';
+import type { Validator } from '../validation/Validation';
 
 export type makeHasherFunction = (config: Config.Options['algorithm']) => BaseHasher;
 
@@ -51,7 +51,7 @@ export abstract class BaseHasher {
     return base32.encode(hashDigest);
   }
 
-  abstract generateHashForObject(obj: Validation.Data['row']): {
+  abstract generateHashForObject(obj: Validator.InputData['row']): {
     [key: string]: string;
   };
 }

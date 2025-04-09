@@ -13,7 +13,7 @@
 
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
-import type { Validation } from '../../src/validation/Validation';
+import { SUPPORTED_VALIDATORS, type Validator } from '../../src/validation/Validation';
 import { SameValueForAllRowsValidator } from '../../src/validation/validators/same_value_for_all_rows';
 
 const TEST_DOCUMENT = {
@@ -21,17 +21,14 @@ const TEST_DOCUMENT = {
   data: [{ col_a: 'A', col_b: 'B' }],
 };
 test('SameValueForAllRowsValidator', () => {
-  const v = new SameValueForAllRowsValidator({
-    op: 'same_value_for_all_rows',
-    value: '',
-  });
+  const v = new SameValueForAllRowsValidator({ op: SUPPORTED_VALIDATORS.SAME_VALUE_FOR_ALL_ROWS });
 
-  const contextA: Validation.Data = {
+  const contextA: Validator.InputData = {
     document: TEST_DOCUMENT,
     column: 'col_a',
     row: [],
   };
-  const contextB: Validation.Data = {
+  const contextB: Validator.InputData = {
     document: TEST_DOCUMENT,
     column: 'col_b',
     row: [],

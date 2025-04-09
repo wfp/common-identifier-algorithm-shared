@@ -14,13 +14,13 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import { SUPPORTED_VALIDATORS } from '../Validation';
-import type { Validator } from '../Validation';
+import type { OptionsValidatorOptions, Validator } from '../Validation';
 
 export class OptionsValidator implements Validator.Base {
   kind = SUPPORTED_VALIDATORS.OPTIONS;
-  opts: Validator.Options.Options;
+  opts: OptionsValidatorOptions;
 
-  constructor(opts: Validator.Options.Options) {
+  constructor(opts: OptionsValidatorOptions) {
     if (!Array.isArray(opts.value)) {
       throw new Error(
         `Options validator must have a 'value' with a list of values -- options are: ${JSON.stringify(opts)}`,

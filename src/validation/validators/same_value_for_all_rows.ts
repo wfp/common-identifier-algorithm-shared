@@ -14,19 +14,19 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import { SUPPORTED_VALIDATORS } from '../Validation';
-import type { Validation, Validator } from '../Validation';
+import type { SameValueForAllRowsValidatorOptions, Validator } from '../Validation';
 
 export class SameValueForAllRowsValidator implements Validator.Base {
   kind = SUPPORTED_VALIDATORS.SAME_VALUE_FOR_ALL_ROWS;
-  opts: Validator.Options.SameValueForAllRows;
+  opts: SameValueForAllRowsValidatorOptions;
 
-  constructor(opts: Validator.Options.SameValueForAllRows) {
+  constructor(opts: SameValueForAllRowsValidatorOptions) {
     this.opts = opts;
   }
 
   message = () => (this.opts.message ? this.opts.message : 'must have identical values in the column');
 
-  validate(value: unknown, data?: Validation.Data): Validator.Result {
+  validate(value: unknown, data?: Validator.InputData): Validator.Result {
     if (!data) throw new Error('This validator validate method must be provided with sheet context.');
     // if this validation function is called there is at least one row of data
     // in the sheet, so we dont need to check for that

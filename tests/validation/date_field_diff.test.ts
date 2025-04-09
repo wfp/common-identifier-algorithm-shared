@@ -13,6 +13,7 @@
 
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
+import { SUPPORTED_VALIDATORS } from '../../src/validation/Validation';
 import { DateFieldDiffValidator } from '../../src/validation/validators/date_field_diff';
 
 let TEST_SHEET_PARAMS: any = {
@@ -22,11 +23,8 @@ let TEST_SHEET_PARAMS: any = {
 };
 
 test('DateFieldDiffValidator', () => {
-  const v = new DateFieldDiffValidator({
-    op: 'date_field_diff',
-    target: 'col_a',
-    value: '-3M:0M',
-  });
+  const v = new DateFieldDiffValidator({ op: SUPPORTED_VALIDATORS.DATE_FIELD_DIFF, target: 'col_a', value: '-3M:0M' });
+
   expect(v.validate('19910102', TEST_SHEET_PARAMS)).toEqual({
     ok: false,
     kind: 'date_field_diff',
@@ -57,7 +55,7 @@ test('DateFieldDiffValidator', () => {
 test('DateFieldDiffValidator::positive', () => {
   TEST_SHEET_PARAMS.row.col_a = '20241001';
   const v = new DateFieldDiffValidator({
-    op: 'date_field_diff',
+    op: SUPPORTED_VALIDATORS.DATE_FIELD_DIFF,
     target: 'col_a',
     value: ':+12M',
   });
@@ -78,7 +76,7 @@ test('DateFieldDiffValidator::positive', () => {
 
 test('DateFieldDiffValidator fails for invalid values', () => {
   const v = new DateFieldDiffValidator({
-    op: 'date_field_diff',
+    op: SUPPORTED_VALIDATORS.DATE_FIELD_DIFF,
     target: 'col_a',
     value: '-3M:0M',
   });
@@ -112,32 +110,14 @@ test('DateFieldDiffValidator fails for invalid values', () => {
 });
 
 test('DateFieldDiffValidator fails for invalid options', () => {
-  // @ts-ignore
+  // @ts-expect-error
   expect(() => new DateFieldDiffValidator({})).toThrow();
-  expect(
-    // @ts-ignore
-    () => new DateFieldDiffValidator({ op: 'date_field_diff', value: 123 }),
-  ).toThrow();
-  expect(
-    // @ts-ignore
-    () => new DateFieldDiffValidator({ op: 'date_field_diff', value: '[[[' }),
-  ).toThrow();
-  expect(
-    () =>
-      new DateFieldDiffValidator({
-        op: 'date_field_diff',
-        target: 'col_a',
-        // @ts-ignore
-        value: 123,
-      }),
-  ).toThrow();
-  // @ts-ignore
-  expect(
-    () =>
-      new DateFieldDiffValidator({
-        op: 'date_field_diff',
-        target: 'col_a',
-        value: '',
-      }),
-  ).toThrow();
+  // @ts-expect-error
+  expect(() => new DateFieldDiffValidator({ op: SUPPORTED_VALIDATORS.DATE_FIELD_DIFF, value: 123 })).toThrow();
+  // @ts-expect-error
+  expect(() => new DateFieldDiffValidator({ op: SUPPORTED_VALIDATORS.DATE_FIELD_DIFF, value: '[[[' })).toThrow();
+  // @ts-expect-error
+  expect(() => new DateFieldDiffValidator({ op: SUPPORTED_VALIDATORS.DATE_FIELD_DIFF,  target: 'col_a', value: 123 })).toThrow();
+  
+  expect(() => new DateFieldDiffValidator({ op: SUPPORTED_VALIDATORS.DATE_FIELD_DIFF, target: 'col_a', value: '' })).toThrow();
 });

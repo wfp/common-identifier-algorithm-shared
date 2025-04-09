@@ -21,4 +21,5 @@ export {
   validateRowWithListDict
 } from './validateDocument';
 
-export type { Validation } from './Validation';
+export type { Validated, Validator } from './Validation';
+export { SUPPORTED_VALIDATORS } from './Validation';

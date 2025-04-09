@@ -13,10 +13,11 @@
 
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
+import { SUPPORTED_VALIDATORS } from '../../src/validation';
 import { MaxFieldLengthValidator } from '../../src/validation/validators/max_field_length';
 
 test('MaxFieldLengthValidator', () => {
-  const v = new MaxFieldLengthValidator({ op: 'max_field_length', value: 2 });
+  const v = new MaxFieldLengthValidator({ op: SUPPORTED_VALIDATORS.MAX_FIELD_LENGTH, value: 2 });
 
   expect(v.validate('')).toEqual({ ok: true, kind: 'max_field_length' });
   expect(v.validate(' ')).toEqual({ ok: true, kind: 'max_field_length' });
@@ -62,6 +63,6 @@ test('MaxFieldLengthValidator', () => {
 test('MaxFieldLengthValidator fails for invalid options', () => {
   expect(
     // @ts-ignore
-    () => new MaxFieldLengthValidator({ op: 'max_field_length', value: '[[[' }),
+    () => new MaxFieldLengthValidator({ op: SUPPORTED_VALIDATORS.MAX_FIELD_LENGTH, value: '[[[' }),
   ).toThrow();
 });

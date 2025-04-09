@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import { SUPPORTED_VALIDATORS } from '../Validation';
-import type { Validator } from '../Validation';
+import type { MaxValueValidatorOptions, Validator } from '../Validation';
 
 enum DATE_OPTS {
   YEAR = '{{currentYear}}',
@@ -23,10 +23,10 @@ enum DATE_OPTS {
 
 export class MaxValueValidator implements Validator.Base {
   kind = SUPPORTED_VALIDATORS.MAX_VALUE;
-  opts: Validator.Options.MaxValue;
+  opts: MaxValueValidatorOptions;
   maxValue: number;
 
-  constructor(opts: Validator.Options.MaxValue) {
+  constructor(opts: MaxValueValidatorOptions) {
     // validate if string, {{currentYear}}
     let maxValue: unknown = opts.value;
 

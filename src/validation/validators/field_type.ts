@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import { SUPPORTED_VALIDATORS } from '../Validation';
-import type { Validator } from '../Validation';
+import type { FieldTypeValidatorOptions, Validator } from '../Validation';
 
 const SUPPORTED_FIELD_TYPES = [
   { type: 'string', value: 'text' },
@@ -23,11 +23,11 @@ const SUPPORTED_FIELD_TYPES = [
 
 export class FieldTypeValidator implements Validator.Base {
   kind = SUPPORTED_VALIDATORS.FIELD_TYPE;
-  opts: Validator.Options.FieldType;
+  opts: FieldTypeValidatorOptions;
   fieldType: string;
   fieldTypeName: string;
 
-  constructor(opts: Validator.Options.FieldType) {
+  constructor(opts: FieldTypeValidatorOptions) {
     if (typeof opts.value !== 'string') {
       throw new Error(
         `FieldType validator must have a 'value' with the field type -- ${JSON.stringify(opts)}`,
