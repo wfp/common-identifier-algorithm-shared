@@ -14,7 +14,22 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import type { Config } from './Config';
-import { SUPPORTED_VALIDATORS, type ValidationRule } from '../validation/Validation';
+import {
+  SUPPORTED_VALIDATORS,
+  isDateDiffValidator,
+  isDateFieldDiffValidator,
+  isFieldTypeValidator,
+  isLanguageCheckValidator,
+  isLinkedFieldValidator,
+  isMaxFieldLengthValidator,
+  isMaxValueValidator,
+  isMinFieldLengthValidator,
+  isMinValueValidator,
+  isOptionsValidator,
+  isRegexMatchValidator,
+  isSameValueForAllRowsValidator,
+} from '../validation/Validation';
+import type { ValidationRule } from '../validation/Validation';
 
 type ConfigValidatorResult = string | undefined;
 type ConfigValidator = (label: string, v: unknown) => ConfigValidatorResult;
@@ -77,9 +92,9 @@ const checkMeta = (meta: Config.Options['meta'], region: string) => {
   if (typeof meta !== 'object') return `[meta] must be present`;
   if (meta.region != region) return `[meta].region is not '${region}'`;
   return (
-    isString('[meta].version', meta.version) ||
     isString('[meta].region', meta.region) ||
-    isString('[meta].signature', meta.signature)
+    isOptional('[meta].version?', meta.version, isString) ||
+    isOptional('[meta].signature?', meta.signature, isString)
   );
 };
 
@@ -115,25 +130,8 @@ const checkSource = (source: Config.Options['source']) => {
 const checkDestination = (label: string, destination: Config.Options['destination']) => {
   return (
     isObject(`[${label}]`, destination) ||
-    isString(`[${label}].postfix`, destination.postfix) ||
+    isOptional(`[${label}].postfix?`, destination.postfix, isString) ||
     checkColumns(`[${label}]`, destination.columns)
-  );
-};
-
-const checkValidationRule = (label: string, v: ValidationRule[]) => {
-  return isArrayOfCustomType<ValidationRule>(
-    label,
-    v,
-    (v) =>
-      isObject('', v) ||
-      isString('.op', v.op) ||
-      isOptional(`.[${v.op}].message?`, v.message, isString)
-      // TODO check target and value properties on validators that require it.
-      //   each is specific to the implementation of the validator itself.
-      //   e.g. if regex_match validator, value must be provided and not empty.
-      //   e.g. if linked_field validator, target must be provided and not empty.
-      // isOptional(`.[${v.op}].value?`, v.value, isSupportedType) ||
-      // isOptional(`.[${v.op}].target?`, v.target, isString),
   );
 };
 
@@ -148,14 +146,38 @@ const checkValidations = (validations: Config.Options['validations'], sourceColu
     }
 
     // syntax checks
-    let check = checkValidationRule(`[validations].${key}`, validations[key]);
-    if (check) return check; // break on first error
+    // let check = checkValidationRule(`[validations].${key}`, validations[key]);
+    // if (check) return check; // break on first error
+    for (let rule of validations[key]) {
+      const prefix = `[validations].${key}.[${rule.op}]`;
+      
+      let initialValidation = 
+        isObject('', rule) ||
+        isString('.op', rule.op) ||
+        isOptional(`${prefix}.message?`, rule.message, isString) ||
+        isOptional(`${prefix}.message?`, rule.message, isNotEmptyString);
+      if (initialValidation) return initialValidation;
 
-    // check validation op is in supported list
-    let unsupported = validations[key].find(
-      (v) => !Object.values(SUPPORTED_VALIDATORS).includes(v.op),
-    );
-    if (unsupported) return `[validations].${key}.[${unsupported.op}] is not a supported op function`;
+      let check: string | undefined = undefined;
+      switch (rule.op) {
+        case SUPPORTED_VALIDATORS.REGEX_MATCH:              check = isRegexMatchValidator(prefix, rule); break;
+        case SUPPORTED_VALIDATORS.OPTIONS:                  check = isOptionsValidator(prefix, rule); break;
+        case SUPPORTED_VALIDATORS.FIELD_TYPE:               check = isFieldTypeValidator(prefix, rule); break;
+        case SUPPORTED_VALIDATORS.LANGUAGE_CHECK:           check = isLanguageCheckValidator(prefix, rule); break;
+        case SUPPORTED_VALIDATORS.MIN_FIELD_LENGTH:         check = isMinFieldLengthValidator(prefix, rule); break;
+        case SUPPORTED_VALIDATORS.MAX_FIELD_LENGTH:         check = isMaxFieldLengthValidator(prefix, rule); break;
+        case SUPPORTED_VALIDATORS.MIN_VALUE:                check = isMinValueValidator(prefix, rule); break;
+        case SUPPORTED_VALIDATORS.MAX_VALUE:                check = isMaxValueValidator(prefix, rule); break;
+        case SUPPORTED_VALIDATORS.DATE_DIFF:                check = isDateDiffValidator(prefix, rule); break;
+        case SUPPORTED_VALIDATORS.SAME_VALUE_FOR_ALL_ROWS:  check = isSameValueForAllRowsValidator(prefix, rule); break;
+        case SUPPORTED_VALIDATORS.LINKED_FIELD:             check = isLinkedFieldValidator(prefix, rule, sourceColumns); break;
+        case SUPPORTED_VALIDATORS.DATE_FIELD_DIFF:          check = isDateFieldDiffValidator(prefix, rule, sourceColumns); break;
+        default:
+          // @ts-expect-error switch case fallthrough for unsupported validators
+          return `[validations].${key}.[${rule.op}] is not a supported validation function`;
+      }
+      if (check) return check;
+    }
   }
 };
 
@@ -224,28 +246,31 @@ const checkAlgorithm = (algorithm: Config.Options['algorithm'], sourceColumns: s
 };
 
 export function validateConfig(config: Config.Options, region: string) {
+  let errors: string[] = [];
   const meta = checkMeta(config.meta, region);
-  if (meta) return meta;
+  if (meta) errors.push(meta);
 
   const messages = checkMessages(config.messages);
-  if (messages) return messages;
+  if (messages) errors.push(messages);
 
   const source = checkSource(config.source);
-  if (source) return source;
+  if (source) errors.push(source);
   const sourceColumns = config.source.columns.map((c) => c.alias);
 
   const destination = checkDestination('destination', config.destination);
-  if (destination) return destination;
+  if (destination) errors.push(destination);
 
   const destinationMap = checkDestination('destination_map', config.destination_map);
-  if (destinationMap) return destinationMap;
+  if (destinationMap) errors.push(destinationMap);
 
   const destinationErrors = checkDestination('destination_errors', config.destination_errors);
-  if (destinationErrors) return destinationErrors;
+  if (destinationErrors) errors.push(destinationErrors);
 
   const validations = checkValidations(config.validations, sourceColumns);
-  if (validations) return validations;
+  if (validations) errors.push(validations);
 
   const algorithm = checkAlgorithm(config.algorithm, sourceColumns);
-  if (algorithm) return algorithm;
+  if (algorithm) errors.push(algorithm);
+ 
+  return errors.length > 0 ? errors.join("\n") : undefined;
 }

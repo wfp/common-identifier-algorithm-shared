@@ -44,8 +44,8 @@ export namespace Config {
     isBackup?: boolean;
     meta: {
       region: string;
-      version: string;
-      signature: string;
+      version?: string;
+      signature?: string;
     };
     messages?: {
       terms_and_conditions: string;

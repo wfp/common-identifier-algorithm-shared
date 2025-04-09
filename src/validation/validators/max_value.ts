@@ -16,7 +16,7 @@
 import { SUPPORTED_VALIDATORS } from '../Validation';
 import type { MaxValueValidatorOptions, Validator } from '../Validation';
 
-enum DATE_OPTS {
+export enum DATE_OPTS {
   YEAR = '{{currentYear}}',
   MONTH = '{{currentMonth}}',
 }

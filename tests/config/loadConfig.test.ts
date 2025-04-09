@@ -42,11 +42,7 @@ test('loadConfig ok', () => {
 
 test('loadConfig invalid', () => {
   const TEST_FILE_PATH = join(FILES_PATH, 'test-appconfig.json');
-  const loadResult = loadConfig(TEST_FILE_PATH, REGION);
-
-  expect(loadResult.success).toEqual(false);
-  if (loadResult.success) throw new TypeError();
-  expect(typeof loadResult.error).toEqual('string');
+  expect(() => loadConfig(TEST_FILE_PATH, REGION)).toThrow();
 });
 
 test('loadConfig salt', () => {
