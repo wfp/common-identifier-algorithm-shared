@@ -17,8 +17,8 @@ import { SUPPORTED_VALIDATORS } from '../Validation';
 import type { MaxValueValidatorOptions, Validator } from '../Validation';
 
 export enum DATE_OPTS {
-  YEAR = '{{currentYear}}',
-  MONTH = '{{currentMonth}}',
+  CURRENT_YEAR = '{{currentYear}}',
+  CURRENT_MONTH = '{{currentMonth}}',
 }
 
 export class MaxValueValidator implements Validator.Base {
@@ -32,10 +32,10 @@ export class MaxValueValidator implements Validator.Base {
 
     if (Object.values(DATE_OPTS).includes(maxValue as DATE_OPTS)) {
       switch (maxValue) {
-        case DATE_OPTS.YEAR:
+        case DATE_OPTS.CURRENT_YEAR:
           maxValue = new Date().getUTCFullYear();
           break;
-        case DATE_OPTS.MONTH:
+        case DATE_OPTS.CURRENT_MONTH:
           maxValue = new Date().getUTCMonth() + 1;
           break; // +1 since getUTCMonth is zero-indexed
       }

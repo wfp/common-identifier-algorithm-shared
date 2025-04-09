@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import type { CidDocument, MappedData } from '../document';
+import { DATE_OPTS } from './validators/max_value';
 
 export enum SUPPORTED_VALIDATORS {
   FIELD_NAME = 'field_name',
@@ -109,7 +110,7 @@ export interface MinFieldLengthValidatorOptions extends ValidationRuleOptions {
 }
 export interface MaxValueValidatorOptions extends ValidationRuleOptions {
   op: SUPPORTED_VALIDATORS.MAX_VALUE;
-  value: number | string;
+  value: number | DATE_OPTS;
 }
 export interface MinValueValidatorOptions extends ValidationRuleOptions {
   op: SUPPORTED_VALIDATORS.MIN_VALUE;
@@ -170,7 +171,9 @@ export const isMinFieldLengthValidator: ValidatorTypeGuard = (prefix, rule) => {
 // TODO: connect this typeguard to the DATE_OPTS enum for {{currentYear}} etc. validation
 export const isMaxValueValidator: ValidatorTypeGuard = (prefix, rule) => {
   if (rule.op !== SUPPORTED_VALIDATORS.MAX_VALUE) return `${prefix} is not a supported validation function, got ${rule.op}`;
-  if (typeof rule.value !== "number" || typeof rule.value !== "string") return `${prefix}.value must be a number or string`;
+  if (typeof rule.value !== "number" && typeof rule.value !== "string") return `${prefix}.value must be a number or supported datestring`;
+  if (typeof rule.value === "string" && !Object.values(DATE_OPTS).includes(rule.value as DATE_OPTS))
+    return `${prefix}.value must be a number or supported datestring`
 }
 export const isMinValueValidator: ValidatorTypeGuard = (prefix, rule) => {
   if (rule.op !== SUPPORTED_VALIDATORS.MIN_VALUE) return `${prefix} is not a supported validation function, got ${rule.op}`;

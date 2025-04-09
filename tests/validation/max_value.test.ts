@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import { SUPPORTED_VALIDATORS } from '../../src/validation';
-import { MaxValueValidator } from '../../src/validation/validators/max_value';
+import { DATE_OPTS, MaxValueValidator } from '../../src/validation/validators/max_value';
 
 test('MaxValueValidator', () => {
   const v = new MaxValueValidator({ op: SUPPORTED_VALIDATORS.MAX_VALUE, value: 100 });
@@ -77,7 +77,7 @@ test('MaxValueValidator', () => {
 });
 
 test('MaxValueValidator::dateString [year]', () => {
-  const v = new MaxValueValidator({ op: SUPPORTED_VALIDATORS.MAX_VALUE, value: '{{currentYear}}' });
+  const v = new MaxValueValidator({ op: SUPPORTED_VALIDATORS.MAX_VALUE, value: DATE_OPTS.CURRENT_YEAR });
 
   const year = new Date().getUTCFullYear();
 
@@ -108,7 +108,7 @@ test('MaxValueValidator::dateString [year]', () => {
 test('MaxValueValidator::dateString [month]', () => {
   const v = new MaxValueValidator({
     op: SUPPORTED_VALIDATORS.MAX_VALUE,
-    value: '{{currentMonth}}',
+    value: DATE_OPTS.CURRENT_MONTH,
   });
 
   const month = new Date().getUTCMonth();
@@ -125,5 +125,6 @@ test('MaxValueValidator::dateString [month]', () => {
 });
 
 test('MaxValueValidator fails for invalid options', () => {
+  // @ts-expect-error
   expect(() => new MaxValueValidator({ op: SUPPORTED_VALIDATORS.MAX_VALUE, value: '[[[' })).toThrow();
 });
