@@ -1,13 +1,7 @@
 // REPLACE ALL REFERENCES TO "_generic_hasher" WITH THE DESIRED ALGORITHM IN THE ALGORITHMS DIRECTORY.
-
-import { dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
-
 import { generateHashesForDocument, validateDocument, type CidDocument, type Config } from '../src/index';
 import { SUPPORTED_VALIDATORS } from '../src/validation/Validation';
 import { makeHasher } from './example_algorithm/_generic_hasher';
-
-const __dirname = dirname(fileURLToPath(import.meta.url));
 
 /*
   Construct a config object instructing the algorithm HOW to process the data being passed
@@ -18,9 +12,8 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 */
 const config: Config.Options = {
   meta: {
-    region: "UNKONWN", // this must match the shortCode of the algorithm being used
-    version: "",
-    signature: ""
+    // this must match the shortCode of the algorithm being used
+    region: "UNKONWN"
   },
   // the schema information for the source data
   source: {
