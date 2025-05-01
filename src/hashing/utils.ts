@@ -20,7 +20,7 @@ import type { Validator } from '../validation/Validation';
 // takes an row object and the "algorithm.columns" config and returns a new
 // object with { static: [<COL VALUES>], to_translate: [..], reference: [...] } columns
 export function extractAlgoColumnsFromObject(
-  columnConfig: Config.Options['algorithm']['columns'],
+  columnConfig: Config.CoreConfiguration['algorithm']['columns'],
   obj: Validator.InputData['row'],
 ) {
   // check if we have an actual config
@@ -28,7 +28,7 @@ export function extractAlgoColumnsFromObject(
     throw new Error('Invalid algorithm columns config');
   }
 
-  let output: Config.Options['algorithm']['columns'] = {
+  let output: Config.CoreConfiguration['algorithm']['columns'] = {
     static: columnConfig.static.map((colName) => obj[colName]),
     process: columnConfig.process.map((colName) => obj[colName]),
     reference: columnConfig.reference.map((colName) => obj[colName]),

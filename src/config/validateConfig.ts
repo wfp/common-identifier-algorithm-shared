@@ -29,7 +29,6 @@ import {
   isRegexMatchValidator,
   isSameValueForAllRowsValidator,
 } from '../validation/Validation';
-import type { ValidationRule } from '../validation/Validation';
 
 type ConfigValidatorResult = string | undefined;
 type ConfigValidator = (label: string, v: unknown) => ConfigValidatorResult;
@@ -68,43 +67,32 @@ const isArrayOfNumbers = (label: string, v: unknown) => {
   if (v.some((e) => typeof e !== 'number')) return `${label} must contain only numbers`;
 };
 
-const isArrayOfCustomType = <T>(
-  label: string,
-  v: unknown,
-  pred: (c: T) => ConfigValidatorResult,
-): ConfigValidatorResult => {
+const isArrayOfCustomType = <T>(label: string, v: unknown, pred: (c: T) => ConfigValidatorResult): ConfigValidatorResult => {
   if (!Array.isArray(v)) return `${label} must be an array`;
   const result = v.find(pred);
   if (result) return `${label}${pred(result)}`;
 };
 
-const isSupportedType = (label: string, v: unknown) => {
-  if (
-    typeof v === 'string' ||
-    typeof v === 'number' ||
-    (Array.isArray(v) && (v.some((e) => typeof e !== 'number') || v.some((e) => typeof e !== 'string')))
-  )
-    return undefined;
-  else return `${label} must either be a string, number, string[], number[]`;
+const checkMetaCore = (meta: Config.CoreConfiguration['meta'], region: string) => {
+  if (typeof meta !== 'object') return `[meta] must be present`;
+  if (meta.region != region) return `[meta].region is not '${region}'`;
+  return (isString('[meta].region', meta.region));
 };
 
-const checkMeta = (meta: Config.Options['meta'], region: string) => {
+const checkMeta = (meta: Config.FileConfiguration['meta'], region: string) => {
   if (typeof meta !== 'object') return `[meta] must be present`;
   if (meta.region != region) return `[meta].region is not '${region}'`;
   return (
     isString('[meta].region', meta.region) ||
-    isOptional('[meta].version?', meta.version, isString) ||
-    isOptional('[meta].signature?', meta.signature, isString)
+    isString('[meta].version', meta.version) ||
+    isString('[meta].signature', meta.signature)
   );
 };
 
-const checkMessages = (messages: Config.Options['messages']) => {
-  // messages is an optional field unless using the UI
-  // TODO: add a check for this in the electron code
-  if (typeof messages === 'undefined') return;
-  // if messages are provided, all keys must be filled
+const checkMessages = (messages: Config.FileConfiguration['messages']) => {
+  // even though messages are marked optional in the type, if using the UI they are mandatory.
+  if (typeof messages !== 'object') return isObject('[messages]', messages);
   return (
-    isObject('[messages]', messages) ||
     isString('[messages].error_in_config', messages.error_in_config) ||
     isString('[messages].error_in_salt', messages.error_in_salt) ||
     isString('[messages].terms_and_conditions', messages.terms_and_conditions)
@@ -123,11 +111,11 @@ const checkColumns = (label: string, columns: Config.Column[]) => {
   );
 };
 
-const checkSource = (source: Config.Options['source']) => {
+const checkSource = (source: Config.CoreConfiguration['source']) => {
   return isObject('[source]', source) || checkColumns('[source]', source.columns);
 };
 
-const checkDestination = (label: string, destination: Config.Options['destination']) => {
+const checkDestination = (label: string, destination: Config.FileConfiguration['destination']) => {
   return (
     isObject(`[${label}]`, destination) ||
     isOptional(`[${label}].postfix?`, destination.postfix, isString) ||
@@ -135,7 +123,7 @@ const checkDestination = (label: string, destination: Config.Options['destinatio
   );
 };
 
-const checkValidations = (validations: Config.Options['validations'], sourceColumns: string[]) => {
+const checkValidations = (validations: Config.CoreConfiguration['validations'], sourceColumns: string[]) => {
   if (!validations) return isOptional('[validations]', validations, isObject);
 
   for (let key of Object.keys(validations)) {
@@ -145,9 +133,6 @@ const checkValidations = (validations: Config.Options['validations'], sourceColu
       if (key !== '*') return `[validations].${key} does not have a corresponding [source] column.`;
     }
 
-    // syntax checks
-    // let check = checkValidationRule(`[validations].${key}`, validations[key]);
-    // if (check) return check; // break on first error
     for (let rule of validations[key]) {
       const prefix = `[validations].${key}.[${rule.op}]`;
       
@@ -181,11 +166,10 @@ const checkValidations = (validations: Config.Options['validations'], sourceColu
   }
 };
 
-const checkAlgorithm = (algorithm: Config.Options['algorithm'], sourceColumns: string[]) => {
+const checkAlgorithm = (algorithm: Config.CoreConfiguration['algorithm'], sourceColumns: string[]) => {
   let exists = isObject('[algorithm]', algorithm) || isObject('[algorithm].columns', algorithm.columns);
   if (exists) return exists;
 
-  // check columns
   const colGroups = [
     { label: '[algorithm].columns.process', value: algorithm.columns.process },
     { label: '[algorithm].columns.static', value: algorithm.columns.static },
@@ -204,14 +188,12 @@ const checkAlgorithm = (algorithm: Config.Options['algorithm'], sourceColumns: s
     }
   }
 
-  // check hash
   // TODO: Add support for other hashing functions
   exists =
     isObject('[algorithm].hash', algorithm.hash) ||
     isOneOf('[algorithm].hash.strategy', ['SHA256'], algorithm.hash.strategy);
   if (exists) return exists;
 
-  // check salt
   exists =
     isObject('[algorithm].salt', algorithm.salt) ||
     isOneOf('[algorithm].salt.source', ['FILE', 'STRING'], algorithm.salt.source);
@@ -245,17 +227,30 @@ const checkAlgorithm = (algorithm: Config.Options['algorithm'], sourceColumns: s
   }
 };
 
-export function validateConfig(config: Config.Options, region: string) {
+export function validateConfigCore(config: Config.CoreConfiguration, region: string) {
   let errors: string[] = [];
-  const meta = checkMeta(config.meta, region);
+  const meta = checkMetaCore(config.meta, region);
   if (meta) errors.push(meta);
-
-  const messages = checkMessages(config.messages);
-  if (messages) errors.push(messages);
 
   const source = checkSource(config.source);
   if (source) errors.push(source);
   const sourceColumns = config.source.columns.map((c) => c.alias);
+
+  const validations = checkValidations(config.validations, sourceColumns);
+  if (validations) errors.push(validations);
+
+  const algorithm = checkAlgorithm(config.algorithm, sourceColumns);
+  if (algorithm) errors.push(algorithm);
+  return errors.length > 0 ? errors.join("\n") : undefined;
+}
+
+export function validateConfigFile(config: Config.FileConfiguration, region: string, ui: boolean=false) {
+  let errors: string[] = [];
+  const core = validateConfigCore(config, region);
+  if (core) errors.push(core);
+
+  const meta = checkMeta(config.meta, region);
+  if (meta) errors.push(meta);
 
   const destination = checkDestination('destination', config.destination);
   if (destination) errors.push(destination);
@@ -266,11 +261,10 @@ export function validateConfig(config: Config.Options, region: string) {
   const destinationErrors = checkDestination('destination_errors', config.destination_errors);
   if (destinationErrors) errors.push(destinationErrors);
 
-  const validations = checkValidations(config.validations, sourceColumns);
-  if (validations) errors.push(validations);
-
-  const algorithm = checkAlgorithm(config.algorithm, sourceColumns);
-  if (algorithm) errors.push(algorithm);
+  if (ui) {
+    const messages = checkMessages(config.messages);
+    if (messages) errors.push(messages);
+  }
  
   return errors.length > 0 ? errors.join("\n") : undefined;
 }

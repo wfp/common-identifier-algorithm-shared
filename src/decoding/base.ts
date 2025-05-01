@@ -22,9 +22,9 @@ import type { CidDocument } from '../document';
 import type { RawData, MappedData } from '../document';
 
 export abstract class DecoderBase {
-  sourceConfig: Config.Options['source'];
+  sourceConfig: Config.CoreConfiguration['source'];
 
-  constructor(sourceConfig: Config.Options['source']) {
+  constructor(sourceConfig: Config.CoreConfiguration['source']) {
     this.sourceConfig = sourceConfig;
   }
 

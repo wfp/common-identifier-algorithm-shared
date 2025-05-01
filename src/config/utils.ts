@@ -54,7 +54,7 @@ export function attemptToReadTOMLData<T>(filePath: string, encoding: fs.Encoding
 
 // takes into consideration the platform and the type of value provided by the config
 // to return an actual, absolute salt file path
-export function getSaltFilePath(saltValueConfig: Config.Options['algorithm']['salt']['value']) {
+export function getSaltFilePath(saltValueConfig: Config.CoreConfiguration['algorithm']['salt']['value']) {
   // if the value is a string always use it
   if (typeof saltValueConfig === 'string') return saltValueConfig;
 

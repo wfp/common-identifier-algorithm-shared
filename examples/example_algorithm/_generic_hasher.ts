@@ -18,7 +18,7 @@ import { joinFieldsForHash, cleanValueList, extractAlgoColumnsFromObject, BaseHa
 import type { Config, Validator, makeHasherFunction } from 'common-identifier-algorithm-shared';
 
 class GenericHasher extends BaseHasher {
-    constructor(config: Config.Options["algorithm"]) {
+    constructor(config: Config.CoreConfiguration["algorithm"]) {
         super(config);
     }
 
@@ -38,7 +38,7 @@ class GenericHasher extends BaseHasher {
 }
 
 export const REGION = "ANY";
-export const makeHasher: makeHasherFunction = (config: Config.Options["algorithm"]) => {
+export const makeHasher: makeHasherFunction = (config: Config.CoreConfiguration["algorithm"]) => {
     switch (config.hash.strategy.toLowerCase()) {
         case 'sha256':
             return new GenericHasher(config);

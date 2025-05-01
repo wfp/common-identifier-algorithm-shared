@@ -52,11 +52,11 @@ export async function readFile(
   return decoded;
 }
 
-export function validateDocument(
-  config: Config.Options,
-  decoded: CidDocument,
-  isMapping: boolean = false,
-): Validated.Document {
+type ValidateDocumentInput = |
+  { config: Config.CoreConfiguration, decoded: CidDocument, isMapping: false } |
+  { config: Config.FileConfiguration, decoded: CidDocument, isMapping: boolean }
+
+export function validateDocument({ config, decoded, isMapping }: ValidateDocumentInput): Validated.Document {
   let validatorDict = makeValidatorListDict(config.validations);
 
   // if this is a mapping document leave only the validators for the algorithm columns
@@ -103,7 +103,7 @@ export interface PreprocessFileResult {
 }
 
 interface PreProcessFileInput {
-  config: Config.Options;
+  config: Config.FileConfiguration;
   inputFilePath: string;
   errorFileOutputPath?: string;
   limit?: number;
@@ -125,13 +125,23 @@ export async function preprocessFile({
 
   // VALIDATION
   // ==========
-  const isMappingDocument = isMappingOnlyDocument(
+
+  // this function assumes that config.destination, config.destination_map, and config.destination_errors
+  // are set in the configuration file. This is not validated at launch time since these fields can be
+  // ommitted from config if using this a library (without the UI). Do a quick undefined check here to
+  // validate:
+  if (!config.destination || !config.destination_map || !config.destination_errors) {
+    // TODO: how to propagate this error up to the UI (is that even necessary)?
+    throw new Error("ERROR: Config file invalid for this use, it must specify 'destination', 'destination_map', and 'destination_errors' fields.")
+  }
+
+  const isMapping = isMappingOnlyDocument(
     config.algorithm.columns,
     config.source,
     config.destination_map,
     decoded,
   );
-  const validationResult = validateDocument(config, decoded, isMappingDocument);
+  const validationResult = validateDocument({ config, decoded, isMapping });
 
   let validationErrorsOutputFile: string | undefined;
   let validationResultDocument: CidDocument;
@@ -142,7 +152,7 @@ export async function preprocessFile({
     let validationResultBaseConfig = config.source;
 
     // but if this is a mapping document we only show the mapping columns in the validation output document
-    if (isMappingDocument) validationResultBaseConfig = keepOutputColumns(config, validationResultBaseConfig);
+    if (isMapping) validationResultBaseConfig = keepOutputColumns(config, validationResultBaseConfig);
 
     validationResultDocument = makeValidationResultDocument(validationResultBaseConfig, validationResult);
 
@@ -157,7 +167,7 @@ export async function preprocessFile({
     );
     return {
       isValid: validationResult.ok,
-      isMappingDocument,
+      isMappingDocument: isMapping,
       document: validationResultDocument,
       inputFilePath: inputFilePath,
       errorFilePath: validationErrorsOutputFile,
@@ -166,7 +176,7 @@ export async function preprocessFile({
 
   return {
     isValid: validationResult.ok,
-    isMappingDocument,
+    isMappingDocument: isMapping,
     document: decoded,
     inputFilePath: inputFilePath,
     errorFilePath: validationErrorsOutputFile,
@@ -184,7 +194,7 @@ export interface ProcessFileResult {
 }
 
 interface ProcessFileInput {
-  config: Config.Options;
+  config: Config.FileConfiguration;
   outputPath: string;
   inputFilePath: string;
   hasherFactory: makeHasherFunction;
@@ -215,6 +225,12 @@ export async function processFile({
 
   // OUTPUT
   // ------
+
+  // See comment in preprocess function for why this is necessary.
+  if (!config.destination || !config.destination_map || !config.destination_errors) {
+    // TODO: how to propagate this error up to the UI (is that even necessary)?
+    throw new Error("ERROR: Config file invalid for this use, it must specify 'destination', 'destination_map', and 'destination_errors' fields.")
+  }
 
   // if the user specified a format use that, otherwise use the input format
   const outputFileType = format || inputFileType;

@@ -25,16 +25,20 @@ type RecursivePartial<T> = { [P in keyof T]?: RecursivePartial<T[P]> };
 
 // Takes a config, removes the "signature" and salt keys from it, generates
 // a stable JSON representation and hashes it using the provided algorithm
-export function generateConfigHash(config: Config.Options, hashType = DEFAULT_HASH_TYPE) {
+export function generateConfigHash<T extends Config.CoreConfiguration>(config: T, hashType = DEFAULT_HASH_TYPE) {
   // create a nested copy of the object
-  const configCopy = { ...(JSON.parse(JSON.stringify(config)) as RecursivePartial<Config.Options>) };
+  const configCopy = { ...(JSON.parse(JSON.stringify(config)) as RecursivePartial<T>) };
 
   // remove the "signature" key
-  delete configCopy.meta!.signature;
+  if (configCopy.meta && "signature" in configCopy.meta) {
+    delete configCopy.meta.signature;
+  }
 
   // remove the "messages" key
   // TODO: messages should go in a separate locales file to future proof translations
-  delete configCopy.messages;
+  if ("messages" in configCopy) {
+    delete configCopy.messages;
+  }
 
   // remove the "algorithm.salt" part as it may have injected keys
   // TODO: this enables messing with the salt file path pre-injection without signature validations, but is required for compatibility w/ the injection workflow

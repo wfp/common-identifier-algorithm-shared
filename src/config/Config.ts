@@ -30,8 +30,8 @@ export namespace Config {
     static: string[];
     reference: string[];
   }
-  export type StringBasedSalt = { source: 'STRING'; value: string };
-  export type FileBasedSalt = {
+  type StringBasedSalt = { source: 'STRING'; value: string };
+  type FileBasedSalt = {
     source: 'FILE';
     validator_regex?: string;
     value: {
@@ -40,18 +40,8 @@ export namespace Config {
       linux?: string;
     };
   };
-  export interface Options {
-    isBackup?: boolean;
-    meta: {
-      region: string;
-      version?: string;
-      signature?: string;
-    };
-    messages?: {
-      terms_and_conditions: string;
-      error_in_config: string;
-      error_in_salt: string;
-    };
+  export interface CoreConfiguration {
+    meta: { region: string }
     source: ColumnMap;
     validations?: { [key: string]: ValidationRule[] };
     algorithm: {
@@ -60,6 +50,21 @@ export namespace Config {
         strategy: 'SHA256';
       };
       salt: StringBasedSalt | FileBasedSalt;
+    };
+  }
+  export interface FileConfiguration extends CoreConfiguration {
+    isBackup?: boolean;
+    meta: {
+      region: string;
+      version: string;
+      signature: string;
+    }
+    // messages relevant for UI only so defining as optional here.
+    // TODO: messages are not relevant for file-based usage without the UI, factor them out to a UIConfig type.
+    messages?: {
+      terms_and_conditions: string;
+      error_in_config: string;
+      error_in_salt: string;
     };
     destination: ColumnMap;
     destination_map: ColumnMap;

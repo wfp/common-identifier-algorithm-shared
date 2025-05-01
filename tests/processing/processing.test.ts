@@ -30,7 +30,7 @@ import { extractAlgoColumnsFromObject } from '../../src/hashing/utils';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-const CONFIG: Config.Options = {
+const CONFIG: Config.FileConfiguration = {
   meta: { region: '', version: '', signature: '' },
   source: {
     columns: [
@@ -180,7 +180,7 @@ test('preprocessFile invalid', async () => {
 ////////////////////////////////////////////////////////////////////////////////
 
 class TestHasher extends BaseHasher {
-  constructor(config: Config.Options['algorithm']) {
+  constructor(config: Config.CoreConfiguration['algorithm']) {
     super(config);
   }
 
@@ -193,7 +193,7 @@ class TestHasher extends BaseHasher {
   }
 }
 
-const makeTestHasher: makeHasherFunction = (config: Config.Options['algorithm']) => {
+const makeTestHasher: makeHasherFunction = (config: Config.CoreConfiguration['algorithm']) => {
   return new TestHasher(config);
 };
 

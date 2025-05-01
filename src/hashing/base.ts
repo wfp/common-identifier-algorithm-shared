@@ -20,13 +20,13 @@ import base32 from 'hi-base32';
 import type { Config } from '../config/Config';
 import type { Validator } from '../validation/Validation';
 
-export type makeHasherFunction = (config: Config.Options['algorithm']) => BaseHasher;
+export type makeHasherFunction = (config: Config.CoreConfiguration['algorithm']) => BaseHasher;
 
 export abstract class BaseHasher {
-  config: Config.Options['algorithm'];
-  saltValue: Config.Options['algorithm']['salt']['value'];
+  config: Config.CoreConfiguration['algorithm'];
+  saltValue: Config.CoreConfiguration['algorithm']['salt']['value'];
 
-  constructor(config: Config.Options['algorithm']) {
+  constructor(config: Config.CoreConfiguration['algorithm']) {
     this.config = config;
 
     // at this point the salt data should be injected into the config

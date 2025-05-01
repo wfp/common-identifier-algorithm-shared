@@ -1,5 +1,5 @@
 // REPLACE ALL REFERENCES TO "_generic_hasher" WITH THE DESIRED ALGORITHM IN THE ALGORITHMS DIRECTORY.
-import { generateHashesForDocument, validateDocument, type CidDocument, type Config } from '../src/index';
+import { generateHashesForDocument, validateConfigCore, validateDocument, type CidDocument, type Config } from '../src/index';
 import { SUPPORTED_VALIDATORS } from '../src/validation/Validation';
 import { makeHasher } from './example_algorithm/_generic_hasher';
 
@@ -10,10 +10,10 @@ import { makeHasher } from './example_algorithm/_generic_hasher';
 
   see ../docs/configuration-files.md for more detail on the relevant config fields.
 */
-const config: Config.Options = {
+const config: Config.CoreConfiguration = {
   meta: {
     // this must match the shortCode of the algorithm being used
-    region: "UNKONWN"
+    region: "UNKNOWN"
   },
   // the schema information for the source data
   source: {
@@ -28,7 +28,6 @@ const config: Config.Options = {
     id: [
       { op: SUPPORTED_VALIDATORS.FIELD_TYPE, value: 'string' },
       { op: SUPPORTED_VALIDATORS.MAX_FIELD_LENGTH, value: 11 }
-      // { op: SUPPORTED_VALIDATORS.LINKED_FIELD, target: "col2" }
     ]
   },
   algorithm: {
@@ -39,13 +38,7 @@ const config: Config.Options = {
       reference: [],
       static: [ "id" ]
     },
-  },
-  // schema for main output file, skipping for brevity
-  destination: { columns: [] },
-  // schema for mapping output file, skipping for brevity
-  destination_map: { columns: [] },
-  // schema for error files, skipping for brevity
-  destination_errors: { columns: [] }
+  }
 }
 
 /*
@@ -61,8 +54,14 @@ const doc: CidDocument = {
 }
 
 function main() {
+  const configValidationResult = validateConfigCore(config, "UNKNOWN");
+  if (!!configValidationResult) {
+    console.log(`ERROR: ${configValidationResult}`);
+    throw new Error("Runtime validation of config failed, check config input");
+  }
+
   // validate the input data against all configured validation rules.
-  const validationResult = validateDocument(config, doc, false);
+  const validationResult = validateDocument({ config: config, decoded: doc, isMapping: false });
   if (!validationResult.ok) {
     console.dir(validationResult.results, { depth: 5 });
     throw new Error("Data contains validation errors, check input");

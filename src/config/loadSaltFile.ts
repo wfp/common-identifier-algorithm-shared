@@ -30,7 +30,7 @@ const DEFAULT_VALIDATOR_REGEXP: RegExp =
 
 // Attempts to load and clean up the salt file data
 export function loadSaltFile(
-  saltFilePath: Config.Options['algorithm']['salt']['value'],
+  saltFilePath: Config.FileConfiguration['algorithm']['salt']['value'],
   validatorRegexp = DEFAULT_VALIDATOR_REGEXP,
 ) {
   // resolve the salt file path from the config & platform

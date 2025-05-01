@@ -125,7 +125,7 @@ import {
   // returns a map of <field name> => <validator list>.
   //
   // This function merges the "*" field validations into each field's validator list
-  export function makeValidatorListDict(validationOpts: Config.Options['validations']) {
+  export function makeValidatorListDict(validationOpts: Config.CoreConfiguration['validations']) {
     if (!validationOpts) return {};
   
     // the "*" field denotes validators targeting all fields
@@ -191,7 +191,7 @@ import {
   // Generates a document for output based on the validation results.
   // sourceConfig is required to map the original column names in the error messages
   export const makeValidationResultDocument = (
-    sourceConfig: Config.Options['source'],
+    sourceConfig: Config.CoreConfiguration['source'],
     documentResult: Validated.Document,
   ): CidDocument => {
     let fieldNameMapping = sourceConfig.columns.reduce(

@@ -36,7 +36,7 @@ function ensureAppDirectoryExists(appDir: string) {
 // This function does not do any validations on the data
 // (that should have happened after loading the config)
 // NOTE: the config is saved as JSON (TOML serialization can be weird)
-function saveConfig(configData: Config.Options, outputPath: string) {
+function saveConfig(configData: Config.FileConfiguration, outputPath: string) {
   // update the config hash on import to account for the
   const outputData = JSON.stringify(configData, null, '    ');
   fs.writeFileSync(outputPath, outputData, CONFIG_FILE_ENCODING);
@@ -44,27 +44,30 @@ function saveConfig(configData: Config.Options, outputPath: string) {
 }
 
 interface ConfigStorePaths {
-  configFilePath: string;
-  appConfigFilePath: string;
-  backupConfigFilePath: string;
-  region: string;
+  config: string;
+  appConfig: string;
+  backupConfig: string;
 }
 
 export class ConfigStore {
-  data?: Config.Options = undefined;
+  data?: Config.FileConfiguration = undefined;
   validationResult = {};
   hasConfigLoaded: boolean = false;
   isValid: boolean = false;
   isUsingBackupConfig: boolean = false;
   lastUpdated: Date;
   loadError: string | undefined;
+  usingUI: boolean;
 
   appConfig: AppConfigData = DEFAULT_APP_CONFIG;
-  configPaths: ConfigStorePaths;
+  filePaths: ConfigStorePaths;
+  region: string;
 
-  constructor(configPaths: ConfigStorePaths) {
+  constructor(filePaths: ConfigStorePaths, region: string, usingUI: boolean = false) {
     this.lastUpdated = new Date();
-    this.configPaths = configPaths;
+    this.filePaths = filePaths;
+    this.region = region;
+    this.usingUI = usingUI;
   }
 
   getConfig() {
@@ -73,22 +76,22 @@ export class ConfigStore {
 
   // Returns the region of the store
   getRegion() {
-    return this.configPaths.region;
+    return this.region;
   }
 
   // Returns the path of the user config file
   getConfigFilePath() {
-    return this.configPaths.configFilePath;
+    return this.filePaths.config;
   }
 
   // Returns the path of the backup config file
   getBackupConfigFilePath() {
-    return this.configPaths.backupConfigFilePath;
+    return this.filePaths.backupConfig;
   }
 
   // Returns the path of the application config file
   getAppConfigFilePath() {
-    return this.configPaths.appConfigFilePath;
+    return this.filePaths.appConfig;
   }
 
   // Returns true if the current config is a backup configuration
@@ -213,14 +216,14 @@ export class ConfigStore {
   }
 
   // use a backup config and store its 'backupness'
-  useBackupConfig(configData: Config.Options) {
+  useBackupConfig(configData: Config.FileConfiguration) {
     this.isUsingBackupConfig = true;
     this.lastUpdated = new Date();
     this._useConfig(configData);
   }
 
   // use an actual user-provided config and store its 'user-providedness'
-  useUserConfig(configData: Config.Options, lastUpdateDate: Date) {
+  useUserConfig(configData: Config.FileConfiguration, lastUpdateDate: Date) {
     this.isUsingBackupConfig = false;
     this.lastUpdated = lastUpdateDate;
     this._useConfig(configData);
@@ -234,7 +237,7 @@ export class ConfigStore {
   }
 
   // use an already validated config as the app config
-  _useConfig(configData: Config.Options) {
+  _useConfig(configData: Config.FileConfiguration) {
     this.data = configData;
     this.hasConfigLoaded = true;
     this.isValid = true;
@@ -248,7 +251,7 @@ export class ConfigStore {
   }
 
   // Overwrites the existing configuration file with the new data
-  saveNewConfigData(configData: Config.Options) {
+  saveNewConfigData(configData: Config.FileConfiguration) {
     // before saving ensure that we can save the configuration
     ensureAppDirectoryExists(dirname(this.getConfigFilePath()));
     // TODO: maybe do a rename w/ timestamp for backup
@@ -292,7 +295,7 @@ export class ConfigStore {
   }
 }
 
-export function makeConfigStore(storeConfig: ConfigStorePaths) {
-  if (!storeConfig) throw new Error(`ConfigStore params MUST be provided.`);
-  return new ConfigStore(storeConfig);
+export function makeConfigStore({filePaths, region, usingUI}: {filePaths: ConfigStorePaths, region: string, usingUI: boolean}) {
+  if (!filePaths || !region) throw new Error(`ConfigStore params MUST be provided.`);
+  return new ConfigStore(filePaths, region, usingUI);
 }

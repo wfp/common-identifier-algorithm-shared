@@ -16,7 +16,7 @@
 
 import fs from 'node:fs';
 
-import { validateConfig } from './validateConfig';
+import { validateConfigFile } from './validateConfig';
 import { loadSaltFile } from './loadSaltFile';
 import { generateConfigHash } from './generateConfigHash';
 
@@ -29,18 +29,9 @@ const log = Debug('CID:loadConfig');
 export const CONFIG_FILE_ENCODING: fs.EncodingOption = 'utf-8';
 
 type LoadConfigResult =
-  | { success: true; lastUpdated: Date; config: Config.Options }
-  | {
-      success: false;
-      error: string;
-      isSaltFileError: false;
-    }
-  | {
-      success: false;
-      error: string;
-      isSaltFileError: true;
-      config: Config.Options;
-    };
+  | { success: true; lastUpdated: Date; config: Config.FileConfiguration; }
+  | { success: false; error: string; isSaltFileError: false; }
+  | { success: false; error: string; isSaltFileError: true; config: Config.FileConfiguration; };
 
 
 // Main entry point for loading a config file.
@@ -49,11 +40,11 @@ type LoadConfigResult =
 // - { success: false, error: "string" } if there are errors
 // - { success: false, isSaltFileError: true, error: "string"}
 //     if there is something wrong with the salt file
-export function loadConfig(configPath: string, region: string): LoadConfigResult {
+export function loadConfig(configPath: string, region: string, usingUI: boolean=false): LoadConfigResult {
   log('Loading config from', configPath);
 
   // attempt to read the file
-  const configData = attemptToReadTOMLData<Config.Options>(configPath, CONFIG_FILE_ENCODING);
+  const configData = attemptToReadTOMLData<Config.FileConfiguration>(configPath, CONFIG_FILE_ENCODING);
 
   // if cannot be read, we have an error
   if (!configData) {
@@ -68,7 +59,7 @@ export function loadConfig(configPath: string, region: string): LoadConfigResult
   const lastUpdateDate = new Date(fs.statSync(configPath).mtime);
 
   // validate the config
-  const validationResult = validateConfig(configData, region);
+  const validationResult = validateConfigFile(configData, region, usingUI);
 
   // if the config is not valid return false
   if (validationResult) {
@@ -132,7 +123,7 @@ export function loadConfig(configPath: string, region: string): LoadConfigResult
   }
 
   // replace the "FILE" with "STRING" amd embed the salt data
-  configData.algorithm.salt = configData.algorithm.salt as unknown as Config.StringBasedSalt;
+  configData.algorithm.salt = configData.algorithm.salt as unknown as Config.CoreConfiguration["algorithm"]["salt"];
   configData.algorithm.salt.source = 'STRING';
   configData.algorithm.salt.value = saltData;
 

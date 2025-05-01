@@ -25,7 +25,7 @@ import type { Config } from '../config/Config';
 class CsvDecoder extends DecoderBase {
   csvOptions: CsvOptions = {};
 
-  constructor(sourceConfig: Config.Options['source'], limit?: number) {
+  constructor(sourceConfig: Config.CoreConfiguration['source'], limit?: number) {
     super(sourceConfig);
     if (limit) this.csvOptions.to = limit + 1; // n+1 since header is included
   }
@@ -37,6 +37,6 @@ class CsvDecoder extends DecoderBase {
   }
 }
 
-export function makeCsvDecoder(sourceConfig: Config.Options['source'], limit?: number) {
+export function makeCsvDecoder(sourceConfig: Config.CoreConfiguration['source'], limit?: number) {
   return new CsvDecoder(sourceConfig, limit);
 }

@@ -31,7 +31,7 @@ import type { CidDocument } from '../document';
 class XlsxDecoder extends DecoderBase {
   decodeOptions: XLSX.ParsingOptions = {};
 
-  constructor(sourceConfig: Config.Options['source'], limit?: number) {
+  constructor(sourceConfig: Config.CoreConfiguration['source'], limit?: number) {
     super(sourceConfig);
     if (limit) this.decodeOptions.sheetRows = limit + 1; // n+1 since header is included
   }
@@ -67,6 +67,6 @@ class XlsxDecoder extends DecoderBase {
 }
 
 // Factory function for the CSV decoder
-export function makeXlsxDecoder(sourceConfig: Config.Options['source'], limit?: number) {
+export function makeXlsxDecoder(sourceConfig: Config.CoreConfiguration['source'], limit?: number) {
   return new XlsxDecoder(sourceConfig, limit);
 }

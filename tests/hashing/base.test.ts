@@ -18,7 +18,7 @@ import { BaseHasher } from '../../src/hashing/base';
 import type { Config } from '../../src/config/Config';
 import type { Validator } from '../../src/validation/Validation';
 
-const BASE_CFG: Config.Options['algorithm'] = {
+const BASE_CFG: Config.CoreConfiguration['algorithm'] = {
   columns: { static: [], process: [], reference: [] },
   hash: { strategy: 'SHA256' },
   salt: { source: 'STRING', value: 'NOPE' },

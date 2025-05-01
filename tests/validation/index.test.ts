@@ -30,7 +30,7 @@ import type { CidDocument } from '../../src/document';
 const className = (obj: object) => obj.constructor.name;
 
 test('makeValidatorListDict types', () => {
-  const TEST_CONFIG: Config.Options['validations'] = {
+  const TEST_CONFIG: Config.CoreConfiguration['validations'] = {
     col_a: [
       { op: SUPPORTED_VALIDATORS.DATE_DIFF, value: ':3M' },
       { op: SUPPORTED_VALIDATORS.DATE_FIELD_DIFF, target: 'col_b', value: ':1M' },
@@ -69,7 +69,7 @@ test('makeValidatorListDict types', () => {
 });
 
 test('makeValidatorListDict columns', () => {
-  const TEST_CONFIG: Config.Options["validations"] = {
+  const TEST_CONFIG: Config.CoreConfiguration["validations"] = {
     '*': [{ op: SUPPORTED_VALIDATORS.OPTIONS, value: ['A', 'A0'] }],
     col_a: [],
     col_b: [],

@@ -29,10 +29,13 @@ const APP_CONFIG_FILE_NAME = 'test-appconfig.json';
 
 function makeTestConfig(basePath: string) {
   return {
-    configFilePath: join(basePath, CONFIG_FILE_NAME),
-    backupConfigFilePath: join(basePath, BACKUP_CONFIG_FILE_NAME),
-    appConfigFilePath: join(basePath, APP_CONFIG_FILE_NAME),
+    filePaths: {
+      config: join(basePath, CONFIG_FILE_NAME),
+      backupConfig: join(basePath, BACKUP_CONFIG_FILE_NAME),
+      appConfig: join(basePath, APP_CONFIG_FILE_NAME),
+    },
     region: 'ANY',
+    usingUI: false
   };
 }
 
