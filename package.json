@@ -1,6 +1,6 @@
 {
   "name": "common-identifier-algorithm-shared",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Generate psuedonymous identifiers from tabular data",
   "author": "World Food Programme",
   "license": "AGPL-3.0-or-later",
