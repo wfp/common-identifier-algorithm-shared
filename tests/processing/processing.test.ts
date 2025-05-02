@@ -31,7 +31,7 @@ import { extractAlgoColumnsFromObject } from '../../src/hashing/utils';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const CONFIG: Config.FileConfiguration = {
-  meta: { region: '', version: '', signature: '' },
+  meta: { id: '', version: '', signature: '' },
   source: {
     columns: [
       { name: 'A', alias: 'col_a' },

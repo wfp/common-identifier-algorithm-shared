@@ -61,43 +61,21 @@ export class ConfigStore {
 
   appConfig: AppConfigData = DEFAULT_APP_CONFIG;
   filePaths: ConfigStorePaths;
-  region: string;
+  algorithmId: string;
 
-  constructor(filePaths: ConfigStorePaths, region: string, usingUI: boolean = false) {
+  constructor(filePaths: ConfigStorePaths, algorithmId: string, usingUI: boolean = false) {
     this.lastUpdated = new Date();
     this.filePaths = filePaths;
-    this.region = region;
+    this.algorithmId = algorithmId;
     this.usingUI = usingUI;
   }
 
-  getConfig() {
-    return this.data;
-  }
-
-  // Returns the region of the store
-  getRegion() {
-    return this.region;
-  }
-
-  // Returns the path of the user config file
-  getConfigFilePath() {
-    return this.filePaths.config;
-  }
-
-  // Returns the path of the backup config file
-  getBackupConfigFilePath() {
-    return this.filePaths.backupConfig;
-  }
-
-  // Returns the path of the application config file
-  getAppConfigFilePath() {
-    return this.filePaths.appConfig;
-  }
-
-  // Returns true if the current config is a backup configuration
-  isCurrentConfigBackup() {
-    return this.data && this.data.isBackup;
-  }
+  getConfig = () => this.data;
+  getAlgorithmId = () => this.algorithmId;
+  getConfigFilePath = () => this.filePaths.config;
+  getBackupConfigFilePath = () => this.filePaths.backupConfig;
+  getAppConfigFilePath = () => this.filePaths.appConfig;
+  isCurrentConfigBackup = () => this.data && this.data.isBackup;
 
   // On boot we try to load the user config from AppData
   // or fall back to a backup config
@@ -106,7 +84,7 @@ export class ConfigStore {
     this.appConfig = loadAppConfig(this.getAppConfigFilePath());
 
     // attempt to load the default app config
-    const userConfigLoad = loadConfig(this.getConfigFilePath(), this.getRegion());
+    const userConfigLoad = loadConfig(this.getConfigFilePath(), this.getAlgorithmId());
 
     // if the load succesds we have a valid config -- use it as a
     // user-provided one
@@ -119,7 +97,7 @@ export class ConfigStore {
     log('User config validation not successful - attempting to load backup config');
     // if the default config load failed use the backup default
     // from the app distribution
-    const backupConfigLoad = loadConfig(this.getBackupConfigFilePath(), this.getRegion());
+    const backupConfigLoad = loadConfig(this.getBackupConfigFilePath(), this.getAlgorithmId());
 
     // if the load succesds we have a valid config -- use it as
     // a config-from-backup
@@ -158,7 +136,7 @@ export class ConfigStore {
   // The config data used by the application is updated after the save
   updateUserConfig(userConfigFilePath: string) {
     // attempt to load & validate the config data
-    const userConfigLoad = loadConfig(userConfigFilePath, this.getRegion());
+    const userConfigLoad = loadConfig(userConfigFilePath, this.getAlgorithmId());
 
     // if failed return the error message
     if (!userConfigLoad.success) {
@@ -190,7 +168,7 @@ export class ConfigStore {
     }
 
     log('[removeUserConfig] Trying to load backup config file');
-    const backupConfigLoad = loadConfig(this.getBackupConfigFilePath(), this.getRegion());
+    const backupConfigLoad = loadConfig(this.getBackupConfigFilePath(), this.getAlgorithmId());
 
     // if failed return the error message (do not delete the user config yet)
     if (!backupConfigLoad.success) {
@@ -295,7 +273,7 @@ export class ConfigStore {
   }
 }
 
-export function makeConfigStore({filePaths, region, usingUI}: {filePaths: ConfigStorePaths, region: string, usingUI: boolean}) {
-  if (!filePaths || !region) throw new Error(`ConfigStore params MUST be provided.`);
-  return new ConfigStore(filePaths, region, usingUI);
+export function makeConfigStore({filePaths, algorithmId, usingUI}: {filePaths: ConfigStorePaths, algorithmId: string, usingUI: boolean}) {
+  if (!filePaths || !algorithmId) throw new Error(`ConfigStore params MUST be provided.`);
+  return new ConfigStore(filePaths, algorithmId, usingUI);
 }

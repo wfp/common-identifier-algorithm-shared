@@ -73,17 +73,17 @@ const isArrayOfCustomType = <T>(label: string, v: unknown, pred: (c: T) => Confi
   if (result) return `${label}${pred(result)}`;
 };
 
-const checkMetaCore = (meta: Config.CoreConfiguration['meta'], region: string) => {
+const checkMetaCore = (meta: Config.CoreConfiguration['meta'], id: string) => {
   if (typeof meta !== 'object') return `[meta] must be present`;
-  if (meta.region != region) return `[meta].region is not '${region}'`;
-  return (isString('[meta].region', meta.region));
+  if (meta.id != id) return `[meta].id is not '${id}'`;
+  return (isString('[meta].id', meta.id));
 };
 
-const checkMeta = (meta: Config.FileConfiguration['meta'], region: string) => {
+const checkMeta = (meta: Config.FileConfiguration['meta'], id: string) => {
   if (typeof meta !== 'object') return `[meta] must be present`;
-  if (meta.region != region) return `[meta].region is not '${region}'`;
+  if (meta.id != id) return `[meta].id is not '${id}'`;
   return (
-    isString('[meta].region', meta.region) ||
+    isString('[meta].id', meta.id) ||
     isString('[meta].version', meta.version) ||
     isString('[meta].signature', meta.signature)
   );
@@ -227,9 +227,9 @@ const checkAlgorithm = (algorithm: Config.CoreConfiguration['algorithm'], source
   }
 };
 
-export function validateConfigCore(config: Config.CoreConfiguration, region: string) {
+export function validateConfigCore(config: Config.CoreConfiguration, id: string) {
   let errors: string[] = [];
-  const meta = checkMetaCore(config.meta, region);
+  const meta = checkMetaCore(config.meta, id);
   if (meta) errors.push(meta);
 
   const source = checkSource(config.source);
@@ -244,12 +244,12 @@ export function validateConfigCore(config: Config.CoreConfiguration, region: str
   return errors.length > 0 ? errors.join("\n") : undefined;
 }
 
-export function validateConfigFile(config: Config.FileConfiguration, region: string, ui: boolean=false) {
+export function validateConfigFile(config: Config.FileConfiguration, id: string, ui: boolean=false) {
   let errors: string[] = [];
-  const core = validateConfigCore(config, region);
+  const core = validateConfigCore(config, id);
   if (core) errors.push(core);
 
-  const meta = checkMeta(config.meta, region);
+  const meta = checkMeta(config.meta, id);
   if (meta) errors.push(meta);
 
   const destination = checkDestination('destination', config.destination);

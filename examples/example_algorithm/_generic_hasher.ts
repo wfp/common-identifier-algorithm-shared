@@ -37,7 +37,7 @@ class GenericHasher extends BaseHasher {
     }
 }
 
-export const REGION = "ANY";
+export const ALGORITHM_ID = "ANY";
 export const makeHasher: makeHasherFunction = (config: Config.CoreConfiguration["algorithm"]) => {
     switch (config.hash.strategy.toLowerCase()) {
         case 'sha256':

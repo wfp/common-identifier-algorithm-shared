@@ -13,7 +13,7 @@ import { makeHasher } from './example_algorithm/_generic_hasher';
 const config: Config.CoreConfiguration = {
   meta: {
     // this must match the shortCode of the algorithm being used
-    region: "UNKNOWN"
+    id: "UNKNOWN"
   },
   // the schema information for the source data
   source: {

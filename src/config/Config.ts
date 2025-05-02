@@ -41,7 +41,7 @@ export namespace Config {
     };
   };
   export interface CoreConfiguration {
-    meta: { region: string }
+    meta: { id: string }
     source: ColumnMap;
     validations?: { [key: string]: ValidationRule[] };
     algorithm: {
@@ -55,7 +55,7 @@ export namespace Config {
   export interface FileConfiguration extends CoreConfiguration {
     isBackup?: boolean;
     meta: {
-      region: string;
+      id: string;
       version: string;
       signature: string;
     }

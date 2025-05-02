@@ -22,12 +22,12 @@ import { loadConfig } from '../../src/config/loadConfig';
 import { generateConfigHash } from '../../src/config/generateConfigHash';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const REGION = 'ANY';
+const ALGORITHM_ID = 'ANY';
 const FILES_PATH = join(__dirname, 'files');
 
 test('loadConfig ok', () => {
   const TEST_FILE_PATH = join(FILES_PATH, 'test-config.json');
-  const loadResult = loadConfig(TEST_FILE_PATH, REGION);
+  const loadResult = loadConfig(TEST_FILE_PATH, ALGORITHM_ID);
 
   expect(loadResult.success).toEqual(true);
   if (!loadResult.success) throw new TypeError();
@@ -42,7 +42,7 @@ test('loadConfig ok', () => {
 
 test('loadConfig invalid', () => {
   const TEST_FILE_PATH = join(FILES_PATH, 'test-appconfig.json');
-  expect(() => loadConfig(TEST_FILE_PATH, REGION)).toThrow();
+  expect(() => loadConfig(TEST_FILE_PATH, ALGORITHM_ID)).toThrow();
 });
 
 test('loadConfig salt', () => {
@@ -57,7 +57,7 @@ test('loadConfig salt', () => {
 
   writeFileSync(TEST_FILE_PATH, JSON.stringify(cfg), 'utf-8');
 
-  const loadResult = loadConfig(TEST_FILE_PATH, REGION);
+  const loadResult = loadConfig(TEST_FILE_PATH, ALGORITHM_ID);
 
   expect(loadResult.success).toEqual(true);
   if (!loadResult.success) throw new TypeError();
@@ -78,7 +78,7 @@ test('loadConfig salt error', () => {
 
   writeFileSync(TEST_FILE_PATH, JSON.stringify(cfg), 'utf-8');
 
-  const loadResult = loadConfig(TEST_FILE_PATH, REGION);
+  const loadResult = loadConfig(TEST_FILE_PATH, ALGORITHM_ID);
 
   expect(loadResult.success).toEqual(false);
 });

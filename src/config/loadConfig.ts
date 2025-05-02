@@ -40,7 +40,7 @@ type LoadConfigResult =
 // - { success: false, error: "string" } if there are errors
 // - { success: false, isSaltFileError: true, error: "string"}
 //     if there is something wrong with the salt file
-export function loadConfig(configPath: string, region: string, usingUI: boolean=false): LoadConfigResult {
+export function loadConfig(configPath: string, algorithmId: string, usingUI: boolean=false): LoadConfigResult {
   log('Loading config from', configPath);
 
   // attempt to read the file
@@ -59,7 +59,7 @@ export function loadConfig(configPath: string, region: string, usingUI: boolean=
   const lastUpdateDate = new Date(fs.statSync(configPath).mtime);
 
   // validate the config
-  const validationResult = validateConfigFile(configData, region, usingUI);
+  const validationResult = validateConfigFile(configData, algorithmId, usingUI);
 
   // if the config is not valid return false
   if (validationResult) {

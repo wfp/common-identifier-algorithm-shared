@@ -1,8 +1,8 @@
 {
   "meta": {
-    "region": "ANY",
+    "id": "ANY",
     "version": "0.1.0",
-    "signature": "a2849754ac478f151b2f9c3c36c05b8d"
+    "signature": "244fb3e1e1846ae1385a64cf1c3a0ce5"
   },
   "source": {
     "columns": [

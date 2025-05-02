@@ -34,7 +34,7 @@ function makeTestConfig(basePath: string) {
       backupConfig: join(basePath, BACKUP_CONFIG_FILE_NAME),
       appConfig: join(basePath, APP_CONFIG_FILE_NAME),
     },
-    region: 'ANY',
+    algorithmId: 'ANY',
     usingUI: false
   };
 }
@@ -61,7 +61,7 @@ test('ConfigStore loading', () => {
 
   const config = Object.assign({}, c.getConfig());
 
-  expect(config.meta.region).toEqual('ANY');
+  expect(config.meta.id).toEqual('ANY');
   expect(config.meta.version).toEqual('0.1.0');
 
   expect(config.algorithm.salt.source).toEqual('STRING');
@@ -152,7 +152,7 @@ test('ConfigStore saving and loading user config', () => {
     expect(c.isValid).toEqual(true);
 
     const config = Object.assign({}, c.getConfig());
-    expect(config.meta.region).toEqual('ANY');
+    expect(config.meta.id).toEqual('ANY');
 
     // ERROR
     const errResult = c.updateUserConfig(join(basePath, 'config.xxx.toml'));
