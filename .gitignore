@@ -6,4 +6,4 @@ coverage
 
 /lib
 output/
-scratch.ts
+scratch.*
