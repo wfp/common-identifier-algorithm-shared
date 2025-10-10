@@ -114,7 +114,7 @@ export function loadConfig({ configPath, algorithmId, usingUI=false, validateCon
 
   // attempt to load the salt file
   // saltFilePath must be { win32: string, darwin: string } at this stage since salt.source is guaranteed to be "FILE".
-  const saltData = loadSaltFile(saltFilePath, saltFileValidatorRegexp);
+  const saltData = loadSaltFile({ saltFilePath: saltFilePath, validatorRegexp: saltFileValidatorRegexp });
 
   // if the salt file load failed, we have failed
   if (!saltData) {

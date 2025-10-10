@@ -84,7 +84,7 @@ export class ConfigStore {
     this.appConfig = loadAppConfig(this.getAppConfigFilePath());
 
     // attempt to load the default app config
-    const userConfigLoad = loadConfig(this.getConfigFilePath(), this.getAlgorithmId());
+    const userConfigLoad = loadConfig({ configPath: this.getConfigFilePath(), algorithmId: this.getAlgorithmId() });
 
     // if the load succesds we have a valid config -- use it as a
     // user-provided one
@@ -97,7 +97,7 @@ export class ConfigStore {
     log('User config validation not successful - attempting to load backup config');
     // if the default config load failed use the backup default
     // from the app distribution
-    const backupConfigLoad = loadConfig(this.getBackupConfigFilePath(), this.getAlgorithmId());
+    const backupConfigLoad = loadConfig({ configPath: this.getBackupConfigFilePath(), algorithmId: this.getAlgorithmId()});
 
     // if the load succesds we have a valid config -- use it as
     // a config-from-backup
@@ -136,7 +136,7 @@ export class ConfigStore {
   // The config data used by the application is updated after the save
   updateUserConfig(userConfigFilePath: string) {
     // attempt to load & validate the config data
-    const userConfigLoad = loadConfig(userConfigFilePath, this.getAlgorithmId());
+    const userConfigLoad = loadConfig({ configPath: userConfigFilePath, algorithmId: this.getAlgorithmId()});
 
     // if failed return the error message
     if (!userConfigLoad.success) {
@@ -168,7 +168,7 @@ export class ConfigStore {
     }
 
     log('[removeUserConfig] Trying to load backup config file');
-    const backupConfigLoad = loadConfig(this.getBackupConfigFilePath(), this.getAlgorithmId());
+    const backupConfigLoad = loadConfig({ configPath: this.getBackupConfigFilePath(), algorithmId: this.getAlgorithmId()});
 
     // if failed return the error message (do not delete the user config yet)
     if (!backupConfigLoad.success) {

@@ -28,11 +28,13 @@ const SALT_FILE_ENCODING: fs.EncodingOption = 'utf-8';
 const DEFAULT_VALIDATOR_REGEXP: RegExp =
   /-----BEGIN PGP PUBLIC KEY BLOCK-----[A-Za-z0-9+/=\s]+-----END PGP PUBLIC KEY BLOCK-----/;
 
+interface LoadSaltFileInput {
+  saltFilePath: Config.FileConfiguration['algorithm']['salt']['value'];
+  validatorRegexp?: RegExp;
+}
+
 // Attempts to load and clean up the salt file data
-export function loadSaltFile(
-  saltFilePath: Config.FileConfiguration['algorithm']['salt']['value'],
-  validatorRegexp = DEFAULT_VALIDATOR_REGEXP,
-) {
+export function loadSaltFile({ saltFilePath, validatorRegexp = DEFAULT_VALIDATOR_REGEXP }: LoadSaltFileInput) {
   // resolve the salt file path from the config & platform
   const fullSaltFilePath = getSaltFilePath(saltFilePath);
 
