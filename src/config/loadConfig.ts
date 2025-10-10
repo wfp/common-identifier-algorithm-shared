@@ -34,13 +34,19 @@ type LoadConfigResult =
   | { success: false; error: string; isSaltFileError: true; config: Config.FileConfiguration; };
 
 
+type LoadConfigInput = {
+  configPath: string,
+  algorithmId: string,
+  usingUI?: boolean,
+  validateConfig?: boolean
+}
 // Main entry point for loading a config file.
 // returns:
 // - { success: true } if the config can be loaded
 // - { success: false, error: "string" } if there are errors
 // - { success: false, isSaltFileError: true, error: "string"}
 //     if there is something wrong with the salt file
-export function loadConfig(configPath: string, algorithmId: string, usingUI: boolean=false): LoadConfigResult {
+export function loadConfig({ configPath, algorithmId, usingUI=false, validateConfig=true }: LoadConfigInput): LoadConfigResult {
   log('Loading config from', configPath);
 
   // attempt to read the file
@@ -58,29 +64,30 @@ export function loadConfig(configPath: string, algorithmId: string, usingUI: boo
   // if the file can be read, attempt to fetch the last modified date
   const lastUpdateDate = new Date(fs.statSync(configPath).mtime);
 
-  // validate the config
-  const validationResult = validateConfigFile(configData, algorithmId, usingUI);
+  if (!!validateConfig) {
+    // validate the config
+    const validationResult = validateConfigFile(configData, algorithmId, usingUI);
+  
+    // if the config is not valid return false
+    if (validationResult) {
+      return {
+        success: false,
+        error: validationResult,
+        isSaltFileError: false,
+      };
+    }
+    // TODO: check sinature validity before salt injection
+    const configHash = generateConfigHash(configData);
+    log('CONFIG HASH:', configHash);
 
-  // if the config is not valid return false
-  if (validationResult) {
-    return {
-      success: false,
-      error: validationResult,
-      isSaltFileError: false,
-    };
-  }
-
-  // TODO: check sinature validity before salt injection
-  const configHash = generateConfigHash(configData);
-  log('CONFIG HASH:', configHash);
-
-  // fail if the signature is not OK
-  if (configHash !== configData.meta.signature) {
-    return {
-      success: false,
-      error: `Configuration file signature mismatch -- required signature is '${configData.meta.signature}' but user configuration has '${configHash}' `,
-      isSaltFileError: false
-    };
+    // fail if the signature is not OK
+    if (configHash !== configData.meta.signature) {
+      return {
+        success: false,
+        error: `Configuration file signature mismatch -- required signature is '${configData.meta.signature}' but user configuration has '${configHash}' `,
+        isSaltFileError: false
+      };
+    }
   }
 
   // alphabetically sort the process, static, and reference fields to standardise and prevent
