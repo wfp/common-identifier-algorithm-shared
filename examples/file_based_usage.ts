@@ -13,7 +13,7 @@ const OUTPUT_PATH = join(__dirname, 'output', 'output_10.csv');
 const VALIDATION_ERRORS_PATH = join(__dirname, 'output', 'validation_errors.csv');
 
 // load configuration from file
-const configLoadResult = loadConfig(CONFIG_PATH, ALGORITHM_ID);
+const configLoadResult = loadConfig({ configPath: CONFIG_PATH, algorithmId: ALGORITHM_ID });
 if (!configLoadResult.success) throw new Error(`ERROR: Unable to load configuration file >> ${configLoadResult.error}`);
 
 // validate the input file against all configured validation rules.
