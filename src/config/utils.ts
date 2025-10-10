@@ -18,7 +18,11 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import toml from 'toml';
+import { createHash } from 'node:crypto';
+import stableStringify from 'safe-stable-stringify';
+
 import type { Config } from './Config';
+
 
 // Tries to read the file data, returns null if unsuccessful
 export function attemptToReadFileData(filePath: string, encoding: fs.EncodingOption = 'utf-8') {
@@ -86,4 +90,43 @@ export function appDataLocation() {
     default:
       throw new Error(`Unsupported platform for salt file location: ${process.platform}`);
   }
+}
+
+const DEFAULT_HASH_TYPE = 'md5';
+const HASH_DIGEST_TYPE = 'hex';
+
+type RecursivePartial<T> = { [P in keyof T]?: RecursivePartial<T[P]> };
+
+// Takes a config, removes the "signature" and salt keys from it, generates
+// a stable JSON representation and hashes it using the provided algorithm
+export function generateConfigHash<T extends Config.CoreConfiguration>(config: T, hashType = DEFAULT_HASH_TYPE) {
+  // create a nested copy of the object
+  const configCopy = { ...(JSON.parse(JSON.stringify(config)) as RecursivePartial<T>) };
+
+  // remove the "signature" key
+  if (configCopy.meta && "signature" in configCopy.meta) {
+    delete configCopy.meta.signature;
+  }
+
+  // remove the "messages" key
+  // TODO: messages should go in a separate locales file to future proof translations
+  if ("messages" in configCopy) {
+    delete configCopy.messages;
+  }
+
+  // remove the "algorithm.salt" part as it may have injected keys
+  // TODO: this enables messing with the salt file path pre-injection without signature validations, but is required for compatibility w/ the injection workflow
+  delete configCopy.algorithm!.salt!.value;
+  // mock the salt source as STRING to ensure that both imported and saved
+  // (with pre-injected salt) config files work
+  configCopy.algorithm!.salt!.source = 'STRING';
+
+  // generate a stable JSON representation
+  const stableJson = stableStringify(configCopy);
+  if (typeof stableJson !== 'string') throw new Error(`Unable to serialise config object to JSON.`);
+
+  // generate the hash
+  const hash = createHash(hashType).update(stableJson).digest(HASH_DIGEST_TYPE);
+
+  return hash;
 }

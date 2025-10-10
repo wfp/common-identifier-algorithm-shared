@@ -18,7 +18,7 @@ import fs from 'node:fs';
 
 import { validateConfigFile } from './validateConfig';
 import { loadSaltFile } from './loadSaltFile';
-import { generateConfigHash } from './generateConfigHash';
+import { generateConfigHash } from './utils';
 
 import { getSaltFilePath, attemptToReadTOMLData } from './utils';
 import type { Config } from './Config';
