@@ -69,6 +69,11 @@ export namespace Config {
     destination: ColumnMap;
     destination_map: ColumnMap;
     destination_errors: ColumnMap;
+    post_processing?: {
+      encryption?: {
+        key_path: string;
+      }
+    }
   }
 }
 

@@ -123,6 +123,17 @@ const checkDestination = (label: string, destination: Config.FileConfiguration['
   );
 };
 
+
+function checkPostProcessing(proc: Config.FileConfiguration["post_processing"]) {
+  if (!proc) return isOptional('[post_processing]', proc, isObject);
+
+  const encryptionCheck = 
+    isOptional('[post_processing].encryption', proc.encryption, isObject) ||
+    isString("[post_processing].encryption.key_path", proc.encryption?.key_path)
+  
+  return encryptionCheck
+}
+
 const checkValidations = (validations: Config.CoreConfiguration['validations'], sourceColumns: string[]) => {
   if (!validations) return isOptional('[validations]', validations, isObject);
 
@@ -265,6 +276,9 @@ export function validateConfigFile(config: Config.FileConfiguration, id: string,
     const messages = checkMessages(config.messages);
     if (messages) errors.push(messages);
   }
+
+  const postProcessing = checkPostProcessing(config.post_processing);
+  if (postProcessing) errors.push(postProcessing);
  
   return errors.length > 0 ? errors.join("\n") : undefined;
 }
