@@ -24,9 +24,9 @@ const VALIDATOR_REGEXP = /BEGIN TEST[a-z\s]*END TEST/;
 const SALT_FILE_PATH = join(__dirname, 'files', 'test.salt');
 
 test('loadSaltFile', () => {
-  expect(loadSaltFile(SALT_FILE_PATH, VALIDATOR_REGEXP)).toEqual(readFileSync(SALT_FILE_PATH, 'utf-8'));
+  expect(loadSaltFile({ saltFilePath: SALT_FILE_PATH, validatorRegexp: VALIDATOR_REGEXP })).toEqual(readFileSync(SALT_FILE_PATH, 'utf-8'));
 
-  expect(loadSaltFile('NON-EXISTANT-FILE', VALIDATOR_REGEXP)).toEqual(null);
+  expect(loadSaltFile({ saltFilePath: 'NON_EXISTENT_FILE', validatorRegexp: VALIDATOR_REGEXP })).toEqual(null);
 
-  expect(loadSaltFile(join(__dirname, 'files', 'test-config.json'), VALIDATOR_REGEXP)).toEqual(null);
+  expect(loadSaltFile({ saltFilePath: join(__dirname, 'files', 'test-config.json'), validatorRegexp: VALIDATOR_REGEXP })).toEqual(null);
 });
