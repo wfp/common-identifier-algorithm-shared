@@ -16,5 +16,5 @@
 
 export { preprocessFile, validateDocument } from './preprocess';
 export { generateHashesForDocument, processFile } from './process';
-export { postprocessFile, encryptFile } from './postprocess';
+export { postprocessFile } from './postprocess';
 export { keepOutputColumns } from './mapping';

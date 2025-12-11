@@ -14,20 +14,13 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import * as openpgp from 'openpgp';
-import { createReadStream, createWriteStream, readFileSync } from 'fs';
-import { pipeline } from 'stream/promises';
-import { Readable } from 'stream';
-
 import type { Config } from '../config/Config';
 
 import Debug from 'debug';
 const log = Debug('CID:postprocessFile');
 
 
-export interface PostprocessFileResult {
-  encryptedFilePath?: string
-}
+export interface PostprocessFileResult {}
 
 interface PostprocessFileInput {
   config: Config.FileConfiguration,
@@ -36,45 +29,8 @@ interface PostprocessFileInput {
 
 export async function postprocessFile({ config, filePath }: PostprocessFileInput): Promise<PostprocessFileResult> {
   log('------------ postprocessFile -----------------');
-  let encryptedFilePath: string | undefined;
 
   if (!config.post_processing) return {}
 
-  if (config.post_processing.encryption) {
-    encryptedFilePath = await encryptFile({
-      filePath: filePath,
-      keyPath: config.post_processing.encryption.key_path
-    });
-  }
-
-  return {
-    encryptedFilePath
-  }
-}
-
-
-type EncryptFileInput = {
-  filePath: string;
-  keyPath: string;
-}
-export async function encryptFile({ filePath, keyPath }: EncryptFileInput) {
-  const publicKeyArmoured = readFileSync(keyPath, "utf-8");
-  const publicKey = await openpgp.readKey({ armoredKey: publicKeyArmoured });
-
-  const webStream  = Readable.toWeb(createReadStream(filePath));
-
-  const encryptionStream = await openpgp.encrypt({
-    message: await openpgp.createMessage({ binary: webStream }),
-    encryptionKeys: publicKey,
-    format: "binary"
-  });
-
-  const outputPath = `${filePath}.gpg`;
-
-  const nodeWritable = createWriteStream(outputPath);
-  const nodeReadable = Readable.fromWeb(encryptionStream);
-
-  await pipeline(nodeReadable, nodeWritable);
-
-  return outputPath;
+  return {}
 }
