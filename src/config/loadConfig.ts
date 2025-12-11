@@ -20,7 +20,7 @@ import { validateConfigFile } from './validateConfig';
 import { loadSaltFile } from './loadSaltFile';
 import { generateConfigHash } from './utils';
 
-import { getSaltFilePath, attemptToReadTOMLData } from './utils';
+import { attemptToReadTOMLData } from './utils';
 import type { Config } from './Config';
 import Debug from 'debug';
 const log = Debug('CID:loadConfig');
@@ -35,10 +35,10 @@ type LoadConfigResult =
 
 
 type LoadConfigInput = {
-  configPath: string,
-  algorithmId: string,
-  usingUI?: boolean,
-  validateConfig?: boolean
+  configPath: string;
+  algorithmId: string;
+  usingUI?: boolean;
+  validateConfig?: boolean;
 }
 // Main entry point for loading a config file.
 // returns:
@@ -96,6 +96,8 @@ export function loadConfig({ configPath, algorithmId, usingUI=false, validateCon
   configData.algorithm.columns.reference = configData.algorithm.columns.reference.sort();
   configData.algorithm.columns.static = configData.algorithm.columns.static.sort();
 
+  // TODO: check whether embedded salt file path is provided, config should override embedded.
+
   // check if we need to inject the salt data into the config
   // if not, the config loading is finished
   if (configData.algorithm.salt.source === 'STRING') {
@@ -122,7 +124,7 @@ export function loadConfig({ configPath, algorithmId, usingUI=false, validateCon
     return {
       success: false,
       isSaltFileError: true,
-      error: `Invalid salt file: '${getSaltFilePath(saltFilePath)}'`,
+      error: `Invalid salt file: '${saltFilePath}'`,
       // send the existing config alongside so if this config is the backup one, error messages
       // can still be loaded
       config: configData,
@@ -130,7 +132,7 @@ export function loadConfig({ configPath, algorithmId, usingUI=false, validateCon
   }
 
   // replace the "FILE" with "STRING" amd embed the salt data
-  configData.algorithm.salt = configData.algorithm.salt as unknown as Config.CoreConfiguration["algorithm"]["salt"];
+  configData.algorithm.salt = configData.algorithm.salt as unknown as Config.StringBasedSalt;
   configData.algorithm.salt.source = 'STRING';
   configData.algorithm.salt.value = saltData;
 

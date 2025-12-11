@@ -18,7 +18,7 @@ import path from 'node:path';
 import Debug from 'debug';
 const log = Debug('CID:loadSaltFile');
 
-import { getSaltFilePath, attemptToReadFileData } from './utils';
+import { attemptToReadFileData } from './utils';
 import type { Config } from './Config';
 
 // the encoding used for the salt file
@@ -29,23 +29,19 @@ const DEFAULT_VALIDATOR_REGEXP: RegExp =
   /-----BEGIN PGP PUBLIC KEY BLOCK-----[A-Za-z0-9+/=\s]+-----END PGP PUBLIC KEY BLOCK-----/;
 
 interface LoadSaltFileInput {
-  saltFilePath: Config.FileConfiguration['algorithm']['salt']['value'];
+  saltFilePath: string;
   validatorRegexp?: RegExp;
 }
 
 // Attempts to load and clean up the salt file data
 export function loadSaltFile({ saltFilePath, validatorRegexp = DEFAULT_VALIDATOR_REGEXP }: LoadSaltFileInput) {
-  // resolve the salt file path from the config & platform
-  const fullSaltFilePath = getSaltFilePath(saltFilePath);
+  log('Attempting to load salt file from ', path.resolve(saltFilePath));
 
-  log('Attempting to load salt file from ', path.resolve(fullSaltFilePath));
-  // return null;
   // TODO: potentially clean up line endings and whitespace here
-  const saltData = attemptToReadFileData(fullSaltFilePath, SALT_FILE_ENCODING);
+  const saltData = attemptToReadFileData(saltFilePath, SALT_FILE_ENCODING);
   if (!saltData) return null;
 
   // check if the structure is correct for the file
-  // /-----BEGIN PGP PUBLIC KEY BLOCK-----[A-Za-z0-9+/=\s]+-----END PGP PUBLIC KEY BLOCK-----/
   const CHECK_RX = new RegExp(validatorRegexp);
 
   if (!CHECK_RX.test(saltData)) {

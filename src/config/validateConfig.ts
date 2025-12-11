@@ -210,7 +210,6 @@ const checkAlgorithm = (algorithm: Config.CoreConfiguration['algorithm'], source
     isOneOf('[algorithm].salt.source', ['FILE', 'STRING'], algorithm.salt.source);
   if (exists) return exists;
 
-  let check: string | undefined;
   if (algorithm.salt.source === 'STRING') {
     return (
       isString('[algorithm].salt.value', algorithm.salt.value) ||
@@ -219,22 +218,12 @@ const checkAlgorithm = (algorithm: Config.CoreConfiguration['algorithm'], source
   }
 
   if (algorithm.salt.source === 'FILE') {
-    check =
-      isObject('[algorithm].salt.value', algorithm.salt.value) ||
+    return (
+      isString('[algorithm].salt.value', algorithm.salt.value) ||
+      isNotEmptyString('[algorithm].salt.value', algorithm.salt.value) ||
       isOptional('[algorithm].salt.validator_regex', algorithm.salt.validator_regex, isString) ||
-      isOptional('[algorithm].salt.validator_regex', algorithm.salt!.validator_regex, isRegexp) ||
-      isOptional('[algorithm].salt.value.win32', algorithm.salt.value!.win32, isString) ||
-      isOptional('[algorithm].salt.value.darwin', algorithm.salt.value!.darwin, isString) ||
-      isOptional('[algorithm].salt.value.linux', algorithm.salt.value!.linux, isString);
-
-    if (check) return check;
-
-    // at least one of [win32, darwin, linux] must be provided
-    if (
-      Object.keys(algorithm.salt.value!).filter((v) => ['win32', 'darwin', 'linux'].includes(v)).length === 0
-    ) {
-      return '[algorithm].salt.value must specify at least one win32, darwin, or linux path value.';
-    }
+      isOptional('[algorithm].salt.validator_regex', algorithm.salt!.validator_regex, isRegexp)
+    )
   }
 };
 

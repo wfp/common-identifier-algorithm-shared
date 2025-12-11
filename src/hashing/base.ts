@@ -24,13 +24,13 @@ export type makeHasherFunction = (config: Config.CoreConfiguration['algorithm'])
 
 export abstract class BaseHasher {
   config: Config.CoreConfiguration['algorithm'];
-  saltValue: Config.CoreConfiguration['algorithm']['salt']['value'];
+  saltValue: Config.CoreConfiguration["algorithm"]["salt"]["value"];
 
   constructor(config: Config.CoreConfiguration['algorithm']) {
     this.config = config;
 
     // at this point the salt data should be injected into the config
-    if (config.salt.source.toLowerCase() !== 'string') {
+    if (config.salt.source !== "STRING") {
       throw new Error(
         'only embedded salt values supported for hashing -- import & save the config if file support is desired here',
       );
@@ -45,7 +45,7 @@ export abstract class BaseHasher {
   generateHashForValue(stringValue: string, algorithm: string = 'sha256') {
     let hashDigest = crypto
       .createHash(algorithm)
-      .update(this.saltValue as string)
+      .update(this.config.salt.value)
       .update(stringValue)
       .digest();
     return base32.encode(hashDigest);

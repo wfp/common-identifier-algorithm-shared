@@ -56,28 +56,6 @@ export function attemptToReadTOMLData<T>(filePath: string, encoding: fs.Encoding
   }
 }
 
-// takes into consideration the platform and the type of value provided by the config
-// to return an actual, absolute salt file path
-export function getSaltFilePath(saltValueConfig: Config.CoreConfiguration['algorithm']['salt']['value']) {
-  // if the value is a string always use it
-  if (typeof saltValueConfig === 'string') return saltValueConfig;
-
-  // no salt path means the config does not have our platform
-  /* istanbul ignore next */
-  if (process.platform in saltValueConfig === false) {
-    throw new Error(`Unsupported platform for salt file location: ${process.platform}`);
-  }
-  const platform = process.platform as keyof typeof saltValueConfig;
-  const platformSaltPath = saltValueConfig[platform];
-
-  if (!platformSaltPath) throw new Error(`Salt path not provided for platform: ${process.platform}`);
-
-  // token replacement
-  return path.resolve(
-    platformSaltPath.replaceAll('$HOME', os.homedir()).replaceAll('$APPDATA', appDataLocation()),
-  );
-}
-
 // Returns the prefered Application Data storage location based on the operating system
 export function appDataLocation() {
   switch (process.platform) {

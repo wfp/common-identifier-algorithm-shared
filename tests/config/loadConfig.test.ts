@@ -49,9 +49,7 @@ test('loadConfig salt', () => {
   const TEST_FILE_PATH = join(tmpdir(), 'salt-config.json');
   const cfg = JSON.parse(readFileSync(join(FILES_PATH, 'test-salt-loading-config.json'), 'utf-8'));
 
-  cfg.algorithm.salt.value.darwin = SALT_FILE_PATH;
-  cfg.algorithm.salt.value.win32 = SALT_FILE_PATH;
-  cfg.algorithm.salt.value.linux = SALT_FILE_PATH;
+  cfg.algorithm.salt.value = SALT_FILE_PATH;
   cfg.meta.signature = generateConfigHash(cfg);
 
   writeFileSync(TEST_FILE_PATH, JSON.stringify(cfg), 'utf-8');
@@ -70,9 +68,7 @@ test('loadConfig salt error', () => {
   const TEST_FILE_PATH = join(tmpdir(), 'salt-config.json');
   const cfg = JSON.parse(readFileSync(join(FILES_PATH, 'test-salt-loading-config.json'), 'utf-8'));
 
-  cfg.algorithm.salt.value.darwin = SALT_FILE_PATH;
-  cfg.algorithm.salt.value.win32 = SALT_FILE_PATH;
-  cfg.algorithm.salt.value.linux = SALT_FILE_PATH;
+  cfg.algorithm.salt.value = SALT_FILE_PATH;
   cfg.meta.signature = generateConfigHash(cfg);
 
   writeFileSync(TEST_FILE_PATH, JSON.stringify(cfg), 'utf-8');
