@@ -90,7 +90,7 @@ export class ConfigStore {
       configPath: this.getConfigFilePath(),
       algorithmId: this.getAlgorithmId(),
       embeddedSalt: this.saltConfiguration,
-      usingUI: true
+      usingUI: this.usingUI
     });
 
     // if the load succesds we have a valid config -- use it as a
@@ -108,7 +108,7 @@ export class ConfigStore {
       configPath: this.getBackupConfigFilePath(),
       algorithmId: this.getAlgorithmId(),
       embeddedSalt: this.saltConfiguration,
-      usingUI: true
+      usingUI: this.usingUI
     });
 
     // if the load succesds we have a valid config -- use it as
@@ -152,7 +152,7 @@ export class ConfigStore {
       configPath: userConfigFilePath,
       algorithmId: this.getAlgorithmId(),
       embeddedSalt: this.saltConfiguration,
-      usingUI: true
+      usingUI: this.usingUI
     });
 
     // if failed return the error message
@@ -189,7 +189,7 @@ export class ConfigStore {
       configPath: this.getBackupConfigFilePath(),
       algorithmId: this.getAlgorithmId(),
       embeddedSalt: this.saltConfiguration,
-      usingUI: true
+      usingUI: this.usingUI
     });
 
     // if failed return the error message (do not delete the user config yet)
