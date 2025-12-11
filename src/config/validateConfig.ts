@@ -205,9 +205,17 @@ const checkAlgorithm = (algorithm: Config.CoreConfiguration['algorithm'], source
     isOneOf('[algorithm].hash.strategy', ['SHA256'], algorithm.hash.strategy);
   if (exists) return exists;
 
-  exists =
-    isObject('[algorithm].salt', algorithm.salt) ||
-    isOneOf('[algorithm].salt.source', ['FILE', 'STRING'], algorithm.salt.source);
+
+  // NOTE: technically the salt configuration is optional to provide in the configuration file
+  //    since it can be provided directly to the algorithm. The Config type requires a salt
+  //    configuration though, so adding an additional check here as well.
+
+  exists = isOptional('[algorithm].salt', algorithm.salt, isObject)
+  if (exists) return exists;
+
+  if (!algorithm.salt) return undefined;
+
+  exists = isOneOf('[algorithm].salt.source', ['FILE', 'STRING'], algorithm.salt.source);
   if (exists) return exists;
 
   if (algorithm.salt.source === 'STRING') {

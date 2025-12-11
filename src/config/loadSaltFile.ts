@@ -15,11 +15,8 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import fs from 'node:fs';
 import path from 'node:path';
-import Debug from 'debug';
-const log = Debug('CID:loadSaltFile');
 
 import { attemptToReadFileData } from './utils';
-import type { Config } from './Config';
 
 // the encoding used for the salt file
 const SALT_FILE_ENCODING: fs.EncodingOption = 'utf-8';
@@ -33,22 +30,20 @@ interface LoadSaltFileInput {
   validatorRegexp?: RegExp;
 }
 
+type LoadSaltFileOutput = { success: true; data: string; message?: string } | { success: false; data?: never, message: string; }
+
 // Attempts to load and clean up the salt file data
-export function loadSaltFile({ saltFilePath, validatorRegexp = DEFAULT_VALIDATOR_REGEXP }: LoadSaltFileInput) {
-  log('Attempting to load salt file from ', path.resolve(saltFilePath));
+export function loadSaltFile({ saltFilePath, validatorRegexp = DEFAULT_VALIDATOR_REGEXP }: LoadSaltFileInput): LoadSaltFileOutput {
 
   // TODO: potentially clean up line endings and whitespace here
   const saltData = attemptToReadFileData(saltFilePath, SALT_FILE_ENCODING);
-  if (!saltData) return null;
+  if (!saltData) return { success: false, message: `[ERROR] Unable to read salt file at path: ${saltFilePath}` };
 
   // check if the structure is correct for the file
   const CHECK_RX = new RegExp(validatorRegexp);
-
   if (!CHECK_RX.test(saltData)) {
-    log('SALT FILE Regexp error');
-    return null;
+    return { success: false, message: `[ERROR] Salt file failed validator regexp check at path: ${saltFilePath}, with regexp: ${validatorRegexp}` };
   }
 
-  log('SALT FILE looks OK');
-  return saltData;
+  return { success: true, data: saltData, message: `[INFO] Successfully loaded salt file from ${saltFilePath}` };
 }

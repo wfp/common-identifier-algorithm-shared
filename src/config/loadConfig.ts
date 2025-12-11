@@ -38,22 +38,16 @@ type LoadConfigInput = {
   configPath: string;
   algorithmId: string;
   usingUI?: boolean;
+  embeddedSalt?: Config.FileBasedSalt | Config.StringBasedSalt;
   validateConfig?: boolean;
 }
-// Main entry point for loading a config file.
-// returns:
-// - { success: true } if the config can be loaded
-// - { success: false, error: "string" } if there are errors
-// - { success: false, isSaltFileError: true, error: "string"}
-//     if there is something wrong with the salt file
-export function loadConfig({ configPath, algorithmId, usingUI=false, validateConfig=true }: LoadConfigInput): LoadConfigResult {
-  log('Loading config from', configPath);
 
-  // attempt to read the file
+export function loadConfig({ configPath, algorithmId, embeddedSalt, usingUI=false, validateConfig=true }: LoadConfigInput): LoadConfigResult {
+  log('[INFO] Loading config from', configPath);
   const configData = attemptToReadTOMLData<Config.FileConfiguration>(configPath, CONFIG_FILE_ENCODING);
 
-  // if cannot be read, we have an error
   if (!configData) {
+    log('[ERROR] Unable to read config file', configPath);
     return {
       success: false,
       error: `Unable to read config file '${configPath}'`,
@@ -78,7 +72,7 @@ export function loadConfig({ configPath, algorithmId, usingUI=false, validateCon
     }
     // TODO: check sinature validity before salt injection
     const configHash = generateConfigHash(configData);
-    log('CONFIG HASH:', configHash);
+    log('[INFO] Generated config hash:', configHash);
 
     // fail if the signature is not OK
     if (configHash !== configData.meta.signature) {
@@ -96,50 +90,56 @@ export function loadConfig({ configPath, algorithmId, usingUI=false, validateCon
   configData.algorithm.columns.reference = configData.algorithm.columns.reference.sort();
   configData.algorithm.columns.static = configData.algorithm.columns.static.sort();
 
-  // TODO: check whether embedded salt file path is provided, config should override embedded.
+  // salt is either provided in the config file (STRING | FILE) or is explicitly provided to
+  // to this function (e.g. by the UI). Precedence should be given to the config file, although
+  // the config fields are optional. The programme should fail if no salt is provided.
 
-  // check if we need to inject the salt data into the config
-  // if not, the config loading is finished
-  if (configData.algorithm.salt.source === 'STRING') {
-    return {
-      success: true,
-      lastUpdated: lastUpdateDate,
-      config: configData,
-    };
+  if (configData.algorithm.salt && configData.algorithm.salt.source == "STRING") {
+    return { success: true, lastUpdated: lastUpdateDate, config: configData };
+  }
+  
+  if (configData.algorithm.salt && configData.algorithm.salt.source == "FILE") {
+    // load the file, convert to a string value, update the config to be of type: "STRING"
+    const saltFilePath = configData.algorithm.salt.value;
+    const validatorRegexp = configData.algorithm.salt.validator_regex ? new RegExp(configData.algorithm.salt.validator_regex) : undefined;
+    return tryLoadSaltFile({ saltFilePath, validatorRegexp, configData, lastUpdateDate, label: "salt" });
+  }
+  
+  if (embeddedSalt && embeddedSalt.source == "STRING") {
+    configData.algorithm.salt = { source: "STRING", value: embeddedSalt.value }
+    return { success: true, lastUpdated: lastUpdateDate, config: configData };
   }
 
-  // figure out the file path and the validation regexp
-  const saltFilePath = configData.algorithm.salt.value;
-  const saltFileValidatorRegexp = configData.algorithm.salt.validator_regex
-    ? RegExp(configData.algorithm.salt.validator_regex)
-    : undefined;
-
-  // attempt to load the salt file
-  // saltFilePath must be { win32: string, darwin: string } at this stage since salt.source is guaranteed to be "FILE".
-  const saltData = loadSaltFile({ saltFilePath: saltFilePath, validatorRegexp: saltFileValidatorRegexp });
-
-  // if the salt file load failed, we have failed
-  if (!saltData) {
-    log('[SALT] Error while loading the salt file!');
-    return {
-      success: false,
-      isSaltFileError: true,
-      error: `Invalid salt file: '${saltFilePath}'`,
-      // send the existing config alongside so if this config is the backup one, error messages
-      // can still be loaded
-      config: configData,
-    };
+  if (embeddedSalt && embeddedSalt.source == "FILE") {
+    const saltFilePath = embeddedSalt.value;
+    const validatorRegexp = embeddedSalt.validator_regex ? new RegExp(embeddedSalt.validator_regex) : undefined;
+    return tryLoadSaltFile({ saltFilePath, validatorRegexp, configData, lastUpdateDate, label: "embedded salt" });
   }
 
-  // replace the "FILE" with "STRING" amd embed the salt data
-  configData.algorithm.salt = configData.algorithm.salt as unknown as Config.StringBasedSalt;
-  configData.algorithm.salt.source = 'STRING';
-  configData.algorithm.salt.value = saltData;
+  return { success: false, error: `No salt configuration provided: either specify salt in config file, or pass in path on config load.`, isSaltFileError: true, config: configData };
+}
 
-  // return the freshly injected config
-  return {
-    success: true,
-    lastUpdated: lastUpdateDate,
-    config: configData,
-  };
+interface TryLoadSaltFileInput {
+  saltFilePath: string;
+  validatorRegexp?: RegExp;
+  configData: Config.FileConfiguration;
+  lastUpdateDate: Date;
+  label: string;
+}
+
+function tryLoadSaltFile({ saltFilePath, validatorRegexp, configData, lastUpdateDate, label="salt"}: TryLoadSaltFileInput): LoadConfigResult {
+  log('[INFO] Loading salt from', saltFilePath);
+
+  const loadSaltResponse = loadSaltFile({ saltFilePath, validatorRegexp });
+  if (!loadSaltResponse.success) {
+    log(loadSaltResponse.message);
+    // send the existing config alongside so if this config is the backup one, error messages can still be loaded
+    return { success: false, isSaltFileError: true, error: `Invalid salt file: '${saltFilePath}'`, config: configData };
+  }
+
+  if (loadSaltResponse.message) log(loadSaltResponse.message);
+
+  // update the config to be of salt type: "STRING" with loaded file data
+  configData.algorithm.salt = { source: "STRING", value: loadSaltResponse.data }
+  return { success: true, lastUpdated: lastUpdateDate, config: configData };
 }

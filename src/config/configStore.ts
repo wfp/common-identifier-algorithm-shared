@@ -47,7 +47,6 @@ interface ConfigStorePaths {
   config: string;
   appConfig: string;
   backupConfig: string;
-  salt?: string;
 }
 
 export class ConfigStore {

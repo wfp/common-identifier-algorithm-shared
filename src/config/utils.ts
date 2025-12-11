@@ -15,8 +15,6 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import fs from 'node:fs';
-import os from 'node:os';
-import path from 'node:path';
 import toml from 'toml';
 import { createHash } from 'node:crypto';
 import stableStringify from 'safe-stable-stringify';
@@ -91,13 +89,6 @@ export function generateConfigHash<T extends Config.CoreConfiguration>(config: T
   if ("messages" in configCopy) {
     delete configCopy.messages;
   }
-
-  // remove the "algorithm.salt" part as it may have injected keys
-  // TODO: this enables messing with the salt file path pre-injection without signature validations, but is required for compatibility w/ the injection workflow
-  delete configCopy.algorithm!.salt!.value;
-  // mock the salt source as STRING to ensure that both imported and saved
-  // (with pre-injected salt) config files work
-  configCopy.algorithm!.salt!.source = 'STRING';
 
   // generate a stable JSON representation
   const stableJson = stableStringify(configCopy);
