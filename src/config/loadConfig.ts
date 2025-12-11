@@ -116,7 +116,7 @@ export function loadConfig({ configPath, algorithmId, embeddedSalt, usingUI=fals
     return tryLoadSaltFile({ saltFilePath, validatorRegexp, configData, lastUpdateDate, label: "embedded salt" });
   }
 
-  return { success: false, error: `No salt configuration provided: either specify salt in config file, or pass in path on config load.`, isSaltFileError: true, config: configData };
+  return { success: false, error: `No salt configuration provided in conguration file or embedded.`, isSaltFileError: true, config: configData };
 }
 
 interface TryLoadSaltFileInput {
@@ -127,7 +127,7 @@ interface TryLoadSaltFileInput {
   label: string;
 }
 
-function tryLoadSaltFile({ saltFilePath, validatorRegexp, configData, lastUpdateDate, label="salt"}: TryLoadSaltFileInput): LoadConfigResult {
+function tryLoadSaltFile({ saltFilePath, validatorRegexp, configData, lastUpdateDate }: TryLoadSaltFileInput): LoadConfigResult {
   log('[INFO] Loading salt from', saltFilePath);
 
   const loadSaltResponse = loadSaltFile({ saltFilePath, validatorRegexp });
@@ -141,5 +141,7 @@ function tryLoadSaltFile({ saltFilePath, validatorRegexp, configData, lastUpdate
 
   // update the config to be of salt type: "STRING" with loaded file data
   configData.algorithm.salt = { source: "STRING", value: loadSaltResponse.data }
+  // update the signature since we have changed the salt configuration
+  configData.meta.signature = generateConfigHash(configData);
   return { success: true, lastUpdated: lastUpdateDate, config: configData };
 }
