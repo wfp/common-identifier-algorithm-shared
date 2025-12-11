@@ -1,7 +1,7 @@
 [meta]
 id="ANY"
 version="1.0.0"
-signature="f51f7b694f62d9bb1c6ece9dd8a85790"
+signature="a36d008f81060928709a6704da61bbd6"
 
 [source]
 columns = [
@@ -30,10 +30,6 @@ reference = []
 
 [algorithm.hash]
 strategy = "SHA256"
-
-[algorithm.salt]
-source = "STRING"
-value = "{{ some_random_salt_value }}"
 
 [destination]
 columns = [
