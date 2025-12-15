@@ -1,10 +1,19 @@
 name: RunTests
 on:
   push:
-    branches: ['main', 'develop']
+    branches: 
+      - main
+      - develop
+      - feat/*
   pull_request:
     branches: ['main']
     types: [opened, reopened, edited]
+  workflow_call:
+
+permissions:
+  checks: write
+  contents: read
+  pull-requests: read
 
 jobs:
   RunTestSuite:
@@ -19,7 +28,7 @@ jobs:
       - name: Install NodeJS
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
 
       - name: Install node packages
         run: npm install
