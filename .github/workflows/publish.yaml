@@ -4,6 +4,7 @@ on:
   push:
     tags:
       - "v*.*.*"
+      - "v*.*.*-*"
 
 permissions:
   contents: read
@@ -33,3 +34,5 @@ jobs:
       
       - name: Publish to GitHub packages
         run: npm publish --dry-run
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
