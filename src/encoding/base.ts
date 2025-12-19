@@ -20,8 +20,6 @@ import path from 'node:path';
 import { lightFormat } from 'date-fns';
 import type { CidDocument, MappedData } from '../document';
 import type { Config } from '../config/Config';
-import Debug from 'debug';
-const log = Debug('CID:Encoding');
 
 // Name formatting via Date-Fns lightformat.
 // TOKEN GUIDE: https://date-fns.org/v3.6.0/docs/lightFormat
@@ -34,6 +32,7 @@ function formatName(name: string, date: Date): string {
 
 // Moves a file (uses fs.rename and falls back to fs.copyFile between FS bounds)
 function moveFile(oldPath: string, newPath: string): void {
+
   // Create the output directory
   fs.mkdirSync(path.dirname(newPath), { recursive: true });
 
@@ -90,29 +89,7 @@ export abstract class EncoderBase {
     let fullName = `${baseFileName}${this.mapping.postfix}`;
     // TODO: add logic from config
     return formatName(fullName, new Date());
-    // return baseFileName;
-  }
-
-  protected generateHeaderRow() {
-    return this.mapping.columns.reduce(
-      (memo, col) => {
-        return Object.assign(memo, { [col.alias]: col.name });
-      },
-      {} as { [key: string]: string },
-    );
-  }
-
-  // Attempts to filter out the columns that should not be present in the
-  protected filterDataBasedOnConfig(data: MappedData[]) {
-    // build a set of keys
-    let keysArray = this.mapping.columns.map((col) => col.alias);
-    // let keysSet = new Set(keysArray);
-    return data.map((row: any) => {
-      return keysArray.reduce((newRow, k) => {
-        return Object.assign(newRow, { [k]: row[k] });
-      }, {});
-    });
-  }
+  }  
 
   protected withTemporaryFile(outputPath: string, pred: CallableFunction) {
     const temporaryFilePath = path.join(os.tmpdir(), path.basename(outputPath));
@@ -122,6 +99,5 @@ export abstract class EncoderBase {
 
     // move to the final output location
     moveFile(temporaryFilePath, outputPath);
-    log('Moved output to final location:', outputPath);
   }
 }

@@ -20,6 +20,9 @@ import base32 from 'hi-base32';
 import type { Config } from '../config/Config';
 import type { Validator } from '../validation/Validation';
 
+import Debug from 'debug';
+const log = Debug('cid::engine::hashing::base');
+
 export type makeHasherFunction = (config: Config.CoreConfiguration['algorithm']) => BaseHasher;
 
 export abstract class BaseHasher {
@@ -38,6 +41,7 @@ export abstract class BaseHasher {
 
     // load the salt value based on the config
     this.saltValue = config.salt.value;
+    log(`[DEBUG] Instantiated hasher; saltLen='${this.saltValue.length}', config='${JSON.stringify(this.config, null, 4)}'`);
   }
 
   // Generates a hash based on the configuration from an already concatenated string

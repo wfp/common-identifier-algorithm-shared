@@ -100,7 +100,7 @@ test('validateDocumentWithListDict OK', () => {
     ],
   };
 
-  const res = validateDocumentWithListDict(VALIDATOR_DICT, TEST_DOC_OK);
+  const res = validateDocumentWithListDict({ validatorListDict: VALIDATOR_DICT, document: TEST_DOC_OK });
 
   expect(res.ok).toEqual(true);
   expect(res.results.length).toEqual(2);
@@ -125,7 +125,7 @@ test('validateDocumentWithListDict ERROR', () => {
     ],
   };
 
-  const res = validateDocumentWithListDict(VALIDATOR_DICT, TEST_DOC_OK);
+  const res = validateDocumentWithListDict({ validatorListDict: VALIDATOR_DICT, document: TEST_DOC_OK });
 
   expect(res.ok).toEqual(false);
   expect(res.results.length).toEqual(2);
@@ -154,7 +154,7 @@ test('makeValidationResultDocument', () => {
     ],
   };
 
-  const doc = makeValidationResultDocument(TEST_CONFIG, TEST_RESULT);
+  const doc = makeValidationResultDocument({ sourceConfig: TEST_CONFIG, documentResult: TEST_RESULT });
 
   expect(doc.name).toEqual('validationResult');
   expect(doc.data).toEqual([
@@ -197,7 +197,7 @@ test('makeValidationResultDocument::error', () => {
     ],
   };
 
-  const doc = makeValidationResultDocument(TEST_CONFIG, TEST_RESULT);
+  const doc = makeValidationResultDocument({ sourceConfig: TEST_CONFIG, documentResult: TEST_RESULT });
   const ERR_STR = 'A must be one of: "A", "A0";\ncol_b must be one of: "B", "B0";';
 
   expect(doc.name).toEqual('validationResult');

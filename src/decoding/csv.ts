@@ -18,10 +18,12 @@ import fs from 'node:fs';
 import { parse as csv_parse } from 'csv-parse/sync';
 import type { Options as CsvOptions } from 'csv-parse/sync';
 
+import Debug from 'debug';
+const log = Debug('cid::engine::decoding::csv');
+
 import { DecoderBase } from './base';
 import type { Config } from '../config/Config';
 
-// A decoder for CSVs
 class CsvDecoder extends DecoderBase {
   csvOptions: CsvOptions = {};
 
@@ -31,9 +33,16 @@ class CsvDecoder extends DecoderBase {
   }
 
   decodeFile(path: string, fileEncoding: fs.EncodingOption = 'utf-8') {
-    let data = fs.readFileSync(path, fileEncoding);
-    let parsed = csv_parse(data, this.csvOptions);
-    return this.documentFromRawData(path, parsed);
+    log(`[INFO] Reading CSV file from ${path} with encoding '${fileEncoding}'`);
+    const data = fs.readFileSync(path, fileEncoding);
+    const parsed = csv_parse(data, this.csvOptions);
+    log(`[INFO] Parsed ${parsed.length} rows from CSV file '${path}'`);
+
+    log(`[DEBUG] Found ${parsed[0].length} columns: [${parsed[0].join(', ')}]`);
+    const document = this.documentFromRawData(path, parsed);
+    log(`[DEBUG] Renamed columns to aliases, columns: [${Object.keys(document.data[0]).join(', ')}]`);
+
+    return document;
   }
 }
 
