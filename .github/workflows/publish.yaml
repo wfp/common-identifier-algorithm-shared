@@ -7,14 +7,18 @@ on:
       - "v*.*.*-*"
 
 permissions:
+  checks: write
   contents: read
   packages: write
+  pull-requests: read
 
 jobs:
   test:
     uses: "./.github/workflows/test.yaml"
   publish:
     runs-on: ubuntu-latest
+    needs:
+      - test
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
@@ -35,4 +39,4 @@ jobs:
       - name: Publish to GitHub packages
         run: npm publish
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.GITHUB_TOKEN }}

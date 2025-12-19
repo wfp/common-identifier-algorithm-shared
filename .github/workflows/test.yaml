@@ -1,11 +1,19 @@
 name: RunTests
 on:
   push:
-    branches: ['main', 'develop']
+    branches: 
+      - main
+      - develop
+      - feat/*
   pull_request:
     branches: ['main']
     types: [opened, reopened, edited]
   workflow_call:
+
+permissions:
+  checks: write
+  contents: read
+  pull-requests: read
 
 jobs:
   RunTestSuite:
