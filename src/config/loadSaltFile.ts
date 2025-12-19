@@ -34,9 +34,11 @@ type LoadSaltFileOutput = { success: true; data: string; message?: string } | { 
 export function loadSaltFile({ saltFilePath, validatorRegexp = DEFAULT_VALIDATOR_REGEXP }: LoadSaltFileInput): LoadSaltFileOutput {
 
   // TODO: potentially clean up line endings and whitespace here
-  const saltData = attemptToReadFileData(saltFilePath, SALT_FILE_ENCODING);
-  if (!saltData) return { success: false, message: `[ERROR] Unable to read salt file at path: ${saltFilePath}` };
-
+  const buf = attemptToReadFileData(saltFilePath, SALT_FILE_ENCODING);
+  if (!buf) return { success: false, message: `[ERROR] Unable to read salt file at path: ${saltFilePath}` };
+  
+  const saltData = buf.toString().replace(/\r\n/g, "\n");
+  
   // check if the structure is correct for the file
   const CHECK_RX = new RegExp(validatorRegexp);
   if (!CHECK_RX.test(saltData)) {
