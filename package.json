@@ -1,25 +1,33 @@
 {
-  "name": "common-identifier-algorithm-shared",
-  "version": "1.2.0",
+  "name": "@wfp/common-identifier-algorithm-shared",
+  "version": "2.0.0",
   "description": "Generate psuedonymous identifiers from tabular data",
   "author": "World Food Programme",
   "license": "AGPL-3.0-or-later",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
-    "dist"
+    "dist",
+    "README.md",
+    "docs"
   ],
   "type": "module",
   "scripts": {
     "build": "tsc",
     "watch": "tsc -w",
     "prepare": "npm run build",
+    "clean": "git clean -xdf dist coverage",
+    "clean:all": "git clean -xdf dist coverage node_modules",
+    "publish:dry": "npm publish --dry-run",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage --config=jest.config.js",
     "test:ci": "node --experimental-vm-modules node_modules/jest/bin/jest.js --ci --coverage --config=jest.ci.config.js"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/wfp/common-identifier-algorithm-shared.git"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
   },
   "bugs": {
     "url": "https://github.com/wfp/common-identifier-algorithm-shared/issues"

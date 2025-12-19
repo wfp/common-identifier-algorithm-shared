@@ -14,8 +14,8 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { joinFieldsForHash, cleanValueList, extractAlgoColumnsFromObject, BaseHasher } from 'common-identifier-algorithm-shared';
-import type { Config, Validator, makeHasherFunction } from 'common-identifier-algorithm-shared';
+import { joinFieldsForHash, cleanValueList, extractAlgoColumnsFromObject, BaseHasher } from '../../src';
+import type { Config, Validator, makeHasherFunction } from '../../src';
 
 class GenericHasher extends BaseHasher {
     constructor(config: Config.CoreConfiguration["algorithm"]) {
