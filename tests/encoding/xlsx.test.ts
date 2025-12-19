@@ -82,3 +82,17 @@ test('XlsxEncoder::must start document before writing or ending', () => {
   expect(() => e.writeDocument(TEST_DOC)).toThrow();
   expect(e.endDocument()).toBe(undefined);
 });
+
+test('EncoderBase::filterDataBasedOnConfig', () => {
+  let e = makeXlsxEncoder(TEST_MAPPING);
+  const test_data = [
+    { col_a: 123, col_b: 456, col_c: 'zxc' },
+    { col_a: 789, col_b: 'abc' },
+  ];
+  const expected = [
+    { col_a: 123, col_b: 456 },
+    { col_a: 789, col_b: 'abc' },
+  ];
+
+  expect(e._filterDataBasedOnConfig(test_data)).toEqual(expected);
+});

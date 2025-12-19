@@ -21,11 +21,11 @@ XLSX.set_fs(fs);
 XLSX.set_cptable(cpexcel);
 
 import Debug from 'debug';
-const log = Debug('CID:XLSXEncoder');
+const log = Debug('cid::engine::encoding::xlsx');
 
 import { EncoderBase } from './base';
 import type { Config } from '../config/Config';
-import type { CidDocument } from '../document';
+import type { CidDocument, MappedData } from '../document';
 
 // The longest allowed sheet name length
 const MAX_EXCEL_SHEET_NAME_LENGTH = 31;
@@ -70,10 +70,11 @@ class XlsxEncoder extends EncoderBase {
     this.withTemporaryFile(fileOutputPath, (temporaryFilePath: string) => {
       XLSX.writeFile(this.workbook, temporaryFilePath, { compression: true });
 
-      log('[XLSX] Written ', temporaryFilePath);
+      log(`[INFO] Saved output to temporary location: ${temporaryFilePath}`);
     });
-
+    
     this.outputPath = fileOutputPath;
+    log(`[INFO] Wrote XLSX file to ${fileOutputPath}`);
     return;
   }
 
@@ -84,11 +85,14 @@ class XlsxEncoder extends EncoderBase {
       throw new Error('No output path provided.');
     }
 
+    log(`[INFO] Writing XLSX document to '${this.basePath}'`);
+
     // SheetJS needs the objects to have only the properties we output
     // so we filter them here
-    let fullData = this.filterDataBasedOnConfig(document.data);
+    let fullData = this._filterDataBasedOnConfig(document.data);
 
     // generate a list of headers in the right order
+    log(`[DEBUG] Generating header names from columns: ${JSON.stringify(this.mapping.columns)}`);
     let headers = this.mapping.columns.reduce(
       (memo, { alias, name }: { alias: string; name: string }) => {
         memo.aliases.push(alias);
@@ -116,7 +120,18 @@ class XlsxEncoder extends EncoderBase {
     // add the sheet to the output document
     XLSX.utils.book_append_sheet(this.workbook, worksheet, sheetName);
 
-    return;
+  }
+
+  // Attempts to filter out the columns that should not be present in the
+  _filterDataBasedOnConfig(data: MappedData[]) {
+    // build a set of keys
+    let keysArray = this.mapping.columns.map((col) => col.alias);
+    // let keysSet = new Set(keysArray);
+    return data.map((row: any) => {
+      return keysArray.reduce((newRow, k) => {
+        return Object.assign(newRow, { [k]: row[k] });
+      }, {});
+    });
   }
 
   _generateColumnWidthConfig(headers: string[], rows: any[]) {

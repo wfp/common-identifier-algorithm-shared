@@ -17,7 +17,7 @@
 import type { Config } from '../config/Config';
 
 import Debug from 'debug';
-const log = Debug('CID:postprocessFile');
+const log = Debug('cid::engine::process::postprocess');
 
 
 export interface PostprocessFileResult {}
@@ -28,7 +28,7 @@ interface PostprocessFileInput {
 }
 
 export async function postprocessFile({ config, filePath }: PostprocessFileInput): Promise<PostprocessFileResult> {
-  log('------------ postprocessFile -----------------');
+  log(`[INFO] Starting processing of file '${filePath}' with config file '${config.meta.signature}'`);
 
   if (!config.post_processing) return {}
 

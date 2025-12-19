@@ -23,24 +23,25 @@
 import Debug from 'debug';
 import type { Config } from '../config/Config';
 import type { CidDocument } from '../document';
-const log = Debug('CID:Processing::mapping');
+const log = Debug('cid::engine::process::mapping');
 
 // Returns a list of columns containing both algorithm-required and "always-include" columns
 // (effectively merging data from the two config sections of algorithm and columns).
 // column returned if name present in any of the algorithm fields (to_translate, static, reference)
 // column returned if name present in both source and destination column configs
-export function mapRequiredColumns(
-  configAlgo: Config.AlgorithmColumns,
-  configSource: Config.ColumnMap,
-  configDestination: Config.ColumnMap,
-) {
+interface MapRequiredColumnsInput {
+  configAlgo: Config.AlgorithmColumns;
+  configSource: Config.ColumnMap;
+  configDestination: Config.ColumnMap;
+}
+export function mapRequiredColumns({ configAlgo, configSource, configDestination }: MapRequiredColumnsInput) {
   // build a list of columns that are used for the hashing (according to the configuration provided)
   // this can be used to figure out if an input document is an assistance document or a mapping document
   let algorithmColumns: string[];
 
   // TODO: probably need stronger schema checking than this...
   if (typeof configAlgo !== 'object') {
-    log('Unable to find column configuration for algorithm.');
+    log('[ERROR]Unable to find column configuration for algorithm.');
     algorithmColumns = [];
   } else {
     // concat the input columns from the config (or use an empty list as default)
@@ -62,21 +63,25 @@ export function mapRequiredColumns(
 
 // Returns true if the sheet is containing only the hash input columns
 // in which case its a mapping-only sheet, and we need to treat it differently
-export function isMappingOnlyDocument(
-  configAlgo: Config.AlgorithmColumns,
-  configSource: Config.ColumnMap,
-  configDestination: Config.ColumnMap,
-  document: CidDocument,
-) {
+interface IsMappingOnlyDocumentInput {
+  configAlgo: Config.AlgorithmColumns;
+  configSource: Config.ColumnMap;
+  configDestination: Config.ColumnMap;
+  document: CidDocument;
+}
+export function isMappingOnlyDocument({ configAlgo, configSource, configDestination, document }: IsMappingOnlyDocumentInput): boolean {
+  log(`[DEBUG] Checking if document is a mapping-only document.`);
   // returns true if two sets are equal
   const areSetsEqual = (xs: Set<string>, ys: Set<string>) =>
     xs.size === ys.size && [...xs].every((x) => ys.has(x));
 
   // build list of column names either in configConfig or BOTH configSource and configDestination
-  const mappingDocumentColumns = mapRequiredColumns(configAlgo, configSource, configDestination);
+  const mappingDocumentColumns = mapRequiredColumns({ configAlgo, configSource, configDestination });
   const documentColumns = document.data.length > 0 ? Object.keys(document.data[0]) : [];
 
   const isMappingDocument = areSetsEqual(new Set(mappingDocumentColumns), new Set(documentColumns));
+  if (isMappingDocument) log(`[DEBUG] Document is a mapping-only document.`);
+  else log(`[DEBUG] Document is NOT a mapping-only document.`);
 
   return isMappingDocument;
 }
@@ -84,11 +89,12 @@ export function isMappingOnlyDocument(
 // Returns a new validator dictionary, keeps only the columns needed by the
 // algorithm (so only columns relevant for mapping files are checked)
 export function keepValidatorsForColumns(config: Config.FileConfiguration, validatorDict: { [key: string]: any[] }) {
-  const keepColumnList = mapRequiredColumns(
-    config.algorithm['columns'],
-    config.source,
-    config.destination_map,
-  );
+  const keepColumnList = mapRequiredColumns({
+    configAlgo: config.algorithm['columns'],
+    configSource: config.source,
+    configDestination: config.destination_map,
+  });
+  log(`[DEBUG] Keeping validators for columns: ${keepColumnList.join(', ')}`);
   return keepColumnList.reduce((memo, col) => Object.assign(memo, { [col]: validatorDict[col] }), {});
 }
 
@@ -96,9 +102,14 @@ export function keepValidatorsForColumns(config: Config.FileConfiguration, valid
 // algorithm (so the validation result of a mapping document only has the mapping columns present)
 export function keepOutputColumns(config: Config.FileConfiguration, outputConfig: Config.ColumnMap) {
   const keepColumnSet = new Set(
-    mapRequiredColumns(config.algorithm['columns'], config.source, config.destination_map),
+    mapRequiredColumns({
+      configAlgo: config.algorithm['columns'],
+      configSource: config.source,
+      configDestination: config.destination_map
+    }),
   );
-
+  
+  log(`[DEBUG] Keeping output columns: ${Array.from(keepColumnSet).join(', ')}`);
   return Object.assign({}, outputConfig, {
     columns: outputConfig.columns.filter(({ alias }) => keepColumnSet.has(alias)),
   });

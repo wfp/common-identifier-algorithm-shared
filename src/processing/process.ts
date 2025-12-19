@@ -25,7 +25,7 @@ import type { CidDocument } from '../document';
 import type { makeHasherFunction } from '../hashing/base';
 
 import Debug from 'debug';
-const log = Debug('CID:processFile');
+const log = Debug('cid::engine::process::process');
 
 
 export const generateHashesForDocument = (hasher: BaseHasher, document: CidDocument): CidDocument => {
@@ -61,7 +61,7 @@ export async function processFile({
   format = undefined,
   limit = undefined,
 }: ProcessFileInput): Promise<ProcessFileResult> {
-  log('------------ processFile -----------------');
+  log(`[INFO] Starting processing of file '${inputFilePath}' with config file '${config.meta.signature}', target output path '${outputPath}'`);
 
   const inputFileType = fileTypeOf(inputFilePath);
 
@@ -75,6 +75,7 @@ export async function processFile({
   // omitted from config if using this a library (without the UI). Do a quick undefined check here to
   // validate:
   if (!config.destination || !config.destination_map || !config.destination_errors) {
+    log('[ERROR] Config file invalid for this use, it must specify destination, destination_map, and destination_errors fields.');
     // TODO: how to propagate this error up to the UI (is that even necessary)?
     throw new Error("ERROR: Config file invalid for this use, it must specify 'destination', 'destination_map', and 'destination_errors' fields.")
   }
@@ -82,12 +83,13 @@ export async function processFile({
   // if the user specified a format use that, otherwise use the input format
   const outputFileType = format || inputFileType;
 
-  const isMappingDocument = isMappingOnlyDocument(
-    config.algorithm.columns,
-    config.source,
-    config.destination_map,
-    decoded,
-  );
+  const isMappingDocument = isMappingOnlyDocument({
+    configAlgo: config.algorithm.columns,
+    configSource: config.source,
+    configDestination: config.destination_map,
+    document: decoded,
+  });
+  if (isMappingDocument) log(`[INFO] Detected mapping-only document during processing.`);
   // output the base document
   const outputFilePath = isMappingDocument ? undefined : writeFileWithConfig({
     fileType: outputFileType,

@@ -26,7 +26,7 @@ import type { Config } from '../config/Config';
 import type { Validated } from '../validation/Validation';
 
 import Debug from 'debug';
-const log = Debug('CID:preprocessFile');
+const log = Debug('cid::engine::process::preprocess');
 
 // PRE-PROCESSING
 // --------------
@@ -52,7 +52,7 @@ export async function preprocessFile({
   errorFileOutputPath = undefined,
   limit = undefined,
 }: PreprocessFileInput): Promise<PreprocessFileResult> {
-  log('------------ preprocessFile -----------------');
+  log(`[INFO] Starting preprocessing of file '${inputFilePath}' with config file '${config.meta.signature}'`);
 
   let inputFileType = fileTypeOf(inputFilePath);
 
@@ -63,16 +63,19 @@ export async function preprocessFile({
   // omitted from config if using this a library (without the UI). Do a quick undefined check here to
   // validate:
   if (!config.destination || !config.destination_map || !config.destination_errors) {
+    log('[ERROR] Config file invalid for this use, it must specify destination, destination_map, and destination_errors fields.');
     // TODO: how to propagate this error up to the UI (is that even necessary)?
     throw new Error("ERROR: Config file invalid for this use, it must specify 'destination', 'destination_map', and 'destination_errors' fields.")
   }
 
-  const isMapping = isMappingOnlyDocument(
-    config.algorithm.columns,
-    config.source,
-    config.destination_map,
-    decoded,
-  );
+  const isMapping = isMappingOnlyDocument({
+    configAlgo: config.algorithm.columns,
+    configSource: config.source,
+    configDestination: config.destination_map,
+    document: decoded,
+  });
+
+  log(`[INFO] Validating document...`);
   const validationResult = validateDocument({ config, decoded, isMapping });
 
   let validationErrorsOutputFile: string | undefined;
@@ -80,13 +83,14 @@ export async function preprocessFile({
 
   // if any sheets contain errors, create an error file
   if (!validationResult.ok) {
+    log(`[ERROR] Validation errors detected during preprocessing.`);
     // by default the validation results show the "source" section columns
     let validationResultBaseConfig = config.source;
 
     // but if this is a mapping document we only show the mapping columns in the validation output document
     if (isMapping) validationResultBaseConfig = keepOutputColumns(config, validationResultBaseConfig);
 
-    validationResultDocument = makeValidationResultDocument(validationResultBaseConfig, validationResult);
+    validationResultDocument = makeValidationResultDocument({ sourceConfig: validationResultBaseConfig, documentResult: validationResult });
 
     // The error file is output to the OS's temporary directory
     if (!errorFileOutputPath) errorFileOutputPath = path.join(os.tmpdir(), path.basename(inputFilePath));
@@ -105,6 +109,7 @@ export async function preprocessFile({
       errorFilePath: validationErrorsOutputFile,
     };
   }
+  else log(`[INFO] No validation errors detected during preprocessing.`);
 
   return {
     isValid: validationResult.ok,
@@ -120,10 +125,10 @@ type ValidateDocumentInput = |
   { config: Config.FileConfiguration, decoded: CidDocument, isMapping: boolean }
 
 export function validateDocument({ config, decoded, isMapping }: ValidateDocumentInput): Validated.Document {
-  let validatorDict = makeValidatorListDict(config.validations);
+  let validatorListDict = makeValidatorListDict(config.validations);
 
   // if this is a mapping document leave only the validators for the algorithm columns
-  if (isMapping) validatorDict = keepValidatorsForColumns(config, validatorDict);
+  if (isMapping) validatorListDict = keepValidatorsForColumns(config, validatorListDict);
 
-  return validateDocumentWithListDict(validatorDict, decoded);
+  return validateDocumentWithListDict({ validatorListDict, document: decoded });
 }

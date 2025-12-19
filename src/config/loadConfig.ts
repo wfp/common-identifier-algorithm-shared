@@ -22,8 +22,9 @@ import { generateConfigHash } from './utils';
 
 import { attemptToReadTOMLData } from './utils';
 import type { Config } from './Config';
+
 import Debug from 'debug';
-const log = Debug('CID:loadConfig');
+const log = Debug('cid::engine::config::loadConfig');
 
 // The encoding used by the config file
 export const CONFIG_FILE_ENCODING: fs.EncodingOption = 'utf-8';
@@ -43,14 +44,14 @@ type LoadConfigInput = {
 }
 
 export function loadConfig({ configPath, algorithmId, embeddedSalt, usingUI=false, validateConfig=true }: LoadConfigInput): LoadConfigResult {
-  log('[INFO] Loading config from', configPath);
+  log(`[INFO] Loading config from '${configPath}'`);
   const configData = attemptToReadTOMLData<Config.FileConfiguration>(configPath, CONFIG_FILE_ENCODING);
 
   if (!configData) {
-    log('[ERROR] Unable to read config file', configPath);
+    log(`[ERROR] Unable to read config file from '${configPath}'`);
     return {
       success: false,
-      error: `Unable to read config file '${configPath}'`,
+      error: `Unable to read config file from '${configPath}'`,
       isSaltFileError: false
     };
   }
@@ -59,6 +60,7 @@ export function loadConfig({ configPath, algorithmId, embeddedSalt, usingUI=fals
   const lastUpdateDate = new Date(fs.statSync(configPath).mtime);
 
   if (!!validateConfig) {
+    log('[INFO] Validating config');
     // validate the config
     const validationResult = validateConfigFile(configData, algorithmId, usingUI);
   
@@ -76,6 +78,7 @@ export function loadConfig({ configPath, algorithmId, embeddedSalt, usingUI=fals
 
     // fail if the signature is not OK
     if (configHash !== configData.meta.signature) {
+      log(`[ERROR] Configuration file signature mismatch; config has '${configData.meta.signature}', generated '${configHash}'`);
       return {
         success: false,
         error: `Configuration file signature mismatch -- required signature is '${configData.meta.signature}' but user configuration has '${configHash}' `,
@@ -86,6 +89,7 @@ export function loadConfig({ configPath, algorithmId, embeddedSalt, usingUI=fals
 
   // alphabetically sort the process, static, and reference fields to standardise and prevent
   // different ordering in config producing different results in output.
+  log('[DEBUG] Standardising column order in configuration');
   configData.algorithm.columns.process = configData.algorithm.columns.process.sort();
   configData.algorithm.columns.reference = configData.algorithm.columns.reference.sort();
   configData.algorithm.columns.static = configData.algorithm.columns.static.sort();
@@ -95,10 +99,12 @@ export function loadConfig({ configPath, algorithmId, embeddedSalt, usingUI=fals
   // the config fields are optional. The programme should fail if no salt is provided.
 
   if (configData.algorithm.salt && configData.algorithm.salt.source == "STRING") {
+    log('[DEBUG] Using string-based salt from configuration file');
     return { success: true, lastUpdated: lastUpdateDate, config: configData };
   }
   
   if (configData.algorithm.salt && configData.algorithm.salt.source == "FILE") {
+    log('[DEBUG] Using file-based salt from configuration file');
     // load the file, convert to a string value, update the config to be of type: "STRING"
     const saltFilePath = configData.algorithm.salt.value;
     const validatorRegexp = configData.algorithm.salt.validator_regex ? new RegExp(configData.algorithm.salt.validator_regex) : undefined;
@@ -106,11 +112,13 @@ export function loadConfig({ configPath, algorithmId, embeddedSalt, usingUI=fals
   }
   
   if (embeddedSalt && embeddedSalt.source == "STRING") {
+    log('[DEBUG] Using string-based salt from embedded configuration');
     configData.algorithm.salt = { source: "STRING", value: embeddedSalt.value }
     return { success: true, lastUpdated: lastUpdateDate, config: configData };
   }
-
+  
   if (embeddedSalt && embeddedSalt.source == "FILE") {
+    log('[DEBUG] Using file-based salt from embedded configuration');
     const saltFilePath = embeddedSalt.value;
     const validatorRegexp = embeddedSalt.validator_regex ? new RegExp(embeddedSalt.validator_regex) : undefined;
     return tryLoadSaltFile({ saltFilePath, validatorRegexp, configData, lastUpdateDate, label: "embedded salt" });
@@ -128,7 +136,7 @@ interface TryLoadSaltFileInput {
 }
 
 function tryLoadSaltFile({ saltFilePath, validatorRegexp, configData, lastUpdateDate }: TryLoadSaltFileInput): LoadConfigResult {
-  log('[INFO] Loading salt from', saltFilePath);
+  log(`[INFO] Loading salt from ${saltFilePath}`);
 
   const loadSaltResponse = loadSaltFile({ saltFilePath, validatorRegexp });
   if (!loadSaltResponse.success) {
@@ -140,8 +148,11 @@ function tryLoadSaltFile({ saltFilePath, validatorRegexp, configData, lastUpdate
   if (loadSaltResponse.message) log(loadSaltResponse.message);
 
   // update the config to be of salt type: "STRING" with loaded file data
+  log(`[DEBUG] Updating configuration with string-based salt of ${loadSaltResponse.data.length} characters`);
   configData.algorithm.salt = { source: "STRING", value: loadSaltResponse.data }
+
   // update the signature since we have changed the salt configuration
   configData.meta.signature = generateConfigHash(configData);
+  log(`[DEBUG] Updated configuration signature to ${configData.meta.signature}`);
   return { success: true, lastUpdated: lastUpdateDate, config: configData };
 }

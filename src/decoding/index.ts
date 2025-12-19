@@ -27,7 +27,7 @@ export function fileTypeOf(filePath: string) {
   if (filePath.endsWith('.csv')) {
     return SUPPORTED_FILE_TYPES.CSV;
   }
-  throw new Error('Unknown file type');
+  throw new Error(`Unknown file type for file at '${filePath}'`);
 }
 
 // Returns an appropriate decoder for a file
