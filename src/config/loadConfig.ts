@@ -74,7 +74,7 @@ export function loadConfig({ configPath, algorithmId, embeddedSalt, usingUI=fals
     }
     // TODO: check sinature validity before salt injection
     const configHash = generateConfigHash(configData);
-    log('[INFO] Generated config hash:', configHash);
+    log(`[INFO] Generated config hash: ${configHash}`);
 
     // fail if the signature is not OK
     if (configHash !== configData.meta.signature) {
