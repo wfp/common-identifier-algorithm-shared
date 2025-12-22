@@ -58,9 +58,10 @@ test('loadConfig salt', () => {
 
   expect(loadResult.success).toEqual(true);
   if (!loadResult.success) throw new TypeError();
+  const expectedSalt = readFileSync(SALT_FILE_PATH, "utf-8").replace(/\r\n/g, "\n");
   const config = loadResult.config;
   expect(config.algorithm.salt.source).toEqual('STRING');
-  expect(config.algorithm.salt.value).toEqual(readFileSync(SALT_FILE_PATH, 'utf-8'));
+  expect(config.algorithm.salt.value).toEqual(expectedSalt);
 });
 
 test('loadConfig salt error', () => {

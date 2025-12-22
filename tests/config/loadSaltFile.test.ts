@@ -26,7 +26,8 @@ const SALT_FILE_PATH = join(__dirname, 'files', 'test.salt');
 test('loadSaltFile okay', () => {
   const response = loadSaltFile({ saltFilePath: SALT_FILE_PATH, validatorRegexp: VALIDATOR_REGEXP })
   expect(response.success).toEqual(true);
-  expect(response.data).toEqual(readFileSync(SALT_FILE_PATH, 'utf-8'));
+  const expectedSalt = readFileSync(SALT_FILE_PATH, "utf-8").replace(/\r\n/g, "\n");
+  if (response.success) expect(response.data).toEqual(expectedSalt);
 })
 
 test('loadSaltFile::salt file does not exist', () => {
