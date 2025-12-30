@@ -14,12 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import fs from 'node:fs';
-import path from 'node:path';
-import Debug from 'debug';
-const log = Debug('CID:loadSaltFile');
-
-import { getSaltFilePath, attemptToReadFileData } from './utils';
-import type { Config } from './Config';
+import { attemptToReadFileData } from './utils';
 
 // the encoding used for the salt file
 const SALT_FILE_ENCODING: fs.EncodingOption = 'utf-8';
@@ -28,29 +23,27 @@ const SALT_FILE_ENCODING: fs.EncodingOption = 'utf-8';
 const DEFAULT_VALIDATOR_REGEXP: RegExp =
   /-----BEGIN PGP PUBLIC KEY BLOCK-----[A-Za-z0-9+/=\s]+-----END PGP PUBLIC KEY BLOCK-----/;
 
+interface LoadSaltFileInput {
+  saltFilePath: string;
+  validatorRegexp?: RegExp;
+}
+
+type LoadSaltFileOutput = { success: true; data: string; message?: string } | { success: false; data?: never, message: string; }
+
 // Attempts to load and clean up the salt file data
-export function loadSaltFile(
-  saltFilePath: Config.FileConfiguration['algorithm']['salt']['value'],
-  validatorRegexp = DEFAULT_VALIDATOR_REGEXP,
-) {
-  // resolve the salt file path from the config & platform
-  const fullSaltFilePath = getSaltFilePath(saltFilePath);
+export function loadSaltFile({ saltFilePath, validatorRegexp = DEFAULT_VALIDATOR_REGEXP }: LoadSaltFileInput): LoadSaltFileOutput {
 
-  log('Attempting to load salt file from ', path.resolve(fullSaltFilePath));
-  // return null;
   // TODO: potentially clean up line endings and whitespace here
-  const saltData = attemptToReadFileData(fullSaltFilePath, SALT_FILE_ENCODING);
-  if (!saltData) return null;
-
+  const buf = attemptToReadFileData(saltFilePath, SALT_FILE_ENCODING);
+  if (!buf) return { success: false, message: `[ERROR] Unable to read salt file at path: ${saltFilePath}` };
+  
+  const saltData = buf.toString().replace(/\r\n/g, "\n");
+  
   // check if the structure is correct for the file
-  // /-----BEGIN PGP PUBLIC KEY BLOCK-----[A-Za-z0-9+/=\s]+-----END PGP PUBLIC KEY BLOCK-----/
   const CHECK_RX = new RegExp(validatorRegexp);
-
   if (!CHECK_RX.test(saltData)) {
-    log('SALT FILE Regexp error');
-    return null;
+    return { success: false, message: `[ERROR] Salt file failed validator regexp check at path: ${saltFilePath}, with regexp: ${validatorRegexp}` };
   }
 
-  log('SALT FILE looks OK');
-  return saltData;
+  return { success: true, data: saltData, message: `[INFO] Successfully loaded salt file from ${saltFilePath}` };
 }

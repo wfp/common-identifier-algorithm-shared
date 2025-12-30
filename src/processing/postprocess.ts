@@ -14,14 +14,23 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-export {
-  makeValidationResultDocument,
-  makeValidatorListDict,
-  validateDocumentWithListDict,
-  validateRowWithListDict
-} from './validateDocument';
+import type { Config } from '../config/Config';
 
-export type { Validated, Validator } from './Validation';
-export { SUPPORTED_VALIDATORS } from './Validation';
+import Debug from 'debug';
+const log = Debug('cid::engine::process::postprocess');
 
-// TODO: add debug logging to each of the validator classes under ./validators
+
+export interface PostprocessFileResult {}
+
+interface PostprocessFileInput {
+  config: Config.FileConfiguration,
+  filePath: string
+}
+
+export async function postprocessFile({ config, filePath }: PostprocessFileInput): Promise<PostprocessFileResult> {
+  log(`[INFO] Starting processing of file '${filePath}' with config file '${config.meta.signature}'`);
+
+  if (!config.post_processing) return {}
+
+  return {}
+}

@@ -123,6 +123,17 @@ const checkDestination = (label: string, destination: Config.FileConfiguration['
   );
 };
 
+
+function checkPostProcessing(proc: Config.FileConfiguration["post_processing"]) {
+  if (!proc) return isOptional('[post_processing]', proc, isObject);
+
+  const encryptionCheck = 
+    isOptional('[post_processing].encryption', proc.encryption, isObject) ||
+    isString("[post_processing].encryption.key_path", proc.encryption?.key_path)
+  
+  return encryptionCheck
+}
+
 const checkValidations = (validations: Config.CoreConfiguration['validations'], sourceColumns: string[]) => {
   if (!validations) return isOptional('[validations]', validations, isObject);
 
@@ -194,12 +205,19 @@ const checkAlgorithm = (algorithm: Config.CoreConfiguration['algorithm'], source
     isOneOf('[algorithm].hash.strategy', ['SHA256'], algorithm.hash.strategy);
   if (exists) return exists;
 
-  exists =
-    isObject('[algorithm].salt', algorithm.salt) ||
-    isOneOf('[algorithm].salt.source', ['FILE', 'STRING'], algorithm.salt.source);
+
+  // NOTE: technically the salt configuration is optional to provide in the configuration file
+  //    since it can be provided directly to the algorithm. The Config type requires a salt
+  //    configuration though, so adding an additional check here as well.
+
+  exists = isOptional('[algorithm].salt', algorithm.salt, isObject)
   if (exists) return exists;
 
-  let check: string | undefined;
+  if (!algorithm.salt) return undefined;
+
+  exists = isOneOf('[algorithm].salt.source', ['FILE', 'STRING'], algorithm.salt.source);
+  if (exists) return exists;
+
   if (algorithm.salt.source === 'STRING') {
     return (
       isString('[algorithm].salt.value', algorithm.salt.value) ||
@@ -208,22 +226,12 @@ const checkAlgorithm = (algorithm: Config.CoreConfiguration['algorithm'], source
   }
 
   if (algorithm.salt.source === 'FILE') {
-    check =
-      isObject('[algorithm].salt.value', algorithm.salt.value) ||
+    return (
+      isString('[algorithm].salt.value', algorithm.salt.value) ||
+      isNotEmptyString('[algorithm].salt.value', algorithm.salt.value) ||
       isOptional('[algorithm].salt.validator_regex', algorithm.salt.validator_regex, isString) ||
-      isOptional('[algorithm].salt.validator_regex', algorithm.salt!.validator_regex, isRegexp) ||
-      isOptional('[algorithm].salt.value.win32', algorithm.salt.value!.win32, isString) ||
-      isOptional('[algorithm].salt.value.darwin', algorithm.salt.value!.darwin, isString) ||
-      isOptional('[algorithm].salt.value.linux', algorithm.salt.value!.linux, isString);
-
-    if (check) return check;
-
-    // at least one of [win32, darwin, linux] must be provided
-    if (
-      Object.keys(algorithm.salt.value!).filter((v) => ['win32', 'darwin', 'linux'].includes(v)).length === 0
-    ) {
-      return '[algorithm].salt.value must specify at least one win32, darwin, or linux path value.';
-    }
+      isOptional('[algorithm].salt.validator_regex', algorithm.salt!.validator_regex, isRegexp)
+    )
   }
 };
 
@@ -265,6 +273,9 @@ export function validateConfigFile(config: Config.FileConfiguration, id: string,
     const messages = checkMessages(config.messages);
     if (messages) errors.push(messages);
   }
+
+  const postProcessing = checkPostProcessing(config.post_processing);
+  if (postProcessing) errors.push(postProcessing);
  
   return errors.length > 0 ? errors.join("\n") : undefined;
 }

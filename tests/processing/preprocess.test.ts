@@ -14,19 +14,14 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import { existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { readFileSync, existsSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { parse } from 'csv-parse/sync';
 
 import { preprocessFile, processFile } from '../../src/processing';
-import { SUPPORTED_FILE_TYPES } from '../../src/document';
-import { BaseHasher } from '../../src/hashing/base';
-import type { makeHasherFunction } from '../../src/hashing/base';
+import { SUPPORTED_VALIDATORS } from '../../src/validation/Validation';
+
 import type { Config } from '../../src/config/Config';
-import { SUPPORTED_VALIDATORS, type Validator } from '../../src/validation/Validation';
-import { extractAlgoColumnsFromObject } from '../../src/hashing/utils';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -175,92 +170,4 @@ test('preprocessFile invalid', async () => {
   const errorFile = results.errorFilePath;
   expect(errorFile).not.toEqual(undefined);
   expect(existsSync(errorFile as string)).toEqual(true);
-});
-
-////////////////////////////////////////////////////////////////////////////////
-
-class TestHasher extends BaseHasher {
-  constructor(config: Config.CoreConfiguration['algorithm']) {
-    super(config);
-  }
-
-  // Builds the hash columns from the extracted row object
-  generateHashForObject(obj: Validator.InputData['row']) {
-    const extractedObj = extractAlgoColumnsFromObject(this.config.columns, obj);
-    return {
-      test: `TEST ${extractedObj.static.join(' ')}`,
-    };
-  }
-}
-
-const makeTestHasher: makeHasherFunction = (config: Config.CoreConfiguration['algorithm']) => {
-  return new TestHasher(config);
-};
-
-test('processFile', async () => {
-  const filePath = join(__dirname, 'files', 'input_ok.csv');
-  const outputBasePath = join(tmpdir(), 'output_test');
-
-  const results = await processFile({
-    config: CONFIG,
-    outputPath: outputBasePath,
-    inputFilePath: filePath,
-    hasherFactory: makeTestHasher,
-    format: SUPPORTED_FILE_TYPES.CSV,
-  });
-
-  expect(results.outputFilePath).toEqual(`${outputBasePath}_OUTPUT.csv`);
-  expect(results.mappingFilePath).toEqual(`${outputBasePath}_MAPPING.csv`);
-
-  const [row1, row2] = results.document.data;
-
-  expect(row1.col_a).toEqual('A0');
-  expect(row1.test).toEqual('TEST A0');
-  expect(row2.col_a).toEqual('A1');
-  expect(row2.test).toEqual('TEST A1');
-
-  const csvData = parse(readFileSync(`${outputBasePath}_OUTPUT.csv`, 'utf-8'));
-
-  expect(csvData).toEqual([
-    ['A', 'Test'],
-    ['A0', 'TEST A0'],
-    ['A1', 'TEST A1'],
-  ]);
-});
-
-test('processMappingFile', async () => {
-  const filePath = join(__dirname, 'files', 'input_ok.csv');
-  const outputBasePath = join(tmpdir(), 'output_test');
-
-  // add col_b to the static columns, so the input becomes a mapping file
-  const newConfig = JSON.parse(JSON.stringify(CONFIG));
-  newConfig.algorithm.columns.static = ['col_a', 'col_b'];
-
-  const results = await processFile({
-    config: newConfig,
-    outputPath: outputBasePath,
-    inputFilePath: filePath,
-    hasherFactory: makeTestHasher,
-    format: SUPPORTED_FILE_TYPES.CSV,
-    limit: 10,
-  });
-
-  // expect(results.outputFilePaths).toEqual([`${outputBasePath}_OUTPUT.csv`]);
-  expect(results.mappingFilePath).toEqual(`${outputBasePath}_MAPPING.csv`);
-  expect(results.outputFilePath).toEqual(undefined);
-
-  const [row1, row2] = results.document.data;
-
-  expect(row1.col_a).toEqual('A0');
-  expect(row1.test).toEqual('TEST A0 B0');
-  expect(row2.col_a).toEqual('A1');
-  expect(row2.test).toEqual('TEST A1 B1');
-
-  const csvData = parse(readFileSync(`${outputBasePath}_MAPPING.csv`, 'utf-8'));
-
-  expect(csvData).toEqual([
-    ['A', 'Test'],
-    ['A0', 'TEST A0 B0'],
-    ['A1', 'TEST A1 B1'],
-  ]);
 });

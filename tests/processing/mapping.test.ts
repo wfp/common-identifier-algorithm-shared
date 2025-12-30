@@ -20,31 +20,35 @@ import { mapRequiredColumns, isMappingOnlyDocument } from '../../src/processing/
 
 test('mapping::mapRequiredColumns', () => {
   expect(
-    mapRequiredColumns({ process: [], static: [], reference: [] }, { columns: [] }, { columns: [] }),
+    mapRequiredColumns({
+      configAlgo: { process: [], static: [], reference: [] },
+      configSource: { columns: [] },
+      configDestination: { columns: [] }
+    }),
   ).toEqual([]);
 
   expect(
-    mapRequiredColumns(
-      {
+    mapRequiredColumns({
+      configAlgo: {
         process: ['first_name', 'last_name', 'father_first_name', 'father_last_name', 'mother_first_name'],
         static: ['dob_year'],
         reference: ['document_type', 'document_id'],
       },
-      {
+      configSource: {
         columns: [
           { name: 'A', alias: 'col_a' },
           { name: 'B', alias: 'col_b' },
           { name: 'MAPPING', alias: 'col_mapping' },
         ],
       },
-      {
+      configDestination: {
         columns: [
           { name: 'C', alias: 'col_c' },
           { name: 'D', alias: 'col_d' },
           { name: 'MAPPING', alias: 'col_mapping' },
         ],
       },
-    ),
+    }),
   ).toEqual([
     'first_name',
     'last_name',
@@ -67,7 +71,7 @@ test('mapping::isMappingOnlyDocument empty config', () => {
   };
   let S: Config.ColumnMap = { columns: [] };
   let D: Config.ColumnMap = { columns: [] };
-  expect(isMappingOnlyDocument(A, S, D, testSheet)).toEqual(false);
+  expect(isMappingOnlyDocument({configAlgo: A, configSource: S, configDestination: D, document: testSheet})).toEqual(false);
 });
 
 test('mapping::isMappingOnlyDocument algo columns specified only', () => {
@@ -79,7 +83,7 @@ test('mapping::isMappingOnlyDocument algo columns specified only', () => {
   };
   const S: Config.ColumnMap = { columns: [] };
   const D: Config.ColumnMap = { columns: [] };
-  expect(isMappingOnlyDocument(A, S, D, testSheet)).toEqual(true);
+  expect(isMappingOnlyDocument({configAlgo: A, configSource: S, configDestination: D, document: testSheet})).toEqual(true);
 });
 
 test('mapping::isMappingOnlyDocument src dest specified only', () => {
@@ -95,11 +99,11 @@ test('mapping::isMappingOnlyDocument src dest specified only', () => {
   // src config doesn't include all sheet columns, dest empty
   S = { columns: [{ name: 'A', alias: 'A' }] };
   D = { columns: [] };
-  expect(isMappingOnlyDocument(A, S, D, testSheet)).toEqual(false);
+  expect(isMappingOnlyDocument({configAlgo: A, configSource: S, configDestination: D, document: testSheet})).toEqual(false);
   // src config doesn't include all sheet columns
   S = { columns: [{ name: 'A', alias: 'A' }] };
   D = { columns: [{ name: 'A', alias: 'A' }] };
-  expect(isMappingOnlyDocument(A, S, D, testSheet)).toEqual(false);
+  expect(isMappingOnlyDocument({configAlgo: A, configSource: S, configDestination: D, document: testSheet})).toEqual(false);
   // set of config columns doesn't include all sheet columns in both configs
   S.columns = [
     { name: 'A', alias: 'A' },
@@ -107,7 +111,7 @@ test('mapping::isMappingOnlyDocument src dest specified only', () => {
     { name: 'C', alias: 'C' },
   ];
   D.columns = [{ name: 'A', alias: 'A' }];
-  expect(isMappingOnlyDocument(A, S, D, testSheet)).toEqual(false);
+  expect(isMappingOnlyDocument({configAlgo: A, configSource: S, configDestination: D, document: testSheet})).toEqual(false);
   // set of config columns in both configs fully includes sheet columns
   S.columns = [
     { name: 'A', alias: 'A' },
@@ -119,5 +123,5 @@ test('mapping::isMappingOnlyDocument src dest specified only', () => {
     { name: 'B', alias: 'B' },
     { name: 'C', alias: 'C' },
   ];
-  expect(isMappingOnlyDocument(A, S, D, testSheet)).toEqual(true);
+  expect(isMappingOnlyDocument({configAlgo: A, configSource: S, configDestination: D, document: testSheet})).toEqual(true);
 });

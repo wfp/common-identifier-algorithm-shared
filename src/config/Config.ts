@@ -30,16 +30,8 @@ export namespace Config {
     static: string[];
     reference: string[];
   }
-  type StringBasedSalt = { source: 'STRING'; value: string };
-  type FileBasedSalt = {
-    source: 'FILE';
-    validator_regex?: string;
-    value: {
-      win32?: string;
-      darwin?: string;
-      linux?: string;
-    };
-  };
+  export type StringBasedSalt = { source: 'STRING'; value: string };
+  export type FileBasedSalt =   { source: 'FILE'; value: string; validator_regex?: string };
   export interface CoreConfiguration {
     meta: { id: string }
     source: ColumnMap;
@@ -69,6 +61,11 @@ export namespace Config {
     destination: ColumnMap;
     destination_map: ColumnMap;
     destination_errors: ColumnMap;
+    post_processing?: {
+      encryption?: {
+        key_path: string;
+      }
+    }
   }
 }
 

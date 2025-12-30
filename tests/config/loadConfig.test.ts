@@ -18,8 +18,7 @@ import { statSync, readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { join, dirname } from 'node:path';
 import { tmpdir } from 'node:os';
-import { loadConfig } from '../../src/config/loadConfig';
-import { generateConfigHash } from '../../src/config/generateConfigHash';
+import { loadConfig, generateConfigHash, type Config } from '../../src/config';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ALGORITHM_ID = 'ANY';
@@ -27,7 +26,7 @@ const FILES_PATH = join(__dirname, 'files');
 
 test('loadConfig ok', () => {
   const TEST_FILE_PATH = join(FILES_PATH, 'test-config.json');
-  const loadResult = loadConfig(TEST_FILE_PATH, ALGORITHM_ID);
+  const loadResult = loadConfig({ configPath: TEST_FILE_PATH, algorithmId: ALGORITHM_ID, usingUI: false });
 
   expect(loadResult.success).toEqual(true);
   if (!loadResult.success) throw new TypeError();
@@ -42,7 +41,7 @@ test('loadConfig ok', () => {
 
 test('loadConfig invalid', () => {
   const TEST_FILE_PATH = join(FILES_PATH, 'test-appconfig.json');
-  expect(() => loadConfig(TEST_FILE_PATH, ALGORITHM_ID)).toThrow();
+  expect(() => loadConfig({ configPath: TEST_FILE_PATH, algorithmId: ALGORITHM_ID, usingUI: false })).toThrow();
 });
 
 test('loadConfig salt', () => {
@@ -50,20 +49,19 @@ test('loadConfig salt', () => {
   const TEST_FILE_PATH = join(tmpdir(), 'salt-config.json');
   const cfg = JSON.parse(readFileSync(join(FILES_PATH, 'test-salt-loading-config.json'), 'utf-8'));
 
-  cfg.algorithm.salt.value.darwin = SALT_FILE_PATH;
-  cfg.algorithm.salt.value.win32 = SALT_FILE_PATH;
-  cfg.algorithm.salt.value.linux = SALT_FILE_PATH;
+  cfg.algorithm.salt.value = SALT_FILE_PATH;
   cfg.meta.signature = generateConfigHash(cfg);
 
   writeFileSync(TEST_FILE_PATH, JSON.stringify(cfg), 'utf-8');
 
-  const loadResult = loadConfig(TEST_FILE_PATH, ALGORITHM_ID);
+  const loadResult = loadConfig({ configPath: TEST_FILE_PATH, algorithmId: ALGORITHM_ID, usingUI: false });
 
   expect(loadResult.success).toEqual(true);
   if (!loadResult.success) throw new TypeError();
+  const expectedSalt = readFileSync(SALT_FILE_PATH, "utf-8").replace(/\r\n/g, "\n");
   const config = loadResult.config;
   expect(config.algorithm.salt.source).toEqual('STRING');
-  expect(config.algorithm.salt.value).toEqual(readFileSync(SALT_FILE_PATH, 'utf-8'));
+  expect(config.algorithm.salt.value).toEqual(expectedSalt);
 });
 
 test('loadConfig salt error', () => {
@@ -71,14 +69,60 @@ test('loadConfig salt error', () => {
   const TEST_FILE_PATH = join(tmpdir(), 'salt-config.json');
   const cfg = JSON.parse(readFileSync(join(FILES_PATH, 'test-salt-loading-config.json'), 'utf-8'));
 
-  cfg.algorithm.salt.value.darwin = SALT_FILE_PATH;
-  cfg.algorithm.salt.value.win32 = SALT_FILE_PATH;
-  cfg.algorithm.salt.value.linux = SALT_FILE_PATH;
+  cfg.algorithm.salt.value = SALT_FILE_PATH;
   cfg.meta.signature = generateConfigHash(cfg);
 
   writeFileSync(TEST_FILE_PATH, JSON.stringify(cfg), 'utf-8');
 
-  const loadResult = loadConfig(TEST_FILE_PATH, ALGORITHM_ID);
+  const loadResult = loadConfig({ configPath: TEST_FILE_PATH, algorithmId: ALGORITHM_ID, usingUI: false });
+
+  expect(loadResult.success).toEqual(false);
+});
+
+test('loadConfig embedded salt file provided', () => {
+  const SALT_FILE_PATH = join(FILES_PATH, 'test.salt');
+  const TEST_FILE_PATH = join(tmpdir(), 'salt-config.json');
+  const cfg = JSON.parse(readFileSync(join(FILES_PATH, 'test-no-salt-config.json'), 'utf-8'));
+
+  cfg.meta.signature = generateConfigHash(cfg);
+
+  writeFileSync(TEST_FILE_PATH, JSON.stringify(cfg), 'utf-8');
+
+  // without defined regexp validator
+  let embeddedSalt: Config.FileBasedSalt = { source: "FILE", value: SALT_FILE_PATH }
+  let loadResult = loadConfig({ configPath: TEST_FILE_PATH, algorithmId: ALGORITHM_ID, embeddedSalt, usingUI: false });
+  expect(loadResult.success).toEqual(false);
+
+  // with defined regexp validator
+  embeddedSalt = { source: "FILE", value: SALT_FILE_PATH, validator_regex: "BEGIN TEST[a-z\\s]*END TEST" }
+  loadResult = loadConfig({ configPath: TEST_FILE_PATH, algorithmId: ALGORITHM_ID, embeddedSalt, usingUI: false });
+  expect(loadResult.success).toEqual(true);
+});
+
+test('loadConfig embedded salt value provided', () => {
+  const TEST_FILE_PATH = join(tmpdir(), 'salt-config.json');
+  const cfg = JSON.parse(readFileSync(join(FILES_PATH, 'test-no-salt-config.json'), 'utf-8'));
+
+  cfg.meta.signature = generateConfigHash(cfg);
+
+  writeFileSync(TEST_FILE_PATH, JSON.stringify(cfg), 'utf-8');
+
+  let embeddedSalt: Config.StringBasedSalt = { source: "STRING", value: "SOME_SALT_VALUE" }
+  let loadResult = loadConfig({ configPath: TEST_FILE_PATH, algorithmId: ALGORITHM_ID, embeddedSalt, usingUI: false });
+  expect(loadResult.success).toEqual(true);
+  // @ts-ignore
+  expect(loadResult.config!.algorithm.salt.value).toEqual(embeddedSalt.value);
+});
+
+test('loadConfig no salt provided', () => {
+  const TEST_FILE_PATH = join(tmpdir(), 'salt-config.json');
+  const cfg = JSON.parse(readFileSync(join(FILES_PATH, 'test-no-salt-config.json'), 'utf-8'));
+
+  cfg.meta.signature = generateConfigHash(cfg);
+
+  writeFileSync(TEST_FILE_PATH, JSON.stringify(cfg), 'utf-8');
+
+  const loadResult = loadConfig({ configPath: TEST_FILE_PATH, algorithmId: ALGORITHM_ID, usingUI: false });
 
   expect(loadResult.success).toEqual(false);
 });

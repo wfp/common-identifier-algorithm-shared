@@ -14,9 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import Debug from 'debug';
-const log = Debug('CID:Decoder');
-
 import type { Config } from '../config/Config';
 import type { CidDocument } from '../document';
 import type { RawData, MappedData } from '../document';
@@ -59,7 +56,6 @@ export abstract class DecoderBase {
       return transformed;
     });
 
-    log('AFTER:', objectRows[0]);
     return objectRows;
   }
 

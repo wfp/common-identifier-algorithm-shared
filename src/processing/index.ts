@@ -14,10 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-export {
-  generateHashesForDocument,
-  preprocessFile,
-  processFile,
-  validateDocument,
-} from './processing';
+export { preprocessFile, validateDocument } from './preprocess';
+export { generateHashesForDocument, processFile } from './process';
+export { postprocessFile } from './postprocess';
 export { keepOutputColumns } from './mapping';

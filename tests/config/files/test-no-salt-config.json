@@ -56,11 +56,6 @@
     },
     "hash": {
       "strategy": "SHA256"
-    },
-    "salt": {
-      "source": "FILE",
-      "validator_regex": "BEGIN TEST[A-Za-z0-9+/=\\s]+END TEST",
-      "value": "<SALT_PATH>"
     }
   },
   "destination": {

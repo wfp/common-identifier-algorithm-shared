@@ -32,7 +32,8 @@ const config: Config.CoreConfiguration = {
   },
   algorithm: {
     hash: { strategy: "SHA256" },
-    salt: { source: "STRING", value: "testSalt" },
+    // NOTE: For procedural use, only salt values with source: "STRING" are permitted
+    salt: { source: "STRING", value: "SOME_VALUE" },
     columns: {
       process: [],
       reference: [],

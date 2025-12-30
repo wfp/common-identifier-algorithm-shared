@@ -22,7 +22,7 @@ import type { Config } from '../config/Config';
 import type { CidDocument } from '../document';
 
 import Debug from 'debug';
-const log = Debug('CID:CSVEncoder');
+const log = Debug('cid::engine::encoder::csv');
 
 class CsvEncoder extends EncoderBase {
   constructor(mapping: Config.ColumnMap) {
@@ -48,31 +48,41 @@ class CsvEncoder extends EncoderBase {
   writeDocument(document: CidDocument) {
     // no base path means no document yet, so we'll skip
     if (!this.basePath) {
+      log('[ERROR] No base path set for CSV output encoder');
       throw new Error('No output path provided.');
     }
 
     // if there is only one sheet we don't need the sheet name in the filename
-    let outputPath = this.getOutputNameFor(this.basePath) + '.csv';
+    const outputPath = this.getOutputNameFor(this.basePath) + '.csv';
+    log(`[INFO] Writing CSV document to '${outputPath}'`);
 
-    // attempt to write the data from the sheet as rows
-    let fullData = [this.generateHeaderRow()].concat(document.data);
-    let generated = stringify(fullData, {});
-
-    // write the file to a temporary location
-    // --------------------------------------
+    // attempt to write the data from the sheet as 
+    const fullData = [this._generateHeaderRow()].concat(document.data);
+    const generated = stringify(fullData, {});
 
     // write to a temporary location then move the file
     this.withTemporaryFile(outputPath, (temporaryFilePath: string) => {
       // write to the disk
       // fs.writeFileSync(outputPath, generated, 'utf-8');
       fs.writeFileSync(temporaryFilePath, generated, 'utf-8');
-      log('Saved output to temporary location:', temporaryFilePath);
+      log(`[INFO] Saved output to temporary location: ${temporaryFilePath}`);
     });
 
     // add the current file to the list of outputs
     this.outputPath = outputPath;
 
-    log('[CSV] Written', outputPath);
+    log(`[INFO] Wrote CSV file to ${outputPath}`);
+  }
+
+  _generateHeaderRow() {
+    const headerRow = this.mapping.columns.reduce(
+      (memo, col) => {
+        return Object.assign(memo, { [col.alias]: col.name });
+      },
+      {} as { [key: string]: string },
+    );
+    log(`[DEBUG] Generating headers names from columns: ${JSON.stringify(headerRow)}}`);
+    return headerRow;
   }
 }
 

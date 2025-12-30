@@ -21,11 +21,10 @@ XLSX.set_fs(fs);
 XLSX.set_cptable(cpexcel);
 
 import Debug from 'debug';
-const log = Debug('CID:XLSXDecoder');
+const log = Debug('cid::engine::decoding::xlsx');
 
 import { DecoderBase } from './base';
 import type { Config } from '../config/Config';
-import type { CidDocument } from '../document';
 
 // A decoder for CSVs
 class XlsxDecoder extends DecoderBase {
@@ -37,6 +36,7 @@ class XlsxDecoder extends DecoderBase {
   }
 
   async decodeFile(path: string) {
+    log(`[INFO] Reading XLSX file from ${path}'`);
     const workbook = XLSX.readFile(path, this.decodeOptions);
 
     // workbook always has one sheet, and we only care about single sheet workbooks
@@ -48,13 +48,14 @@ class XlsxDecoder extends DecoderBase {
       // (necessary for ID numbers with too many bits, that are not
       // representable by JS numbers)
       raw: false,
-    });
-    log('RAW:', data[0]);
-
+    }) as Array<{ [key: string]: string }>;
+    log(`[INFO] Parsed ${data.length} rows from XLSX file '${path}'`);
+  
     // convert the human names to aliases
+    log(`[DEBUG] Found ${Object.keys(data[0]).length} columns: [${Object.keys(data[0]).join(', ')}]`);
     const dataWithAliases = this.renameColumnsToAliases(data);
+    log(`[DEBUG] Renamed columns to aliases, columns: [${Object.keys(dataWithAliases[0]).join(', ')}]`);
 
-    log('DECODED:', dataWithAliases[0]);
     return { name: path, data: dataWithAliases };
   }
 

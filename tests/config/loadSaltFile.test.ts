@@ -23,10 +23,20 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const VALIDATOR_REGEXP = /BEGIN TEST[a-z\s]*END TEST/;
 const SALT_FILE_PATH = join(__dirname, 'files', 'test.salt');
 
-test('loadSaltFile', () => {
-  expect(loadSaltFile(SALT_FILE_PATH, VALIDATOR_REGEXP)).toEqual(readFileSync(SALT_FILE_PATH, 'utf-8'));
+test('loadSaltFile okay', () => {
+  const response = loadSaltFile({ saltFilePath: SALT_FILE_PATH, validatorRegexp: VALIDATOR_REGEXP })
+  expect(response.success).toEqual(true);
+  const expectedSalt = readFileSync(SALT_FILE_PATH, "utf-8").replace(/\r\n/g, "\n");
+  if (response.success) expect(response.data).toEqual(expectedSalt);
+})
 
-  expect(loadSaltFile('NON-EXISTANT-FILE', VALIDATOR_REGEXP)).toEqual(null);
+test('loadSaltFile::salt file does not exist', () => {
+  const response = loadSaltFile({ saltFilePath: 'NON_EXISTENT_FILE', validatorRegexp: VALIDATOR_REGEXP });
+  expect(response.success).toEqual(false);
+})
 
-  expect(loadSaltFile(join(__dirname, 'files', 'test-config.json'), VALIDATOR_REGEXP)).toEqual(null);
+test('loadSaltFile::failed regexp validation', () => {
+  const response = loadSaltFile({ saltFilePath: join(__dirname, 'files', 'test-config.json'), validatorRegexp: VALIDATOR_REGEXP });
+  expect(response.success).toEqual(false);
+  expect(response.message).toMatch(/failed validator regexp/);
 });

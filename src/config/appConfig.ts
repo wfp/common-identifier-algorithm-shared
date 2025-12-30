@@ -18,7 +18,9 @@ import fs from 'node:fs';
 import { attemptToReadTOMLData } from './utils';
 import type { AppConfigData } from './Config';
 import Debug from 'debug';
-const log = Debug('CID:appConfig');
+const log = Debug('cid::engine::config::appConfig');
+
+// TODO: This type of configuration should probably be included as part of the electron application, not the backend engine.
 
 const APP_CONFIG_ENCODING: fs.EncodingOption = 'utf-8';
 
@@ -38,14 +40,14 @@ export const DEFAULT_APP_CONFIG: AppConfigData = {
 };
 
 export function loadAppConfig(configPath: string) {
-  log('Loading Application config from', configPath);
+  log(`[INFO] Loading Application config from ${configPath}`);
 
   // attempt to read the file
   const configData = attemptToReadTOMLData<AppConfigData>(configPath, APP_CONFIG_ENCODING);
 
   // if cannot be read we assume default application configuration
   if (!configData) {
-    log('Cannot find Application config file -- using the default');
+    log('[WARN] Cannot find Application config file, using the default configuration');
     return DEFAULT_APP_CONFIG;
   }
 
@@ -56,7 +58,7 @@ export function loadAppConfig(configPath: string) {
     typeof configData.window.width !== 'number' ||
     typeof configData.window.height !== 'number'
   ) {
-    log('Application config file is not valid -- using the default');
+    log('[ERROR] Application config file is not valid, using the default configuration');
     return DEFAULT_APP_CONFIG;
   }
 
@@ -65,7 +67,7 @@ export function loadAppConfig(configPath: string) {
 
 export function saveAppConfig(configData: AppConfigData, outputPath: string) {
   // update the config hash on import to account for the
-  const outputData = JSON.stringify(configData, null, '    ');
+  const outputData = JSON.stringify(configData, null, 4);
   fs.writeFileSync(outputPath, outputData, APP_CONFIG_ENCODING);
-  log('Written Application config data to ', outputPath);
+  log(`[INFO] Written Application config data to '${outputPath}'`);
 }

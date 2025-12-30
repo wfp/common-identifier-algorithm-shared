@@ -64,3 +64,8 @@ test('CsvEncoder::must start document before writing or ending', () => {
   expect(() => e.writeDocument(TEST_DOC)).toThrow();
   expect(e.endDocument()).toBe(undefined);
 });
+
+test('EncoderBase::generateHeaderRow', () => {
+  let e = makeCsvEncoder(TEST_MAPPING);
+  expect(e._generateHeaderRow()).toEqual({ col_a: 'A', col_b: 'B' });
+});

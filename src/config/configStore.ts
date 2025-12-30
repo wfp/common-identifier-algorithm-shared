@@ -16,8 +16,9 @@
 
 import { dirname } from 'node:path';
 import fs from 'node:fs';
+
 import Debug from 'debug';
-const log = Debug('CID:ConfigStore');
+const log = Debug('cid::engine::config::store');
 
 import { loadConfig, CONFIG_FILE_ENCODING } from './loadConfig';
 import { loadAppConfig, saveAppConfig, DEFAULT_APP_CONFIG } from './appConfig';
@@ -27,7 +28,7 @@ import type { AppConfigData, Config } from './Config';
 // Ensure the application's config file directory exists
 function ensureAppDirectoryExists(appDir: string) {
   if (!fs.existsSync(appDir)) {
-    log("Application directory '", appDir, "' does not exits -- creating it");
+    log(`[WARN] Application directory '${appDir}' does not exits, creating it`);
     fs.mkdirSync(appDir /*, { recursive: true } */);
   }
 }
@@ -40,7 +41,7 @@ function saveConfig(configData: Config.FileConfiguration, outputPath: string) {
   // update the config hash on import to account for the
   const outputData = JSON.stringify(configData, null, '    ');
   fs.writeFileSync(outputPath, outputData, CONFIG_FILE_ENCODING);
-  log('Written config data to ', outputPath);
+  log(`[INFO] Written config data to ${outputPath}`);
 }
 
 interface ConfigStorePaths {
@@ -59,15 +60,17 @@ export class ConfigStore {
   loadError: string | undefined;
   usingUI: boolean;
 
+  algorithmId: string;
   appConfig: AppConfigData = DEFAULT_APP_CONFIG;
   filePaths: ConfigStorePaths;
-  algorithmId: string;
+  saltConfiguration?: Config.FileBasedSalt | Config.StringBasedSalt;
 
-  constructor(filePaths: ConfigStorePaths, algorithmId: string, usingUI: boolean = false) {
-    this.lastUpdated = new Date();
-    this.filePaths = filePaths;
-    this.algorithmId = algorithmId;
+  constructor(filePaths: ConfigStorePaths, algorithmId: string, usingUI: boolean = false, saltConfiguration?: Config.FileBasedSalt | Config.StringBasedSalt) {
     this.usingUI = usingUI;
+    this.filePaths = filePaths;
+    this.lastUpdated = new Date();
+    this.algorithmId = algorithmId;
+    this.saltConfiguration = saltConfiguration;
   }
 
   getConfig = () => this.data;
@@ -84,25 +87,35 @@ export class ConfigStore {
     this.appConfig = loadAppConfig(this.getAppConfigFilePath());
 
     // attempt to load the default app config
-    const userConfigLoad = loadConfig(this.getConfigFilePath(), this.getAlgorithmId());
+    const userConfigLoad = loadConfig({
+      configPath: this.getConfigFilePath(),
+      algorithmId: this.getAlgorithmId(),
+      embeddedSalt: this.saltConfiguration,
+      usingUI: this.usingUI
+    });
 
     // if the load succesds we have a valid config -- use it as a
     // user-provided one
     if (userConfigLoad.success) {
-      log('User config validation success - using it as config');
+      log('[INFO] User config validation success - using it as config');
       this.useUserConfig(userConfigLoad.config, userConfigLoad.lastUpdated);
       return;
     }
 
-    log('User config validation not successful - attempting to load backup config');
+    log('[WARN] User config validation unsuccessful - attempting to load backup config');
     // if the default config load failed use the backup default
     // from the app distribution
-    const backupConfigLoad = loadConfig(this.getBackupConfigFilePath(), this.getAlgorithmId());
+    const backupConfigLoad = loadConfig({
+      configPath: this.getBackupConfigFilePath(),
+      algorithmId: this.getAlgorithmId(),
+      embeddedSalt: this.saltConfiguration,
+      usingUI: this.usingUI
+    });
 
     // if the load succesds we have a valid config -- use it as
     // a config-from-backup
     if (backupConfigLoad.success) {
-      log('Backup config validation success - using it as config');
+      log('[INFO] Backup config validation success - using it as config');
       backupConfigLoad.config.isBackup = true;
       this.useBackupConfig(backupConfigLoad.config);
       return;
@@ -112,10 +125,7 @@ export class ConfigStore {
     this.loadError = backupConfigLoad.error;
 
     // if the backup config fails to load we are screwed
-    log(
-      'Backup config load failed - the application should alert the user: ',
-      backupConfigLoad.error,
-    );
+    log(`[ERROR] Backup config load failed - the application should alert the user: ${backupConfigLoad.error}`);
 
     // if there is a salt file error store the config, but act like it's invalid
     // (this is needed to pick up error messages from the config file)
@@ -136,7 +146,12 @@ export class ConfigStore {
   // The config data used by the application is updated after the save
   updateUserConfig(userConfigFilePath: string) {
     // attempt to load & validate the config data
-    const userConfigLoad = loadConfig(userConfigFilePath, this.getAlgorithmId());
+    const userConfigLoad = loadConfig({
+      configPath: userConfigFilePath,
+      algorithmId: this.getAlgorithmId(),
+      embeddedSalt: this.saltConfiguration,
+      usingUI: this.usingUI
+    });
 
     // if failed return the error message
     if (!userConfigLoad.success) {
@@ -158,24 +173,26 @@ export class ConfigStore {
   // This method does not save the backup as the user config, only deletes the user config file
   removeUserConfig() {
     // attempt to load the backup config
-    log('[removeUserConfig] Attempting to remove user configuration and replace with backup.');
+    log('[INFO] Attempting to remove user configuration and replace with backup.');
 
     // if the current config is already a backup config don't do anything
     if (this.isCurrentConfigBackup()) {
-      log('[removeUserConfig] Already using a backup config -- bailing');
+      log('[INFO] Already using a backup config -- bailing');
       // this is not an error - we're already using the backup
       return;
     }
 
-    log('[removeUserConfig] Trying to load backup config file');
-    const backupConfigLoad = loadConfig(this.getBackupConfigFilePath(), this.getAlgorithmId());
+    log('[INFO] Trying to load backup config file');
+    const backupConfigLoad = loadConfig({
+      configPath: this.getBackupConfigFilePath(),
+      algorithmId: this.getAlgorithmId(),
+      embeddedSalt: this.saltConfiguration,
+      usingUI: this.usingUI
+    });
 
     // if failed return the error message (do not delete the user config yet)
     if (!backupConfigLoad.success) {
-      log(
-        'Backup config validation failed -- returning error and keeping existing user config:',
-        backupConfigLoad.error,
-      );
+      log(`[ERROR] Backup config validation failed -- returning error and keeping existing user config: ${backupConfigLoad.error}`)
       // save the error
       this.loadError = backupConfigLoad.error;
       // and return it
@@ -183,7 +200,7 @@ export class ConfigStore {
     }
 
     // if successful use the loaded backup configuration
-    log('[removeUserConfig] Backup config validation success - using it as config');
+    log('[INFO] Backup config validation success - using it as config');
     backupConfigLoad.config.isBackup = true;
     this.useBackupConfig(backupConfigLoad.config);
 
@@ -224,7 +241,7 @@ export class ConfigStore {
   // deletes the user configuration file
   _deleteUserConfigFile() {
     const configPath = this.getConfigFilePath();
-    log('Deleting config file: ', configPath);
+    log(`[INFO] Deleting config file: ${configPath}`);
     fs.unlinkSync(configPath);
   }
 
@@ -273,7 +290,14 @@ export class ConfigStore {
   }
 }
 
-export function makeConfigStore({filePaths, algorithmId, usingUI}: {filePaths: ConfigStorePaths, algorithmId: string, usingUI: boolean}) {
+interface ConfigStoreInput {
+  usingUI: boolean;
+  algorithmId: string;
+  filePaths: ConfigStorePaths;
+  saltConfiguration?: Config.FileBasedSalt | Config.StringBasedSalt;
+}
+
+export function makeConfigStore({ filePaths, algorithmId, usingUI, saltConfiguration }: ConfigStoreInput) {
   if (!filePaths || !algorithmId) throw new Error(`ConfigStore params MUST be provided.`);
-  return new ConfigStore(filePaths, algorithmId, usingUI);
+  return new ConfigStore(filePaths, algorithmId, usingUI, saltConfiguration);
 }

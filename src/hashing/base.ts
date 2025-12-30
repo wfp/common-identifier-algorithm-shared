@@ -20,17 +20,20 @@ import base32 from 'hi-base32';
 import type { Config } from '../config/Config';
 import type { Validator } from '../validation/Validation';
 
+import Debug from 'debug';
+const log = Debug('cid::engine::hashing::base');
+
 export type makeHasherFunction = (config: Config.CoreConfiguration['algorithm']) => BaseHasher;
 
 export abstract class BaseHasher {
   config: Config.CoreConfiguration['algorithm'];
-  saltValue: Config.CoreConfiguration['algorithm']['salt']['value'];
+  saltValue: Config.CoreConfiguration["algorithm"]["salt"]["value"];
 
   constructor(config: Config.CoreConfiguration['algorithm']) {
     this.config = config;
 
     // at this point the salt data should be injected into the config
-    if (config.salt.source.toLowerCase() !== 'string') {
+    if (config.salt.source !== "STRING") {
       throw new Error(
         'only embedded salt values supported for hashing -- import & save the config if file support is desired here',
       );
@@ -38,6 +41,7 @@ export abstract class BaseHasher {
 
     // load the salt value based on the config
     this.saltValue = config.salt.value;
+    log(`[DEBUG] Instantiated hasher; saltLen='${this.saltValue.length}', config='${JSON.stringify(this.config, null, 4)}'`);
   }
 
   // Generates a hash based on the configuration from an already concatenated string
@@ -45,7 +49,7 @@ export abstract class BaseHasher {
   generateHashForValue(stringValue: string, algorithm: string = 'sha256') {
     let hashDigest = crypto
       .createHash(algorithm)
-      .update(this.saltValue as string)
+      .update(this.config.salt.value)
       .update(stringValue)
       .digest();
     return base32.encode(hashDigest);
