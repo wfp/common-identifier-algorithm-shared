@@ -35,6 +35,8 @@ type ConfigValidator = (label: string, v: unknown) => ConfigValidatorResult;
 
 const isTrue: ConfigValidator = (label: string, v: unknown) => (!v ? label : undefined);
 const isFalse: ConfigValidator = (label: string, v: unknown) => (!!v ? label : undefined);
+const isBoolean: ConfigValidator = (label: string, v: unknown) =>
+  typeof v !== 'boolean' ? `${label} must be a boolean` : undefined;
 const isObject: ConfigValidator = (label: string, v: unknown) =>
   typeof v !== 'object' ? `Missing ${label}` : undefined;
 const isNumber: ConfigValidator = (label: string, v: unknown) =>
@@ -118,6 +120,7 @@ const checkSource = (source: Config.CoreConfiguration['source']) => {
 const checkDestination = (label: string, destination: Config.FileConfiguration['destination']) => {
   return (
     isObject(`[${label}]`, destination) ||
+    isOptional(`[${label}].prefix?`, destination.prefix, isString) ||
     isOptional(`[${label}].postfix?`, destination.postfix, isString) ||
     checkColumns(`[${label}]`, destination.columns)
   );
@@ -129,7 +132,8 @@ function checkPostProcessing(proc: Config.FileConfiguration["post_processing"]) 
 
   const encryptionCheck = 
     isOptional('[post_processing].encryption', proc.encryption, isObject) ||
-    isString("[post_processing].encryption.key_path", proc.encryption?.key_path)
+    isNotEmptyString("[post_processing].encryption.recipient", proc.encryption?.recipient) ||
+    isOptional("[post_processing].encryption.gpgBinaryPath?", proc.encryption?.gpgBinaryPath, isNotEmptyString);
   
   return encryptionCheck
 }

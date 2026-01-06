@@ -14,19 +14,16 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { SUPPORTED_FILE_TYPES } from '../../src/document';
-import { encoderForFile } from '../../src/encoding/index';
-import { makeCsvEncoder } from '../../src/encoding/csv';
-import { makeXlsxEncoder } from '../../src/encoding/xlsx';
+import { test, expect } from 'vitest';
+import { SUPPORTED_FILE_TYPES } from '@/document';
+import { encoderForFile } from '@/encoding/index';
+import { makeCsvEncoder } from '@/encoding/csv';
+import { makeXlsxEncoder } from '@/encoding/xlsx';
 
 test('encoderForFile', () => {
   expect(encoderForFile(SUPPORTED_FILE_TYPES.CSV)).toEqual(makeCsvEncoder);
   expect(encoderForFile(SUPPORTED_FILE_TYPES.XLSX)).toEqual(makeXlsxEncoder);
 
-  // @ts-ignore
-  expect(() => encoderForFile(null)).toThrow();
-  // @ts-ignore
-  expect(() => encoderForFile('')).toThrow();
-  // @ts-ignore
-  expect(() => encoderForFile(new Date())).toThrow();
+  const badInputs = [null, '', new Date(), 1234];
+  badInputs.forEach(x => expect(() => encoderForFile(x as any)).toThrow());
 });

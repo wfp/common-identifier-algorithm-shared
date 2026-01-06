@@ -1,0 +1,441 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuites name="vitest tests" tests="184" failures="0" errors="0" time="1.5022096">
+    <testsuite name="tests/config/appConfig.test.ts" timestamp="2026-01-06T14:43:37.465Z" hostname="WFPITPF4N7H0B" tests="2" failures="0" errors="0" skipped="0" time="0.0663687">
+        <testcase classname="tests/config/appConfig.test.ts" name="config::appConfig &gt; load" time="0.0445977">
+        </testcase>
+        <testcase classname="tests/config/appConfig.test.ts" name="config::appConfig &gt; save" time="0.0197034">
+        </testcase>
+    </testsuite>
+    <testsuite name="tests/config/configStore.test.ts" timestamp="2026-01-06T14:43:37.467Z" hostname="WFPITPF4N7H0B" tests="5" failures="0" errors="0" skipped="0" time="0.6197367">
+        <testcase classname="tests/config/configStore.test.ts" name="config::configStore &gt; loading" time="0.0781412">
+        </testcase>
+        <testcase classname="tests/config/configStore.test.ts" name="config::configStore &gt; backup loading" time="0.1323758">
+        </testcase>
+        <testcase classname="tests/config/configStore.test.ts" name="config::configStore &gt; error loading" time="0.0750956">
+        </testcase>
+        <testcase classname="tests/config/configStore.test.ts" name="config::configStore &gt; saving and loading user config" time="0.2608397">
+        </testcase>
+        <testcase classname="tests/config/configStore.test.ts" name="config::configStore &gt; app config TnS" time="0.0700971">
+        </testcase>
+    </testsuite>
+    <testsuite name="tests/config/loadConfig.test.ts" timestamp="2026-01-06T14:43:37.468Z" hostname="WFPITPF4N7H0B" tests="7" failures="0" errors="0" skipped="0" time="0.1468886">
+        <testcase classname="tests/config/loadConfig.test.ts" name="config::loadConfig &gt; ok" time="0.0083143">
+        </testcase>
+        <testcase classname="tests/config/loadConfig.test.ts" name="config::loadConfig &gt; invalid" time="0.0034583">
+        </testcase>
+        <testcase classname="tests/config/loadConfig.test.ts" name="config::loadConfig &gt; with salt file" time="0.060563">
+        </testcase>
+        <testcase classname="tests/config/loadConfig.test.ts" name="config::loadConfig &gt; with salt file error" time="0.0208114">
+        </testcase>
+        <testcase classname="tests/config/loadConfig.test.ts" name="config::loadConfig &gt; embedded salt file provided" time="0.0414676">
+        </testcase>
+        <testcase classname="tests/config/loadConfig.test.ts" name="config::loadConfig &gt; embedded salt value provided" time="0.0050691">
+        </testcase>
+        <testcase classname="tests/config/loadConfig.test.ts" name="config::loadConfig &gt; no salt provided" time="0.0046357">
+        </testcase>
+    </testsuite>
+    <testsuite name="tests/config/loadSaltFile.test.ts" timestamp="2026-01-06T14:43:37.470Z" hostname="WFPITPF4N7H0B" tests="3" failures="0" errors="0" skipped="0" time="0.0082002">
+        <testcase classname="tests/config/loadSaltFile.test.ts" name="config::loadSaltFile &gt; okay" time="0.0038364">
+        </testcase>
+        <testcase classname="tests/config/loadSaltFile.test.ts" name="config::loadSaltFile &gt; file does not exist" time="0.000559">
+        </testcase>
+        <testcase classname="tests/config/loadSaltFile.test.ts" name="config::loadSaltFile &gt; failed regexp validation" time="0.001657">
+        </testcase>
+    </testsuite>
+    <testsuite name="tests/config/utils.test.ts" timestamp="2026-01-06T14:43:37.471Z" hostname="WFPITPF4N7H0B" tests="1" failures="0" errors="0" skipped="0" time="0.0038491">
+        <testcase classname="tests/config/utils.test.ts" name="utils::attemptToReadTomlData" time="0.0023186">
+        </testcase>
+    </testsuite>
+    <testsuite name="tests/config/validateConfig.test.ts" timestamp="2026-01-06T14:43:37.471Z" hostname="WFPITPF4N7H0B" tests="25" failures="0" errors="0" skipped="0" time="0.0119084">
+        <testcase classname="tests/config/validateConfig.test.ts" name="config::validate::core &gt; returns undefined for a minimal valid core config" time="0.0027071">
+        </testcase>
+        <testcase classname="tests/config/validateConfig.test.ts" name="config::validate::core &gt; fails when [meta] is missing or id mismatches" time="0.0008873">
+        </testcase>
+        <testcase classname="tests/config/validateConfig.test.ts" name="config::validate::core &gt; fails on bad [source].columns entries" time="0.0003156">
+        </testcase>
+        <testcase classname="tests/config/validateConfig.test.ts" name="config::validate::core &gt; fails when algorithm.columns include blank or unknown source columns" time="0.0002941">
+        </testcase>
+        <testcase classname="tests/config/validateConfig.test.ts" name="config::validate::core &gt; fails on unsupported hash strategy via isOneOf" time="0.0002007">
+        </testcase>
+        <testcase classname="tests/config/validateConfig.test.ts" name="config::validate::core &gt; handles salt: optional, STRING, and FILE sources with validation" time="0.0004483">
+        </testcase>
+        <testcase classname="tests/config/validateConfig.test.ts" name="config::validate::core &gt; fails when validations refer to unknown column and not &quot;*&quot;" time="0.0002181">
+        </testcase>
+        <testcase classname="tests/config/validateConfig.test.ts" name="config::validate::core &gt; accepts &quot;*&quot; validations (wildcard applies to all columns)" time="0.0002438">
+        </testcase>
+        <testcase classname="tests/config/validateConfig.test.ts" name="config::validate::core &gt; returns default-branch error for unsupported validation op" time="0.0002122">
+        </testcase>
+        <testcase classname="tests/config/validateConfig.test.ts" name="config::validate::core &gt; propagates guard errors from a supported rule (e.g., REGEX_MATCH with empty string)" time="0.0001931">
+        </testcase>
+        <testcase classname="tests/config/validateConfig.test.ts" name="config::validate::core &gt; algorithm: missing [hash] object" time="0.0001756">
+        </testcase>
+        <testcase classname="tests/config/validateConfig.test.ts" name="config::validate::core &gt; algorithm.columns: non-string entry triggers &quot;must contain only strings&quot;" time="0.0001734">
+        </testcase>
+        <testcase classname="tests/config/validateConfig.test.ts" name="config::validate::file &gt; returns undefined for a valid file config (ui=false)" time="0.0006811">
+        </testcase>
+        <testcase classname="tests/config/validateConfig.test.ts" name="config::validate::file &gt; includes core errors within file validation" time="0.000204">
+        </testcase>
+        <testcase classname="tests/config/validateConfig.test.ts" name="config::validate::file &gt; destination: postfix wrong type triggers optional validator" time="0.0002157">
+        </testcase>
+        <testcase classname="tests/config/validateConfig.test.ts" name="config::validate::file &gt; columns: optional default provided but not a string" time="0.0003291">
+        </testcase>
+        <testcase classname="tests/config/validateConfig.test.ts" name="config::validate::file &gt; fails destination objects when missing" time="0.0002633">
+        </testcase>
+        <testcase classname="tests/config/validateConfig.test.ts" name="config::validate::file &gt; fails destination_map and destination_errors similarly" time="0.00032">
+        </testcase>
+        <testcase classname="tests/config/validateConfig.test.ts" name="config::validate::file &gt; validates messages only when ui=true" time="0.0003223">
+        </testcase>
+        <testcase classname="tests/config/validateConfig.test.ts" name="config::validate::file &gt; messages: error_in_config wrong type (ui=true)" time="0.0001909">
+        </testcase>
+        <testcase classname="tests/config/validateConfig.test.ts" name="config::validate::file &gt; messages: error_in_salt wrong type (ui=true)" time="0.0002046">
+        </testcase>
+        <testcase classname="tests/config/validateConfig.test.ts" name="config::validate::file &gt; messages: terms_and_conditions wrong type (ui=true)" time="0.0001472">
+        </testcase>
+        <testcase classname="tests/config/validateConfig.test.ts" name="config::validate::file &gt; messages: all correct with ui=true should be fine" time="0.0001471">
+        </testcase>
+        <testcase classname="tests/config/validateConfig.test.ts" name="config::validate::file &gt; post_processing encryption config type guards" time="0.0002141">
+        </testcase>
+        <testcase classname="tests/config/validateConfig.test.ts" name="config::validate::file &gt; destination columns trigger column-level errors" time="0.0001611">
+        </testcase>
+    </testsuite>
+    <testsuite name="tests/crypto/gpg.test.ts" timestamp="2026-01-06T14:43:37.474Z" hostname="WFPITPF4N7H0B" tests="9" failures="0" errors="0" skipped="0" time="0.0206415">
+        <testcase classname="tests/crypto/gpg.test.ts" name="crypto::gpg &gt; fails when input file is not readable" time="0.0039701">
+        </testcase>
+        <testcase classname="tests/crypto/gpg.test.ts" name="crypto::gpg &gt; fails when output directory is not writable" time="0.0010227">
+        </testcase>
+        <testcase classname="tests/crypto/gpg.test.ts" name="crypto::gpg &gt; succeeds on happy path (no signing, armor off, trust off)" time="0.0033311">
+        </testcase>
+        <testcase classname="tests/crypto/gpg.test.ts" name="crypto::gpg &gt; passes signer + loopback + passphrase via stdin (spawn args include --passphrase-fd 0)" time="0.0026097">
+        </testcase>
+        <testcase classname="tests/crypto/gpg.test.ts" name="crypto::gpg &gt; warns when loopback is set but no signer passphrase (still proceeds)" time="0.0012424">
+        </testcase>
+        <testcase classname="tests/crypto/gpg.test.ts" name="crypto::gpg &gt; classifies generic GPG failure via stderr and returns success=false " time="0.0015848">
+        </testcase>
+        <testcase classname="tests/crypto/gpg.test.ts" name="crypto::gpg &gt; sets armor/trustAlways/pinentry mode flags when options require them" time="0.0015936">
+        </testcase>
+        <testcase classname="tests/crypto/gpg.test.ts" name="crypto::gpg &gt; reports timeout as failure" time="0.0014949">
+        </testcase>
+        <testcase classname="tests/crypto/gpg.test.ts" name="crypto::gpg &gt; reports success=false on general gpg termination" time="0.001291">
+        </testcase>
+    </testsuite>
+    <testsuite name="tests/encoding/base.test.ts" timestamp="2026-01-06T14:43:37.475Z" hostname="WFPITPF4N7H0B" tests="1" failures="0" errors="0" skipped="0" time="0.0072608">
+        <testcase classname="tests/encoding/base.test.ts" name="EncoderBase::getOutputNameFor" time="0.0056429">
+        </testcase>
+    </testsuite>
+    <testsuite name="tests/encoding/csv.test.ts" timestamp="2026-01-06T14:43:37.476Z" hostname="WFPITPF4N7H0B" tests="3" failures="0" errors="0" skipped="0" time="0.0238593">
+        <testcase classname="tests/encoding/csv.test.ts" name="encoding::csv &gt; makeCsvEncoder creation" time="0.020808">
+        </testcase>
+        <testcase classname="tests/encoding/csv.test.ts" name="encoding::csv &gt; must start document before writing or ending" time="0.0011594">
+        </testcase>
+        <testcase classname="tests/encoding/csv.test.ts" name="encoding::csv &gt; generateHeaderRow" time="0.0003534">
+        </testcase>
+    </testsuite>
+    <testsuite name="tests/encoding/index.test.ts" timestamp="2026-01-06T14:43:37.476Z" hostname="WFPITPF4N7H0B" tests="1" failures="0" errors="0" skipped="0" time="0.0040725">
+        <testcase classname="tests/encoding/index.test.ts" name="encoderForFile" time="0.0031883">
+        </testcase>
+    </testsuite>
+    <testsuite name="tests/encoding/xlsx.test.ts" timestamp="2026-01-06T14:43:37.477Z" hostname="WFPITPF4N7H0B" tests="3" failures="0" errors="0" skipped="0" time="0.0776191">
+        <testcase classname="tests/encoding/xlsx.test.ts" name="encoding::xlsx &gt; makeXlsxEncoder creation" time="0.0746063">
+        </testcase>
+        <testcase classname="tests/encoding/xlsx.test.ts" name="encoding::xlsx &gt; must start document before writing or ending" time="0.0010396">
+        </testcase>
+        <testcase classname="tests/encoding/xlsx.test.ts" name="encoding::xlsx &gt; filterDataBasedOnConfig" time="0.0001936">
+        </testcase>
+    </testsuite>
+    <testsuite name="tests/processing/mapping.test.ts" timestamp="2026-01-06T14:43:37.479Z" hostname="WFPITPF4N7H0B" tests="4" failures="0" errors="0" skipped="0" time="0.0057498">
+        <testcase classname="tests/processing/mapping.test.ts" name="processing::mapping &gt; mapRequiredColumns" time="0.0026443">
+        </testcase>
+        <testcase classname="tests/processing/mapping.test.ts" name="processing::mapping &gt; isMappingOnlyDocument empty config" time="0.0005357">
+        </testcase>
+        <testcase classname="tests/processing/mapping.test.ts" name="processing::mapping &gt; isMappingOnlyDocument algo columns specified only" time="0.0002419">
+        </testcase>
+        <testcase classname="tests/processing/mapping.test.ts" name="processing::mapping &gt; isMappingOnlyDocument src dest specified only" time="0.0003549">
+        </testcase>
+    </testsuite>
+    <testsuite name="tests/processing/postprocess.test.ts" timestamp="2026-01-06T14:43:37.480Z" hostname="WFPITPF4N7H0B" tests="6" failures="0" errors="0" skipped="0" time="0.0104145">
+        <testcase classname="tests/processing/postprocess.test.ts" name="postprocess &gt; returns success=true with no steps when no post_processing is configured" time="0.0043783">
+        </testcase>
+        <testcase classname="tests/processing/postprocess.test.ts" name="postprocess &gt; no-op when post_processing exists but encryption is missing" time="0.0006464">
+        </testcase>
+        <testcase classname="tests/processing/postprocess.test.ts" name="postprocess::encrypt &gt; runs encryption and returns success with outputPath (happy path)" time="0.0018212">
+        </testcase>
+        <testcase classname="tests/processing/postprocess.test.ts" name="postprocess::encrypt &gt; forwards signer option to encryptFile" time="0.000527">
+        </testcase>
+        <testcase classname="tests/processing/postprocess.test.ts" name="postprocess::encrypt &gt; records failed encryption and returns success=false" time="0.0005734">
+        </testcase>
+        <testcase classname="tests/processing/postprocess.test.ts" name="postprocess::encrypt &gt; sets final outputPath to last successful step (single step today)" time="0.0002572">
+        </testcase>
+    </testsuite>
+    <testsuite name="tests/processing/preprocess.test.ts" timestamp="2026-01-06T14:43:37.481Z" hostname="WFPITPF4N7H0B" tests="6" failures="0" errors="0" skipped="0" time="0.1560633">
+        <testcase classname="tests/processing/preprocess.test.ts" name="processing::pre &gt; okay" time="0.0295544">
+        </testcase>
+        <testcase classname="tests/processing/preprocess.test.ts" name="processing::pre &gt; invalid input" time="0.0036506">
+        </testcase>
+        <testcase classname="tests/processing/preprocess.test.ts" name="processing::pre &gt; with limit" time="0.0064557">
+        </testcase>
+        <testcase classname="tests/processing/preprocess.test.ts" name="processing::pre &gt; with mapping file input" time="0.0199498">
+        </testcase>
+        <testcase classname="tests/processing/preprocess.test.ts" name="processing::pre &gt; with invalid mapping file" time="0.0119806">
+        </testcase>
+        <testcase classname="tests/processing/preprocess.test.ts" name="processing::pre &gt; with validation errors" time="0.0812198">
+        </testcase>
+    </testsuite>
+    <testsuite name="tests/processing/process.test.ts" timestamp="2026-01-06T14:43:37.483Z" hostname="WFPITPF4N7H0B" tests="2" failures="0" errors="0" skipped="0" time="0.0581299">
+        <testcase classname="tests/processing/process.test.ts" name="processing::main &gt; okay" time="0.0289484">
+        </testcase>
+        <testcase classname="tests/processing/process.test.ts" name="processing::main &gt; mapping file okay" time="0.0268504">
+        </testcase>
+    </testsuite>
+    <testsuite name="tests/decoding/base.test.ts" timestamp="2026-01-06T14:43:37.484Z" hostname="WFPITPF4N7H0B" tests="3" failures="0" errors="0" skipped="0" time="0.0053546">
+        <testcase classname="tests/decoding/base.test.ts" name="decoding::base &gt; sheetFromRawData" time="0.0026989">
+        </testcase>
+        <testcase classname="tests/decoding/base.test.ts" name="decoding::base &gt; mapColumnNamesToIds" time="0.0003354">
+        </testcase>
+        <testcase classname="tests/decoding/base.test.ts" name="decoding::base &gt; convertSheetRowsToObjects" time="0.0003577">
+        </testcase>
+    </testsuite>
+    <testsuite name="tests/decoding/csv.test.ts" timestamp="2026-01-06T14:43:37.485Z" hostname="WFPITPF4N7H0B" tests="2" failures="0" errors="0" skipped="0" time="0.0300758">
+        <testcase classname="tests/decoding/csv.test.ts" name="decoding::csv &gt; okay" time="0.0248317">
+        </testcase>
+        <testcase classname="tests/decoding/csv.test.ts" name="decoding::csv &gt; with limit" time="0.0031469">
+        </testcase>
+    </testsuite>
+    <testsuite name="tests/decoding/index.test.ts" timestamp="2026-01-06T14:43:37.485Z" hostname="WFPITPF4N7H0B" tests="2" failures="0" errors="0" skipped="0" time="0.0055473">
+        <testcase classname="tests/decoding/index.test.ts" name="decoderForFile" time="0.0034774">
+        </testcase>
+        <testcase classname="tests/decoding/index.test.ts" name="fileTypeOf" time="0.0004864">
+        </testcase>
+    </testsuite>
+    <testsuite name="tests/decoding/xlsx.test.ts" timestamp="2026-01-06T14:43:37.486Z" hostname="WFPITPF4N7H0B" tests="3" failures="0" errors="0" skipped="0" time="0.1089104">
+        <testcase classname="tests/decoding/xlsx.test.ts" name="decoding::xlsx &gt; okay" time="0.0564278">
+        </testcase>
+        <testcase classname="tests/decoding/xlsx.test.ts" name="decoding::xlsx &gt; with limit" time="0.0118638">
+        </testcase>
+        <testcase classname="tests/decoding/xlsx.test.ts" name="decoding::xlsx &gt; multiple sheets" time="0.0382948">
+        </testcase>
+    </testsuite>
+    <testsuite name="tests/hashing/base.test.ts" timestamp="2026-01-06T14:43:37.487Z" hostname="WFPITPF4N7H0B" tests="2" failures="0" errors="0" skipped="0" time="0.0090431">
+        <testcase classname="tests/hashing/base.test.ts" name="hashing::base &gt; generateHash" time="0.0048729">
+        </testcase>
+        <testcase classname="tests/hashing/base.test.ts" name="hashing::base &gt; invalid" time="0.0014557">
+        </testcase>
+    </testsuite>
+    <testsuite name="tests/hashing/utils.test.ts" timestamp="2026-01-06T14:43:37.487Z" hostname="WFPITPF4N7H0B" tests="3" failures="0" errors="0" skipped="0" time="0.0053304">
+        <testcase classname="tests/hashing/utils.test.ts" name="hashing::util &gt; extractAlgoColumnsFromObject" time="0.002667">
+        </testcase>
+        <testcase classname="tests/hashing/utils.test.ts" name="hashing::util &gt; joinFieldsForHash" time="0.0003034">
+        </testcase>
+        <testcase classname="tests/hashing/utils.test.ts" name="hashing::util &gt; cleanValueList" time="0.0002489">
+        </testcase>
+    </testsuite>
+    <testsuite name="tests/validation/date_diff.test.ts" timestamp="2026-01-06T14:43:37.488Z" hostname="WFPITPF4N7H0B" tests="5" failures="0" errors="0" skipped="0" time="0.0157288">
+        <testcase classname="tests/validation/date_diff.test.ts" name="validation::dateDiff &gt; future case" time="0.0074143">
+        </testcase>
+        <testcase classname="tests/validation/date_diff.test.ts" name="validation::dateDiff &gt; past case" time="0.0018801">
+        </testcase>
+        <testcase classname="tests/validation/date_diff.test.ts" name="validation::dateDiff &gt; invalid" time="0.0010071">
+        </testcase>
+        <testcase classname="tests/validation/date_diff.test.ts" name="validation::dateDiff &gt; inRange" time="0.0011984">
+        </testcase>
+        <testcase classname="tests/validation/date_diff.test.ts" name="validation::dateDiff &gt; fails for invalid options" time="0.0016772">
+        </testcase>
+    </testsuite>
+    <testsuite name="tests/validation/date_field_diff.test.ts" timestamp="2026-01-06T14:43:37.488Z" hostname="WFPITPF4N7H0B" tests="4" failures="0" errors="0" skipped="0" time="0.0140491">
+        <testcase classname="tests/validation/date_field_diff.test.ts" name="validation::dateFieldDiff &gt; okay" time="0.0068466">
+        </testcase>
+        <testcase classname="tests/validation/date_field_diff.test.ts" name="validation::dateFieldDiff &gt; positive" time="0.0012786">
+        </testcase>
+        <testcase classname="tests/validation/date_field_diff.test.ts" name="validation::dateFieldDiff &gt; fails for invalid values" time="0.0010917">
+        </testcase>
+        <testcase classname="tests/validation/date_field_diff.test.ts" name="validation::dateFieldDiff &gt; fails for invalid options" time="0.0022839">
+        </testcase>
+    </testsuite>
+    <testsuite name="tests/validation/date_shared.test.ts" timestamp="2026-01-06T14:43:37.489Z" hostname="WFPITPF4N7H0B" tests="3" failures="0" errors="0" skipped="0" time="0.0078562">
+        <testcase classname="tests/validation/date_shared.test.ts" name="validation::dateShared &gt; parseDateRangeDiff" time="0.0030734">
+        </testcase>
+        <testcase classname="tests/validation/date_shared.test.ts" name="validation::dateShared &gt; attemptToParseDate" time="0.0021276">
+        </testcase>
+        <testcase classname="tests/validation/date_shared.test.ts" name="validation::dateShared &gt; formatDateWithDefaultFormat" time="0.0008512">
+        </testcase>
+    </testsuite>
+    <testsuite name="tests/validation/field_type.test.ts" timestamp="2026-01-06T14:43:37.489Z" hostname="WFPITPF4N7H0B" tests="2" failures="0" errors="0" skipped="0" time="0.0068804">
+        <testcase classname="tests/validation/field_type.test.ts" name="validation::fieldType &gt; okay" time="0.0035927">
+        </testcase>
+        <testcase classname="tests/validation/field_type.test.ts" name="validation::fieldType &gt; fails for invalid option value" time="0.0013039">
+        </testcase>
+    </testsuite>
+    <testsuite name="tests/validation/index.test.ts" timestamp="2026-01-06T14:43:37.490Z" hostname="WFPITPF4N7H0B" tests="58" failures="0" errors="0" skipped="0" time="0.0180036">
+        <testcase classname="tests/validation/index.test.ts" name="validation &gt; makeValidatorListDict types" time="0.0038072">
+        </testcase>
+        <testcase classname="tests/validation/index.test.ts" name="validation &gt; makeValidatorListDict columns" time="0.0003361">
+        </testcase>
+        <testcase classname="tests/validation/index.test.ts" name="validation &gt; validateDocumentWithListDict OK" time="0.0009095">
+        </testcase>
+        <testcase classname="tests/validation/index.test.ts" name="validation &gt; validateDocumentWithListDict ERROR" time="0.0004715">
+        </testcase>
+        <testcase classname="tests/validation/index.test.ts" name="validation &gt; makeValidationResultDocument" time="0.0008661">
+        </testcase>
+        <testcase classname="tests/validation/index.test.ts" name="validation &gt; makeValidationResultDocument::error" time="0.0004317">
+        </testcase>
+        <testcase classname="tests/validation/index.test.ts" name="validation::typeguards &gt; isOptionsValidator &gt; rejects wrong op" time="0.0003622">
+        </testcase>
+        <testcase classname="tests/validation/index.test.ts" name="validation::typeguards &gt; isOptionsValidator &gt; rejects non-array value" time="0.0001702">
+        </testcase>
+        <testcase classname="tests/validation/index.test.ts" name="validation::typeguards &gt; isOptionsValidator &gt; rejects empty array" time="0.0001167">
+        </testcase>
+        <testcase classname="tests/validation/index.test.ts" name="validation::typeguards &gt; isOptionsValidator &gt; rejects wrong item types" time="0.0000815">
+        </testcase>
+        <testcase classname="tests/validation/index.test.ts" name="validation::typeguards &gt; isOptionsValidator &gt; accepts numbers and strings" time="0.000085">
+        </testcase>
+        <testcase classname="tests/validation/index.test.ts" name="validation::typeguards &gt; isRegexMatchValidator &gt; rejects wrong op" time="0.0001428">
+        </testcase>
+        <testcase classname="tests/validation/index.test.ts" name="validation::typeguards &gt; isRegexMatchValidator &gt; rejects non-string" time="0.0001116">
+        </testcase>
+        <testcase classname="tests/validation/index.test.ts" name="validation::typeguards &gt; isRegexMatchValidator &gt; rejects empty string" time="0.0000918">
+        </testcase>
+        <testcase classname="tests/validation/index.test.ts" name="validation::typeguards &gt; isRegexMatchValidator &gt; accepts non-empty string" time="0.0000846">
+        </testcase>
+        <testcase classname="tests/validation/index.test.ts" name="validation::typeguards &gt; isFieldTypeValidator &gt; rejects wrong op" time="0.0001081">
+        </testcase>
+        <testcase classname="tests/validation/index.test.ts" name="validation::typeguards &gt; isFieldTypeValidator &gt; rejects non-string value" time="0.0000819">
+        </testcase>
+        <testcase classname="tests/validation/index.test.ts" name="validation::typeguards &gt; isFieldTypeValidator &gt; rejects wrong string" time="0.0000609">
+        </testcase>
+        <testcase classname="tests/validation/index.test.ts" name="validation::typeguards &gt; isFieldTypeValidator &gt; accepts &quot;string&quot;" time="0.0000682">
+        </testcase>
+        <testcase classname="tests/validation/index.test.ts" name="validation::typeguards &gt; isFieldTypeValidator &gt; accepts &quot;number&quot;" time="0.0000883">
+        </testcase>
+        <testcase classname="tests/validation/index.test.ts" name="validation::typeguards &gt; isLanguageCheckValidator &gt; rejects wrong op" time="0.0003177">
+        </testcase>
+        <testcase classname="tests/validation/index.test.ts" name="validation::typeguards &gt; isLanguageCheckValidator &gt; rejects non-string" time="0.0002001">
+        </testcase>
+        <testcase classname="tests/validation/index.test.ts" name="validation::typeguards &gt; isLanguageCheckValidator &gt; rejects empty string" time="0.0001644">
+        </testcase>
+        <testcase classname="tests/validation/index.test.ts" name="validation::typeguards &gt; isLanguageCheckValidator &gt; accepts non-empty string" time="0.0001604">
+        </testcase>
+        <testcase classname="tests/validation/index.test.ts" name="validation::typeguards &gt; isMaxFieldLengthValidator &gt; rejects wrong op" time="0.00023">
+        </testcase>
+        <testcase classname="tests/validation/index.test.ts" name="validation::typeguards &gt; isMaxFieldLengthValidator &gt; rejects non-number" time="0.000232">
+        </testcase>
+        <testcase classname="tests/validation/index.test.ts" name="validation::typeguards &gt; isMaxFieldLengthValidator &gt; accepts number" time="0.0002108">
+        </testcase>
+        <testcase classname="tests/validation/index.test.ts" name="validation::typeguards &gt; isMinFieldLengthValidator &gt; rejects wrong op" time="0.0002373">
+        </testcase>
+        <testcase classname="tests/validation/index.test.ts" name="validation::typeguards &gt; isMinFieldLengthValidator &gt; rejects non-number" time="0.000161">
+        </testcase>
+        <testcase classname="tests/validation/index.test.ts" name="validation::typeguards &gt; isMinFieldLengthValidator &gt; accepts number" time="0.0001473">
+        </testcase>
+        <testcase classname="tests/validation/index.test.ts" name="validation::typeguards &gt; isMaxValueValidator &gt; rejects wrong op" time="0.0002245">
+        </testcase>
+        <testcase classname="tests/validation/index.test.ts" name="validation::typeguards &gt; isMaxValueValidator &gt; rejects wrong type" time="0.0001532">
+        </testcase>
+        <testcase classname="tests/validation/index.test.ts" name="validation::typeguards &gt; isMaxValueValidator &gt; rejects invalid DATE_OPTS string" time="0.0001677">
+        </testcase>
+        <testcase classname="tests/validation/index.test.ts" name="validation::typeguards &gt; isMaxValueValidator &gt; accepts number" time="0.0001335">
+        </testcase>
+        <testcase classname="tests/validation/index.test.ts" name="validation::typeguards &gt; isMaxValueValidator &gt; accepts valid DATE_OPTS" time="0.0001532">
+        </testcase>
+        <testcase classname="tests/validation/index.test.ts" name="validation::typeguards &gt; isMinValueValidator &gt; rejects wrong op" time="0.0002543">
+        </testcase>
+        <testcase classname="tests/validation/index.test.ts" name="validation::typeguards &gt; isMinValueValidator &gt; rejects non-number" time="0.000149">
+        </testcase>
+        <testcase classname="tests/validation/index.test.ts" name="validation::typeguards &gt; isMinValueValidator &gt; accepts number" time="0.0001339">
+        </testcase>
+        <testcase classname="tests/validation/index.test.ts" name="validation::typeguards &gt; isDateDiffValidator &gt; rejects wrong op" time="0.0002149">
+        </testcase>
+        <testcase classname="tests/validation/index.test.ts" name="validation::typeguards &gt; isDateDiffValidator &gt; rejects non-string" time="0.0001489">
+        </testcase>
+        <testcase classname="tests/validation/index.test.ts" name="validation::typeguards &gt; isDateDiffValidator &gt; rejects empty string" time="0.0001444">
+        </testcase>
+        <testcase classname="tests/validation/index.test.ts" name="validation::typeguards &gt; isDateDiffValidator &gt; accepts non-empty string" time="0.0001155">
+        </testcase>
+        <testcase classname="tests/validation/index.test.ts" name="validation::typeguards &gt; isSameValueForAllRowsValidator &gt; rejects wrong op" time="0.0001774">
+        </testcase>
+        <testcase classname="tests/validation/index.test.ts" name="validation::typeguards &gt; isSameValueForAllRowsValidator &gt; accepts correct op" time="0.0001327">
+        </testcase>
+        <testcase classname="tests/validation/index.test.ts" name="validation::typeguards &gt; isLinkedFieldValidator &gt; rejects wrong op" time="0.0003161">
+        </testcase>
+        <testcase classname="tests/validation/index.test.ts" name="validation::typeguards &gt; isLinkedFieldValidator &gt; rejects non-string target" time="0.0002878">
+        </testcase>
+        <testcase classname="tests/validation/index.test.ts" name="validation::typeguards &gt; isLinkedFieldValidator &gt; rejects empty target" time="0.0002366">
+        </testcase>
+        <testcase classname="tests/validation/index.test.ts" name="validation::typeguards &gt; isLinkedFieldValidator &gt; rejects when sourceColumns provided and missing target" time="0.0001683">
+        </testcase>
+        <testcase classname="tests/validation/index.test.ts" name="validation::typeguards &gt; isLinkedFieldValidator &gt; accepts valid target in sourceColumns" time="0.0001293">
+        </testcase>
+        <testcase classname="tests/validation/index.test.ts" name="validation::typeguards &gt; isLinkedFieldValidator &gt; accepts valid target when sourceColumns undefined" time="0.0001162">
+        </testcase>
+        <testcase classname="tests/validation/index.test.ts" name="validation::typeguards &gt; isDateFieldDiffValidator &gt; rejects wrong op" time="0.0001938">
+        </testcase>
+        <testcase classname="tests/validation/index.test.ts" name="validation::typeguards &gt; isDateFieldDiffValidator &gt; rejects non-string value" time="0.000115">
+        </testcase>
+        <testcase classname="tests/validation/index.test.ts" name="validation::typeguards &gt; isDateFieldDiffValidator &gt; rejects empty value" time="0.0001123">
+        </testcase>
+        <testcase classname="tests/validation/index.test.ts" name="validation::typeguards &gt; isDateFieldDiffValidator &gt; rejects non-string target" time="0.0001212">
+        </testcase>
+        <testcase classname="tests/validation/index.test.ts" name="validation::typeguards &gt; isDateFieldDiffValidator &gt; rejects empty target" time="0.0001315">
+        </testcase>
+        <testcase classname="tests/validation/index.test.ts" name="validation::typeguards &gt; isDateFieldDiffValidator &gt; rejects when sourceColumns provided and missing target" time="0.0001222">
+        </testcase>
+        <testcase classname="tests/validation/index.test.ts" name="validation::typeguards &gt; isDateFieldDiffValidator &gt; accepts valid target and value" time="0.0001149">
+        </testcase>
+        <testcase classname="tests/validation/index.test.ts" name="validation::typeguards &gt; isDateFieldDiffValidator &gt; accepts when sourceColumns undefined" time="0.0001097">
+        </testcase>
+    </testsuite>
+    <testsuite name="tests/validation/language_check.test.ts" timestamp="2026-01-06T14:43:37.505Z" hostname="WFPITPF4N7H0B" tests="2" failures="0" errors="0" skipped="0" time="0.0048567">
+        <testcase classname="tests/validation/language_check.test.ts" name="validaiton::languageCheck &gt; okay" time="0.002044">
+        </testcase>
+        <testcase classname="tests/validation/language_check.test.ts" name="validaiton::languageCheck &gt; fails for invalid options" time="0.0009156">
+        </testcase>
+    </testsuite>
+    <testsuite name="tests/validation/linked_field.test.ts" timestamp="2026-01-06T14:43:37.506Z" hostname="WFPITPF4N7H0B" tests="2" failures="0" errors="0" skipped="0" time="0.0054654">
+        <testcase classname="tests/validation/linked_field.test.ts" name="validation::linkedField &gt; LinkedFieldValidator" time="0.0033374">
+        </testcase>
+        <testcase classname="tests/validation/linked_field.test.ts" name="validation::linkedField &gt; fails for invalid option value" time="0.0003457">
+        </testcase>
+    </testsuite>
+    <testsuite name="tests/validation/max_field_length.test.ts" timestamp="2026-01-06T14:43:37.507Z" hostname="WFPITPF4N7H0B" tests="2" failures="0" errors="0" skipped="0" time="0.0083616">
+        <testcase classname="tests/validation/max_field_length.test.ts" name="validation::maxFieldLength &gt; MaxFieldLengthValidator" time="0.0042232">
+        </testcase>
+        <testcase classname="tests/validation/max_field_length.test.ts" name="validation::maxFieldLength &gt; MaxFieldLengthValidator fails for invalid options" time="0.0014723">
+        </testcase>
+    </testsuite>
+    <testsuite name="tests/validation/max_value.test.ts" timestamp="2026-01-06T14:43:37.508Z" hostname="WFPITPF4N7H0B" tests="4" failures="0" errors="0" skipped="0" time="0.0074128">
+        <testcase classname="tests/validation/max_value.test.ts" name="validation::maxValue &gt; MaxValueValidator" time="0.0028683">
+        </testcase>
+        <testcase classname="tests/validation/max_value.test.ts" name="validation::maxValue &gt; MaxValueValidator::dateString [year]" time="0.0007385">
+        </testcase>
+        <testcase classname="tests/validation/max_value.test.ts" name="validation::maxValue &gt; MaxValueValidator::dateString [month]" time="0.0004104">
+        </testcase>
+        <testcase classname="tests/validation/max_value.test.ts" name="validation::maxValue &gt; MaxValueValidator fails for invalid options" time="0.0013312">
+        </testcase>
+    </testsuite>
+    <testsuite name="tests/validation/min_field_length.test.ts" timestamp="2026-01-06T14:43:37.510Z" hostname="WFPITPF4N7H0B" tests="2" failures="0" errors="0" skipped="0" time="0.0034396">
+        <testcase classname="tests/validation/min_field_length.test.ts" name="validation::minFieldLength &gt; MinFieldLengthValidator" time="0.0016693">
+        </testcase>
+        <testcase classname="tests/validation/min_field_length.test.ts" name="validation::minFieldLength &gt; MinFieldLengthValidator fails for invalid options" time="0.000691">
+        </testcase>
+    </testsuite>
+    <testsuite name="tests/validation/min_value.test.ts" timestamp="2026-01-06T14:43:37.511Z" hostname="WFPITPF4N7H0B" tests="2" failures="0" errors="0" skipped="0" time="0.0059989">
+        <testcase classname="tests/validation/min_value.test.ts" name="validation::minValue &gt; MinValueValidator" time="0.0029814">
+        </testcase>
+        <testcase classname="tests/validation/min_value.test.ts" name="validation::minValue &gt; MinValueValidator fails for invalid options" time="0.0011757">
+        </testcase>
+    </testsuite>
+    <testsuite name="tests/validation/options.test.ts" timestamp="2026-01-06T14:43:37.512Z" hostname="WFPITPF4N7H0B" tests="2" failures="0" errors="0" skipped="0" time="0.0063672">
+        <testcase classname="tests/validation/options.test.ts" name="validation::options &gt; OptionsValidator" time="0.0028961">
+        </testcase>
+        <testcase classname="tests/validation/options.test.ts" name="validation::options &gt; OptionsValidator fails for invalid options" time="0.0017064">
+        </testcase>
+    </testsuite>
+    <testsuite name="tests/validation/regexp.test.ts" timestamp="2026-01-06T14:43:37.513Z" hostname="WFPITPF4N7H0B" tests="2" failures="0" errors="0" skipped="0" time="0.0063603">
+        <testcase classname="tests/validation/regexp.test.ts" name="validation::rexexp &gt; RegexpValidator" time="0.0026533">
+        </testcase>
+        <testcase classname="tests/validation/regexp.test.ts" name="validation::rexexp &gt; RegexpValidator fails for invalid regexp" time="0.0012774">
+        </testcase>
+    </testsuite>
+    <testsuite name="tests/validation/same_value_for_all_rows.test.ts" timestamp="2026-01-06T14:43:37.514Z" hostname="WFPITPF4N7H0B" tests="1" failures="0" errors="0" skipped="0" time="0.006405">
+        <testcase classname="tests/validation/same_value_for_all_rows.test.ts" name="validation::sameValueForAllRows &gt; SameValueForAllRowsValidator" time="0.0043757">
+        </testcase>
+    </testsuite>
+</testsuites>

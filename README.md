@@ -10,6 +10,7 @@ This repository is designed to be used with file-based data programmatically; fo
 📦common-identifier-algorithm-shared
  ┣ 📂src
  ┃ ┣ 📂config     # functions related to the handling of configuration files
+ ┃ ┣ 📂crypto     # functions related to encryption & signing of files
  ┃ ┣ 📂decoding   # reading and decoding files - CSV or XLSX
  ┃ ┣ 📂encoding   # encoding and writing files - CSV or XLSX
  ┃ ┣ 📂hashing    # base hashing logic and supporting utilities
@@ -47,3 +48,7 @@ This repository is designed to be used with file-based data programmatically; fo
 - The active algorithm takes the `{ static:[...], to_translate:[...], reference: [...] }` per-row data and returns a map with the columns it wants to add -- ex: `{ USCADI: "....", DOCUMENT_HASH: "..." }`
 - The data returned by the algorithm is merged into the source rows so the encoders can package multiple different outputs
 - The `src/encoding` Encoders (CSV and XLSX) write the output based on the relevant `[destination]` / `[destination_map]` section of the active configuration.
+
+### Post-processing
+
+- Any post-processing steps (e.g. encryption, signing, etc.) are handled after the encoding step, using the relevant classes in `src/crypto` (e.g. `GpgWrapper` for GPG encryption/signing)

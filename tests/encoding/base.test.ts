@@ -13,11 +13,12 @@
 
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-import { EncoderBase } from '../../src/encoding/base';
-import type { Config } from '../../src/config/Config';
+import { test, expect } from 'vitest';
+import { EncoderBase } from '@/encoding/base';
+import type { Config } from '@/config/Config';
 
 const BASE_CFG: Config.ColumnMap = {
+  prefix: "PREFIX_",
   postfix: '_POSTFIX',
   columns: [
     { name: 'A', alias: 'col_a' },
@@ -48,12 +49,12 @@ function makeEncoderBase(cfg = BASE_CFG) {
 
 test('EncoderBase::getOutputNameFor', () => {
   let e = makeEncoderBase(BASE_CFG);
-  expect(e.test__getOutputNameFor('output')).toEqual('output_POSTFIX');
+  expect(e.test__getOutputNameFor('output')).toEqual('PREFIX_output_POSTFIX');
 
   BASE_CFG.postfix = '_PF_{{yyyy}}';
   e = makeEncoderBase(BASE_CFG);
   const d = new Date();
-  expect(e.test__getOutputNameFor('output')).toEqual(`output_PF_${d.getFullYear()}`);
+  expect(e.test__getOutputNameFor('output')).toEqual(`PREFIX_output_PF_${d.getFullYear()}`);
 });
 
 

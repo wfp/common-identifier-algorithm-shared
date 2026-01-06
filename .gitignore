@@ -3,6 +3,7 @@ tmp
 dist
 .vscode
 coverage
+reports
 
 /lib
 output/

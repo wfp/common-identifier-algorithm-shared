@@ -1,5 +1,9 @@
 {
   "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": [ "./src/*" ],
+    },
     "target": "ESNext",
     "module": "ESNext",
     "lib": ["ESNext"],
@@ -20,12 +24,8 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
 
-    "outDir": "dist",
-    "rootDir": "src",
-    "sourceMap": true,
-
-    "declaration": true,    
+    "noEmit": true
   },
-  "include": ["src/**/*.ts"],
-  "exclude": ["node_modules", "tests", "dist", "tmp"]
+  "include": ["src/**/*.ts", "tests/**/*.ts", "examples/**/*.ts" ],
+  "exclude": ["node_modules", "dist", "tmp", "**/tmp"]
 }

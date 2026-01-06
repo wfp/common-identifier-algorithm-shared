@@ -16,7 +16,9 @@
 
 import { fileURLToPath } from 'node:url';
 import { join, dirname } from 'path';
-import { makeXlsxDecoder } from '../../src/decoding/xlsx';
+import { describe, test, expect } from 'vitest';
+
+import { makeXlsxDecoder } from '@/decoding/xlsx';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -27,30 +29,31 @@ const BASE_CFG = {
   ],
 };
 
-test('XLSXDecoder', async () => {
-  const d = makeXlsxDecoder(BASE_CFG);
-  const decoded = await d.decodeFile(join(__dirname, 'files', 'test.xlsx'));
+describe("decoding::xlsx", () => {
+  test('okay', async () => {
+    const d = makeXlsxDecoder(BASE_CFG);
+    const decoded = await d.decodeFile(join(__dirname, 'files', 'test.xlsx'));
 
-  expect(decoded.data.length).toEqual(10);
-  expect(decoded.data[0]).toEqual({ y: '1994', o: 'ORG1' });
-  expect(decoded.data[1]).toEqual({ y: '1982', o: 'ORG1' });
-});
+    expect(decoded.data.length).toEqual(10);
+    expect(decoded.data[0]).toEqual({ y: '1994', o: 'ORG1' });
+    expect(decoded.data[1]).toEqual({ y: '1982', o: 'ORG1' });
+  });
 
-test('XLSXDecoder::with limit', async () => {
-  const limit = 8;
-  const d = makeXlsxDecoder(BASE_CFG, limit);
-  const decoded = await d.decodeFile(join(__dirname, 'files', 'test.xlsx'));
+  test('with limit', async () => {
+    const limit = 8;
+    const d = makeXlsxDecoder(BASE_CFG, limit);
+    const decoded = await d.decodeFile(join(__dirname, 'files', 'test.xlsx'));
 
-  expect(decoded.data.length).toEqual(limit);
-  expect(decoded.data[0]).toEqual({ y: '1994', o: 'ORG1' });
-  expect(decoded.data[1]).toEqual({ y: '1982', o: 'ORG1' });
-});
+    expect(decoded.data.length).toEqual(limit);
+    expect(decoded.data[0]).toEqual({ y: '1994', o: 'ORG1' });
+    expect(decoded.data[1]).toEqual({ y: '1982', o: 'ORG1' });
+  });
 
-test('XLSXDecoder::multipleSheets', async () => {
-  const limit = 8;
-  const d = makeXlsxDecoder(BASE_CFG, limit);
+  test('multiple sheets', async () => {
+    const limit = 8;
+    const d = makeXlsxDecoder(BASE_CFG, limit);
+    const promise = d.decodeFile(join(__dirname, 'files', 'test_multiple_sheets.xlsx'));
 
-  expect(
-    async () => await d.decodeFile(join(__dirname, 'files', 'test_multiple_sheets.xlsx')),
-  ).rejects.toThrow();
+    await expect(async () => await promise).rejects.toThrow(/single sheet/);
+  });
 });

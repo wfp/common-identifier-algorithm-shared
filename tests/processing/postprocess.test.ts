@@ -13,73 +13,145 @@
 
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import type { GpgOptions, GpgWrapper } from '@/crypto/gpg';
 
-import { tmpdir } from 'node:os';
-import { parse } from 'csv-parse/sync';
-import { readFileSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
-import { join, dirname } from 'node:path';
+const hoisted = vi.hoisted(() => {
+  const encryptFileMock = vi.fn();
+  const constructedOptions: Array<GpgOptions> = [];
 
-import { processFile } from '../../src/processing';
-import { BaseHasher } from '../../src/hashing/base';
-import { SUPPORTED_FILE_TYPES } from '../../src/document';
-import { extractAlgoColumnsFromObject } from '../../src/hashing/utils';
-import { SUPPORTED_VALIDATORS, type Validator } from '../../src/validation/Validation';
+  const instances: any[] = [];
 
-import type { Config } from '../../src/config/Config';
-import type { makeHasherFunction } from '../../src/hashing/base';
+  class GpgWrapperMock {
+    public opts: GpgOptions;
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
+    constructor(opts: GpgWrapperMock['opts']) {
+      this.opts = opts;
+      constructedOptions.push(opts);
+      instances.push(this);
+    }
 
-const CONFIG: Config.FileConfiguration = {
-  meta: { id: '', version: '', signature: '' },
-  source: {
-    columns: [
-      { name: 'A', alias: 'col_a' },
-      { name: 'B', alias: 'col_b' },
-    ],
-  },
-  algorithm: {
-    hash: { strategy: 'SHA256' },
-    salt: { source: 'STRING', value: 'TEST' },
-    columns: {
-      static: ['col_a'],
-      process: [],
-      reference: [],
-    },
-  },
-  validations: {
-    col_a: [{ op: SUPPORTED_VALIDATORS.MAX_FIELD_LENGTH, value: 2 }],
-  },
-  destination: {
-    columns: [
-      { name: 'A', alias: 'col_a' },
-      { name: 'Test', alias: 'test' },
-    ],
-    postfix: '_OUTPUT',
-  },
-  destination_errors: {
-    columns: [
-      { name: 'Errors', alias: 'errors' },
-      { name: 'A', alias: 'col_a' },
-    ],
-    postfix: '_ERRORS',
-  },
-  destination_map: {
-    columns: [
-      { name: 'A', alias: 'col_a' },
-      { name: 'Test', alias: 'test' },
-    ],
-    postfix: '_MAPPING',
-  },
-  post_processing: {
-    encryption: {
-      key_path: ""
+    encryptFile(args: Parameters<GpgWrapper['encryptFile']>[0]) {
+      return encryptFileMock(args);
     }
   }
-};
+
+  return { encryptFileMock, constructedOptions, instances, GpgWrapperMock };
+});
+
+vi.mock('@/crypto/gpg', () => ({
+  GpgWrapper: hoisted.GpgWrapperMock,
+}));
 
 
-test('postprocessFile', async () => {
-  // TODO
-})
+import { postprocessFile } from '@/processing/postprocess';
+
+describe('postprocess', () => {
+  beforeEach(() => {
+    vi.restoreAllMocks();
+    vi.resetAllMocks();
+    hoisted.encryptFileMock.mockReset();
+    hoisted.constructedOptions.length = 0;
+    hoisted.instances.length = 0;
+  });
+
+  it('returns success=true with no steps when no post_processing is configured', async () => {
+    const config = { meta: { signature: 'QWERTY' }} as any;
+    const res = await postprocessFile({ config, inputPath: 'in.csv', outputPath: 'out.gpg'});
+
+    expect(res).toEqual({ success: true, steps: [] });
+    expect(hoisted.encryptFileMock).not.toHaveBeenCalled();
+    expect(hoisted.constructedOptions).toHaveLength(0);
+  });
+
+  it('no-op when post_processing exists but encryption is missing', async () => {
+    const config = { meta: { signature: 'QWERTY' }, post_processing: {} } as any;
+    const res = await postprocessFile({ config, inputPath: 'in.csv', outputPath: 'out.gpg' });
+
+    expect(res).toEqual({ success: true, steps: [] });
+    expect(hoisted.encryptFileMock).not.toHaveBeenCalled();
+    expect(hoisted.constructedOptions).toHaveLength(0);
+  });
+});
+
+describe('postprocess::encrypt', () => {
+  beforeEach(() => {
+    vi.restoreAllMocks();
+    vi.resetAllMocks();
+    hoisted.encryptFileMock.mockReset();
+    hoisted.constructedOptions.length = 0;
+    hoisted.instances.length = 0;
+  });
+  it('runs encryption and returns success with outputPath (happy path)', async () => {
+    hoisted.encryptFileMock.mockResolvedValueOnce({ success: true, outputPath: 'out.gpg' });
+
+    const config = { meta: { signature: 'QWERTY' }, post_processing: { encryption: { recipient: 'RECIP' }}} as any;
+    const res = await postprocessFile({ config, inputPath: 'in.csv', outputPath: 'out.gpg' });
+
+    expect(res.success).toBe(true);
+    expect(res.steps).toEqual([{ success: true, step: 'ENCRYPTION', outputPath: 'out.gpg' }]);
+    expect(res.outputPath).toBe('out.gpg');
+
+    const callArgs = hoisted.encryptFileMock.mock.calls.at(-1)?.[0];
+    expect(callArgs).toMatchObject({
+      inputPath: 'in.csv',
+      outputPath: 'out.gpg',
+      recipient: 'RECIP',
+      signer: undefined,
+    });
+
+    expect(hoisted.constructedOptions).toEqual([{ trustAlways: true, timeoutMs: 60_000, verifyKeys: true }]);
+  });
+
+  it('forwards signer option to encryptFile', async () => {
+    hoisted.encryptFileMock.mockResolvedValueOnce({ success: true, outputPath: 'out.gpg' });
+
+    const config = {
+      meta: { signature: 'QWERTY' },
+      post_processing: { encryption: { recipient: 'RECIP' }}
+    } as any;
+
+    await postprocessFile({ config, inputPath: 'in.csv', outputPath: 'out.gpg', options: { signer: 'SIGNER' }});
+
+    const callArgs = hoisted.encryptFileMock.mock.calls.at(-1)?.[0];
+    expect(callArgs.signer).toBe('SIGNER');
+  });
+
+  it('records failed encryption and returns success=false', async () => {
+    hoisted.encryptFileMock.mockResolvedValueOnce({
+      success: false,
+      error: 'Recipient key not found',
+      code: 'RECIPIENT_KEY_NOT_FOUND'
+    });
+
+    const config = {
+      meta: { signature: 'QWERTY' },
+      post_processing: { encryption: { recipient: 'RECIP' }}
+    } as any;
+
+    const res = await postprocessFile({ config, inputPath: 'in.csv', outputPath: 'out.gpg' });
+
+    expect(res.success).toBe(false);
+    expect(res.steps).toEqual([{ success: false, step: 'ENCRYPTION', error: 'Recipient key not found' }]);
+    expect(res.outputPath).toBeUndefined();
+    expect(hoisted.encryptFileMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('sets final outputPath to last successful step (single step today)', async () => {
+    hoisted.encryptFileMock.mockResolvedValueOnce({ success: true, outputPath: 'encrypted.gpg' });
+
+    const config = {
+      meta: { signature: 'QWERTY' },
+      post_processing: { encryption: { recipient: 'RECIP' }}
+    } as any;
+
+    const res = await postprocessFile({
+      config,
+      inputPath: 'in.csv',
+      outputPath: 'encrypted.gpg'
+    });
+
+    expect(res.success).toBe(true);
+    expect(res.outputPath).toBe('encrypted.gpg');
+  });
+});

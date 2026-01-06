@@ -10,17 +10,15 @@ Look in any of the existing algorithm implementation repositories for examples o
 
 The meta section of the file contains information related to application versioning.
 
-```
+```toml
 [meta]
-region="ABC"    # application installations are region dependent, the value specified here MUST match the built-in region.
+id="ABC"    # application installations are typically region dependent, the value specified here MUST match the built-in region.
 version="1.0.0" # the version information is shown in the top-right of the desktop UI for user visibility.
 signature = "aaabbb"
 ```
-The signature is the calculated `md5` hash value of the configuration file itself, computed using the `src/config/generateConfigHash.ts` utility. This feature exists to reduce the likelihood of accidental changes to the config file causing issues in the deterministic processing of input data.
+The signature is the calculated `md5` hash value of the configuration file itself, computed using the [`generateConfigHash`](../src/config/utils.ts) utility. This feature exists to reduce the likelihood of accidental changes to the config file causing issues in the deterministic processing of input data.
 
 When a change is made to the configuration file, a new signature value must be created to reflect its new content.
-
-> TODO: git pre-commit hook to validate the config file on commit and throw an error if values don't match.
 
 ### Messages
 
@@ -29,7 +27,7 @@ When a change is made to the configuration file, a new signature value must be c
 
 Messages are an optional field used to set the default error and terms & conditions messages within the UI application. Each of these fields supports `HTML` tag syntax.
 
-```
+```toml
 [messages]
 # terms and conditions are shown to the user on first start and upon configuration file changes.
 terms_and_conditions="""
@@ -46,9 +44,7 @@ error_in_salt=""
 
 The `source` sections defines the expected input columns in the source dataset. The `name` key is the human readable name in the header of the CSV file, `alias` is the more machine-friendly name used by the application internally, and `default` is the default value to use for empty cells where necessary.
 
-> TODO: make `alias` an optional parameter - it is not relevant for programmatic usage.
-
-```
+```toml
 [source]
 # an array of column names, their aliases, and default values where necessary.
 columns = [
@@ -62,7 +58,7 @@ columns = [
 
 This file section details which validation rules to apply to which columns in the input file.
 
-```
+```toml
 [validations]
 # per column name to apply validation rules to, define an array of validation rules
 column_name = [
@@ -74,7 +70,7 @@ column_name = [
 ]
 ```
 
-```
+```toml
 # the structure of a validation rule is as follows:
 {
     # the name of the validation rule, from the supported list.
@@ -107,7 +103,7 @@ This is the list of currently supported validation rules, these are further desc
 
 ### Algorithm
 
-```
+```toml
 [algorithm]
 # the aliased columns to use as part of the algo implementation.
 [algorithm.columns]
@@ -119,7 +115,7 @@ static = [ "col_b" ]
 reference = [ "col_c" ]
 ```
 
-```
+```toml
 [algorithm.hash]
 # the hashing algorithm to use, currently only SHA256 is supported
 strategy = "SHA256"
@@ -146,7 +142,7 @@ darwin = "$APPDATA/<path_to_file>/file.asc"
 
 Define the columns to include in the output file, including the human-readable names to convert to where necessary.
 
-```
+```toml
 [destination]
 # array of column names and aliases to include in the output file
 columns = [
@@ -163,7 +159,7 @@ postfix = "_OUTPUT"
 
 Define the columns to include in the output mapping file, including the human-readable names to convert to where necessary.
 
-```
+```toml
 [destination_map]
 # array of column names and aliases to include in the output mapping file
 columns = [
@@ -183,7 +179,7 @@ Define the columns to include in the error report, including the human-readable 
 > [!IMPORTANT]
 > Make sure to include the `Errors | errors` column in the output configuration, otherwise they will not be included in the output file.
 
-```
+```toml
 [destination_errors]
 # array of column names and aliases to include in the errors file
 columns = [
@@ -195,4 +191,15 @@ columns = [
 # suffix that is appended to the errors filename -> <input_file_name><postfix>.csv
 # for XLSX, this is also the name of the sheet containing the final data
 postfix = "_ERRORS"
+```
+
+### Post-processing
+
+#### Encryption / Signing
+
+```toml
+[post_processing]
+[post_processing.encryption]
+recipient = "QWERTY" # the fingerprint or identifier of the recipient to encrypt the file for
+gpgBinaryPath = "" # optional path to gpg binary, overrides system path lookup
 ```

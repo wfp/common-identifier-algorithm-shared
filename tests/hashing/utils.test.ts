@@ -14,69 +14,52 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { extractAlgoColumnsFromObject, joinFieldsForHash, cleanValueList } from '../../src/hashing/utils';
+import { describe, test, expect } from 'vitest';
+import { extractAlgoColumnsFromObject, joinFieldsForHash, cleanValueList } from "@/hashing/utils";
 
-test('extractAlgoColumnsFromObject', () => {
-  expect(
-    extractAlgoColumnsFromObject(
-      {
-        static: [],
-        process: [],
-        reference: [],
-      },
+describe("hashing::util", () => {
+
+  test('extractAlgoColumnsFromObject', () => {
+    expect(extractAlgoColumnsFromObject(
+      { static: [], process: [], reference: [] },
       {},
-    ),
-  ).toEqual({
-    static: [],
-    process: [],
-    reference: [],
-  });
+    )).toEqual({ static: [], process: [], reference: [] });
 
-  expect(
-    extractAlgoColumnsFromObject(
+    expect(extractAlgoColumnsFromObject(
       {
         static: ['col_a', 'col_b'],
         process: ['col_tra', 'col_trb'],
         reference: ['col_refa', 'col_refb'],
       },
       {},
-    ),
-  ).toEqual({
-    static: [],
-    process: [],
-    reference: [],
-  });
+    )).toEqual({ static: [], process: [], reference: [] });
 
-  expect(
-    extractAlgoColumnsFromObject(
+    expect(extractAlgoColumnsFromObject(
       {
         static: ['col_a', 'col_b'],
         process: ['col_tra', 'col_trb'],
         reference: ['col_refa', 'col_refb'],
       },
       {
-        col_a: 'a',
-        col_b: 'b',
-        col_tra: 'tra',
-        col_trb: 'trb',
-        col_refa: 'refa',
-        col_refb: 'refb',
+        col_a: 'a', col_b: 'b',
+        col_tra: 'tra', col_trb: 'trb',
+        col_refa: 'refa', col_refb: 'refb',
       },
-    ),
-  ).toEqual({
-    static: ['a', 'b'],
-    process: ['tra', 'trb'],
-    reference: ['refa', 'refb'],
+    )).toEqual({
+      static: ['a', 'b'],
+      process: ['tra', 'trb'],
+      reference: ['refa', 'refb'],
+    });
   });
-});
 
-test('joinFieldsForHash', () => {
-  expect(joinFieldsForHash([])).toEqual('');
-  expect(joinFieldsForHash(['a', 'b'])).toEqual('ab');
-});
+  test('joinFieldsForHash', () => {
+    expect(joinFieldsForHash([])).toEqual('');
+    expect(joinFieldsForHash(['a', 'b'])).toEqual('ab');
+  });
 
-test('cleanValueList', () => {
-  expect(cleanValueList([])).toEqual([]);
-  expect(cleanValueList(['a', 'b'])).toEqual(['a', 'b']);
-  expect(cleanValueList(['a', 'b', 10, 'c', null, 'd'])).toEqual(['a', 'b', '', 'c', '', 'd']);
+  test('cleanValueList', () => {
+    expect(cleanValueList([])).toEqual([]);
+    expect(cleanValueList(['a', 'b'])).toEqual(['a', 'b']);
+    expect(cleanValueList(['a', 'b', 10, 'c', null, 'd'])).toEqual(['a', 'b', '', 'c', '', 'd']);
+  });
 });

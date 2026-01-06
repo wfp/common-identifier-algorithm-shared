@@ -13,15 +13,16 @@
 
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
+import { describe, test, expect } from 'vitest';
 
 import { existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { preprocessFile, processFile } from '../../src/processing';
-import { SUPPORTED_VALIDATORS } from '../../src/validation/Validation';
+import { preprocessFile, processFile } from '@/processing';
+import { SUPPORTED_VALIDATORS } from '@/validation/Validation';
 
-import type { Config } from '../../src/config/Config';
+import type { Config } from '@/config/Config';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -68,106 +69,108 @@ const CONFIG: Config.FileConfiguration = {
   },
 };
 
-test('preprocessFile invalid', async () => {
-  const fn = async () =>
-    await processFile({
+describe("processing::pre", () => {
+    test('okay', async () => {
+    const filePath = join(__dirname, 'files', 'input_ok.csv');
+    const results = await preprocessFile({
       config: CONFIG,
-      inputFilePath: '',
-      outputPath: '',
-      // @ts-ignore
-      format: null,
+      inputFilePath: filePath,
       limit: 10,
     });
-  await expect(fn).rejects.toThrow();
-});
 
-test('preprocessFile', async () => {
-  const filePath = join(__dirname, 'files', 'input_ok.csv');
-  const results = await preprocessFile({
-    config: CONFIG,
-    inputFilePath: filePath,
-    limit: 10,
+    expect(results.document.data[0]).toEqual({ col_a: 'A0', col_b: 'B0' });
+    expect(results.isValid).toEqual(true);
+    expect(results.isMappingDocument).toEqual(false);
+    expect(results.inputFilePath).toEqual(filePath);
+    expect(results.errorFilePath).toEqual(undefined);
   });
 
-  expect(results.document.data[0]).toEqual({ col_a: 'A0', col_b: 'B0' });
-  expect(results.isValid).toEqual(true);
-  expect(results.isMappingDocument).toEqual(false);
-  expect(results.inputFilePath).toEqual(filePath);
-  expect(results.errorFilePath).toEqual(undefined);
-});
-
-test('preprocessFile::args', async () => {
-  const filePath = join(__dirname, 'files', 'input_ok.csv');
-  let results = await preprocessFile({
-    config: CONFIG,
-    inputFilePath: filePath,
-    limit: 1,
+  test('invalid input', async () => {
+    const fn = async () =>
+      await processFile({
+        config: CONFIG,
+        inputFilePath: '',
+        outputPath: '',
+        // @ts-expect-error format only accepts SUPPORTED_FILE_TYPES
+        format: null,
+        limit: 10,
+      });
+    await expect(fn).rejects.toThrow();
   });
 
-  expect(results.document.data.length).toEqual(1);
+  test('with limit', async () => {
+    const filePath = join(__dirname, 'files', 'input_ok.csv');
+    let results = await preprocessFile({
+      config: CONFIG,
+      inputFilePath: filePath,
+      limit: 1,
+    });
 
-  results = await preprocessFile({ config: CONFIG, inputFilePath: filePath });
-  expect(results.document.data.length).toEqual(2);
-});
+    expect(results.document.data.length).toEqual(1);
 
-test('preprocessFile mapping', async () => {
-  const filePath = join(__dirname, 'files', 'input_mapping_ok.csv');
-  const results = await preprocessFile({
-    config: CONFIG,
-    inputFilePath: filePath,
-    limit: 10,
+    results = await preprocessFile({ config: CONFIG, inputFilePath: filePath });
+    expect(results.document.data.length).toEqual(2);
   });
 
-  expect(results.document.data[0]).toEqual({ col_a: 'A0' });
+  test('with mapping file input', async () => {
+    const filePath = join(__dirname, 'files', 'input_mapping_ok.csv');
+    const results = await preprocessFile({
+      config: CONFIG,
+      inputFilePath: filePath,
+      limit: 10,
+    });
 
-  expect(results.isValid).toEqual(true);
-  expect(results.isMappingDocument).toEqual(true);
-  expect(results.inputFilePath).toEqual(filePath);
-  expect(results.errorFilePath).toEqual(undefined);
-});
+    expect(results.document.data[0]).toEqual({ col_a: 'A0' });
 
-test('preprocessFile mapping invalid', async () => {
-  const filePath = join(__dirname, 'files', 'input_mapping_ok.csv');
-
-  const newConfig = JSON.parse(JSON.stringify(CONFIG));
-  newConfig.validations.col_a.push({ op: 'options', value: ['NO', 'WAY'] });
-
-  const results = await preprocessFile({
-    config: newConfig,
-    inputFilePath: filePath,
-    limit: 10,
+    expect(results.isValid).toEqual(true);
+    expect(results.isMappingDocument).toEqual(true);
+    expect(results.inputFilePath).toEqual(filePath);
+    expect(results.errorFilePath).toEqual(undefined);
   });
 
-  expect(results.isMappingDocument).toEqual(true);
-  expect(results.isValid).toEqual(false);
-});
+  test('with invalid mapping file', async () => {
+    const filePath = join(__dirname, 'files', 'input_mapping_ok.csv');
 
-test('preprocessFile invalid', async () => {
-  const filePath = join(__dirname, 'files', 'input_invalid.csv');
+    const newConfig = JSON.parse(JSON.stringify(CONFIG));
+    newConfig.validations.col_a.push({ op: 'options', value: ['NO', 'WAY'] });
 
-  const results = await preprocessFile({
-    config: CONFIG,
-    inputFilePath: filePath,
-    limit: 10,
+    const results = await preprocessFile({
+      config: newConfig,
+      inputFilePath: filePath,
+      limit: 10,
+    });
+
+    expect(results.isMappingDocument).toEqual(true);
+    expect(results.isValid).toEqual(false);
   });
 
-  expect(results.isMappingDocument).toEqual(false);
-  expect(results.document.data[0]).toEqual({
-    col_a: 'A0',
-    col_b: 'B0',
-    errors: '',
-    row_number: 2,
-  });
-  expect(results.document.data[1]).toEqual({
-    col_a: 'A1 TOO LONG',
-    col_b: 'B1',
-    errors: 'A must be shorter than 2 characters;',
-    row_number: 3,
-  });
+  test('with validation errors', async () => {
+    const filePath = join(__dirname, 'files', 'input_invalid.csv');
 
-  expect(results.isValid).toEqual(false);
+    const results = await preprocessFile({
+      config: CONFIG,
+      inputFilePath: filePath,
+      limit: 10,
+    });
 
-  const errorFile = results.errorFilePath;
-  expect(errorFile).not.toEqual(undefined);
-  expect(existsSync(errorFile as string)).toEqual(true);
+    expect(results.isMappingDocument).toEqual(false);
+    expect(results.document.data[0]).toEqual({
+      col_a: 'A0',
+      col_b: 'B0',
+      errors: '',
+      row_number: 2,
+    });
+    expect(results.document.data[1]).toEqual({
+      col_a: 'A1 TOO LONG',
+      col_b: 'B1',
+      errors: 'A must be shorter than 2 characters;',
+      row_number: 3,
+    });
+
+    expect(results.isValid).toEqual(false);
+
+    const errorFile = results.errorFilePath;
+    expect(errorFile).not.toEqual(undefined);
+    expect(existsSync(errorFile as string)).toEqual(true);
+  });
 });

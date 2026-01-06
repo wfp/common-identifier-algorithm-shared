@@ -20,14 +20,16 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { join, dirname } from 'node:path';
 
-import { processFile } from '../../src/processing';
-import { BaseHasher } from '../../src/hashing/base';
-import { SUPPORTED_FILE_TYPES } from '../../src/document';
-import { extractAlgoColumnsFromObject } from '../../src/hashing/utils';
-import { SUPPORTED_VALIDATORS, type Validator } from '../../src/validation/Validation';
+import { describe, test, expect } from 'vitest';
 
-import type { Config } from '../../src/config/Config';
-import type { makeHasherFunction } from '../../src/hashing/base';
+import { processFile } from '@/processing';
+import { BaseHasher } from '@/hashing/base';
+import { SUPPORTED_FILE_TYPES } from '@/document';
+import { extractAlgoColumnsFromObject } from '@/hashing/utils';
+import { SUPPORTED_VALIDATORS, type Validator } from '@/validation/Validation';
+
+import type { Config } from '@/config/Config';
+import type { makeHasherFunction } from '@/hashing/base';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -92,70 +94,72 @@ const makeTestHasher: makeHasherFunction = (config: Config.CoreConfiguration['al
   return new TestHasher(config);
 };
 
-test('processFile', async () => {
-  const filePath = join(__dirname, 'files', 'input_ok.csv');
-  const outputBasePath = join(tmpdir(), 'output_test');
+describe("processing::main", () => {
+  test('okay', async () => {
+    const filePath = join(__dirname, 'files', 'input_ok.csv');
+    const outputBasePath = join(tmpdir(), 'output_test');
 
-  const results = await processFile({
-    config: CONFIG,
-    outputPath: outputBasePath,
-    inputFilePath: filePath,
-    hasherFactory: makeTestHasher,
-    format: SUPPORTED_FILE_TYPES.CSV,
+    const results = await processFile({
+      config: CONFIG,
+      outputPath: outputBasePath,
+      inputFilePath: filePath,
+      hasherFactory: makeTestHasher,
+      format: SUPPORTED_FILE_TYPES.CSV,
+    });
+
+    expect(results.outputFilePath).toEqual(`${outputBasePath}_OUTPUT.csv`);
+    expect(results.mappingFilePath).toEqual(`${outputBasePath}_MAPPING.csv`);
+
+    const [row1, row2] = results.document.data;
+
+    expect(row1.col_a).toEqual('A0');
+    expect(row1.test).toEqual('TEST A0');
+    expect(row2.col_a).toEqual('A1');
+    expect(row2.test).toEqual('TEST A1');
+
+    const csvData = parse(readFileSync(`${outputBasePath}_OUTPUT.csv`, 'utf-8'));
+
+    expect(csvData).toEqual([
+      ['A', 'Test'],
+      ['A0', 'TEST A0'],
+      ['A1', 'TEST A1'],
+    ]);
   });
 
-  expect(results.outputFilePath).toEqual(`${outputBasePath}_OUTPUT.csv`);
-  expect(results.mappingFilePath).toEqual(`${outputBasePath}_MAPPING.csv`);
+  test('mapping file okay', async () => {
+    const filePath = join(__dirname, 'files', 'input_ok.csv');
+    const outputBasePath = join(tmpdir(), 'output_test');
 
-  const [row1, row2] = results.document.data;
+    // add col_b to the static columns, so the input becomes a mapping file
+    const newConfig = JSON.parse(JSON.stringify(CONFIG));
+    newConfig.algorithm.columns.static = ['col_a', 'col_b'];
 
-  expect(row1.col_a).toEqual('A0');
-  expect(row1.test).toEqual('TEST A0');
-  expect(row2.col_a).toEqual('A1');
-  expect(row2.test).toEqual('TEST A1');
+    const results = await processFile({
+      config: newConfig,
+      outputPath: outputBasePath,
+      inputFilePath: filePath,
+      hasherFactory: makeTestHasher,
+      format: SUPPORTED_FILE_TYPES.CSV,
+      limit: 10,
+    });
 
-  const csvData = parse(readFileSync(`${outputBasePath}_OUTPUT.csv`, 'utf-8'));
+    // expect(results.outputFilePaths).toEqual([`${outputBasePath}_OUTPUT.csv`]);
+    expect(results.mappingFilePath).toEqual(`${outputBasePath}_MAPPING.csv`);
+    expect(results.outputFilePath).toEqual(undefined);
 
-  expect(csvData).toEqual([
-    ['A', 'Test'],
-    ['A0', 'TEST A0'],
-    ['A1', 'TEST A1'],
-  ]);
-});
+    const [row1, row2] = results.document.data;
 
-test('processMappingFile', async () => {
-  const filePath = join(__dirname, 'files', 'input_ok.csv');
-  const outputBasePath = join(tmpdir(), 'output_test');
+    expect(row1.col_a).toEqual('A0');
+    expect(row1.test).toEqual('TEST A0 B0');
+    expect(row2.col_a).toEqual('A1');
+    expect(row2.test).toEqual('TEST A1 B1');
 
-  // add col_b to the static columns, so the input becomes a mapping file
-  const newConfig = JSON.parse(JSON.stringify(CONFIG));
-  newConfig.algorithm.columns.static = ['col_a', 'col_b'];
+    const csvData = parse(readFileSync(`${outputBasePath}_MAPPING.csv`, 'utf-8'));
 
-  const results = await processFile({
-    config: newConfig,
-    outputPath: outputBasePath,
-    inputFilePath: filePath,
-    hasherFactory: makeTestHasher,
-    format: SUPPORTED_FILE_TYPES.CSV,
-    limit: 10,
+    expect(csvData).toEqual([
+      ['A', 'Test'],
+      ['A0', 'TEST A0 B0'],
+      ['A1', 'TEST A1 B1'],
+    ]);
   });
-
-  // expect(results.outputFilePaths).toEqual([`${outputBasePath}_OUTPUT.csv`]);
-  expect(results.mappingFilePath).toEqual(`${outputBasePath}_MAPPING.csv`);
-  expect(results.outputFilePath).toEqual(undefined);
-
-  const [row1, row2] = results.document.data;
-
-  expect(row1.col_a).toEqual('A0');
-  expect(row1.test).toEqual('TEST A0 B0');
-  expect(row2.col_a).toEqual('A1');
-  expect(row2.test).toEqual('TEST A1 B1');
-
-  const csvData = parse(readFileSync(`${outputBasePath}_MAPPING.csv`, 'utf-8'));
-
-  expect(csvData).toEqual([
-    ['A', 'Test'],
-    ['A0', 'TEST A0 B0'],
-    ['A1', 'TEST A1 B1'],
-  ]);
 });

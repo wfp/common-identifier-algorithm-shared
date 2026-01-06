@@ -17,24 +17,27 @@ import { fileURLToPath } from 'node:url';
 import { join, dirname } from 'node:path';
 import { readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { loadAppConfig, saveAppConfig, DEFAULT_APP_CONFIG } from '../../src/config/appConfig';
+import { describe, test, expect } from 'vitest';
+import { loadAppConfig, saveAppConfig, DEFAULT_APP_CONFIG } from '@/config/appConfig';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-test('appConfig load', () => {
-  const PATH = join(__dirname, 'files', 'test-appconfig.json');
-  expect(loadAppConfig(PATH)).toEqual(JSON.parse(readFileSync(PATH, 'utf-8')));
+describe("config::appConfig", () => {
+  test('load', () => {
+    const PATH = join(__dirname, 'files', 'test-appconfig.json');
+    expect(loadAppConfig(PATH)).toEqual(JSON.parse(readFileSync(PATH, 'utf-8')));
 
-  expect(loadAppConfig('Some invalid path')).toEqual(DEFAULT_APP_CONFIG);
+    expect(loadAppConfig('Some invalid path')).toEqual(DEFAULT_APP_CONFIG);
 
-  expect(loadAppConfig(join(__dirname, 'files', 'test-config.json'))).toEqual(DEFAULT_APP_CONFIG);
-});
+    expect(loadAppConfig(join(__dirname, 'files', 'test-config.json'))).toEqual(DEFAULT_APP_CONFIG);
+  });
 
-test('appConfig save', () => {
-  const cfg = Object.assign({}, DEFAULT_APP_CONFIG) as any;
-  cfg.test = 'SOME TEST';
+  test('save', () => {
+    const cfg = Object.assign({}, DEFAULT_APP_CONFIG) as any;
+    cfg.test = 'SOME TEST';
 
-  const PATH = join(tmpdir(), 'test-appconfig.json');
-  saveAppConfig(cfg, PATH);
-  expect(JSON.parse(readFileSync(PATH, 'utf-8'))).toEqual(cfg);
+    const PATH = join(tmpdir(), 'test-appconfig.json');
+    saveAppConfig(cfg, PATH);
+    expect(JSON.parse(readFileSync(PATH, 'utf-8'))).toEqual(cfg);
+  });
 });

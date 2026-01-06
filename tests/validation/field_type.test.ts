@@ -13,33 +13,37 @@
 
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
-import { SUPPORTED_VALIDATORS } from '../../src/validation/Validation';
-import { FieldTypeValidator } from '../../src/validation/validators/field_type';
+import { describe, test, expect } from 'vitest';
 
-test('FieldTypeValidator', () => {
-  {
-    let v = new FieldTypeValidator({ op: SUPPORTED_VALIDATORS.FIELD_TYPE, value: 'string' });
-    expect(v.validate(123)).toEqual({
-      ok: false,
-      kind: 'field_type',
-      message: 'must be of type: text',
-    });
-    expect(v.validate('123')).toEqual({ ok: true, kind: 'field_type' });
-  }
-  {
-    const v = new FieldTypeValidator({ op: SUPPORTED_VALIDATORS.FIELD_TYPE, value: 'number' });
-    expect(v.validate(123)).toEqual({ ok: true, kind: 'field_type' });
-    expect(v.validate('123')).toEqual({
-      ok: false,
-      kind: 'field_type',
-      message: 'must be of type: number',
-    });
-  }
-});
+import { SUPPORTED_VALIDATORS } from '@/validation/Validation';
+import { FieldTypeValidator } from '@/validation/validators/field_type';
 
-test('FieldTypeValidator fails for invalid option value', () => {
-  // @ts-expect-error
-  expect(() => new FieldTypeValidator({ op: SUPPORTED_VALIDATORS.FIELD_TYPE, value: 123 })).toThrow();
-  // @ts-expect-error
-  expect(() => new FieldTypeValidator({ op: SUPPORTED_VALIDATORS.FIELD_TYPE, value: "[[[" })).toThrow();
+describe("validation::fieldType", () => {
+  test('okay', () => {
+    {
+      let v = new FieldTypeValidator({ op: SUPPORTED_VALIDATORS.FIELD_TYPE, value: 'string' });
+      expect(v.validate(123)).toEqual({
+        ok: false,
+        kind: 'field_type',
+        message: 'must be of type: text',
+      });
+      expect(v.validate('123')).toEqual({ ok: true, kind: 'field_type' });
+    }
+    {
+      const v = new FieldTypeValidator({ op: SUPPORTED_VALIDATORS.FIELD_TYPE, value: 'number' });
+      expect(v.validate(123)).toEqual({ ok: true, kind: 'field_type' });
+      expect(v.validate('123')).toEqual({
+        ok: false,
+        kind: 'field_type',
+        message: 'must be of type: number',
+      });
+    }
+  });
+
+  test('fails for invalid option value', () => {
+    // @ts-expect-error
+    expect(() => new FieldTypeValidator({ op: SUPPORTED_VALIDATORS.FIELD_TYPE, value: 123 })).toThrow();
+    // @ts-expect-error
+    expect(() => new FieldTypeValidator({ op: SUPPORTED_VALIDATORS.FIELD_TYPE, value: "[[[" })).toThrow();
+  });
 });

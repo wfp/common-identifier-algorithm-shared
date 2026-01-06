@@ -18,11 +18,12 @@ import type { ValidationRule } from "../validation/Validation";
 export namespace Config {
   export interface Column {
     name: string;
-    alias: string;
+    alias: string; // TODOL: make alias optional for programmatic usage
     default?: string | number | string[] | number[];
   }
   export interface ColumnMap {
     columns: Column[];
+    prefix?: string;
     postfix?: string;
   }
   export interface AlgorithmColumns {
@@ -32,6 +33,7 @@ export namespace Config {
   }
   export type StringBasedSalt = { source: 'STRING'; value: string };
   export type FileBasedSalt =   { source: 'FILE'; value: string; validator_regex?: string };
+  export type CryptoPinentryMode = 'default' | 'loopback';
   export interface CoreConfiguration {
     meta: { id: string }
     source: ColumnMap;
@@ -43,6 +45,12 @@ export namespace Config {
       };
       salt: StringBasedSalt | FileBasedSalt;
     };
+    post_processing?: {
+      encryption?: {
+        recipient: string;
+        gpgBinaryPath?: string;
+      }
+    }
   }
   export interface FileConfiguration extends CoreConfiguration {
     isBackup?: boolean;
@@ -61,11 +69,6 @@ export namespace Config {
     destination: ColumnMap;
     destination_map: ColumnMap;
     destination_errors: ColumnMap;
-    post_processing?: {
-      encryption?: {
-        key_path: string;
-      }
-    }
   }
 }
 

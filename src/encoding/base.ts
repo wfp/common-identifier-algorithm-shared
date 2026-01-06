@@ -84,11 +84,12 @@ export abstract class EncoderBase {
     return this.outputPath;
   }
 
-  // internal helper to return a full name (with a timestamp according to the config)
-  protected getOutputNameFor(baseFileName: string) {
-    let fullName = `${baseFileName}${this.mapping.postfix}`;
-    // TODO: add logic from config
-    return formatName(fullName, new Date());
+  // take a file path, split into filename, apply prefix/postfix, resolve subsitutions, return full path
+  protected getOutputNameFor(filePath: string) {
+    const fileParts = path.parse(filePath);
+    const fileName = `${this.mapping.prefix ?? ''}${fileParts.name}${this.mapping.postfix ?? ''}`;
+    const formatted = formatName(fileName, new Date());
+    return path.join(fileParts.dir, formatted);
   }  
 
   protected withTemporaryFile(outputPath: string, pred: CallableFunction) {

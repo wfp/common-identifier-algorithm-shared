@@ -13,11 +13,13 @@
 
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
+import { test, expect } from 'vitest';
 
-import { SUPPORTED_FILE_TYPES } from '../../src/document';
-import { decoderForFile, fileTypeOf } from '../../src/decoding/index';
-import { makeCsvDecoder } from '../../src/decoding/csv';
-import { makeXlsxDecoder } from '../../src/decoding/xlsx';
+import { SUPPORTED_FILE_TYPES } from '@/document';
+import { decoderForFile, fileTypeOf } from '@/decoding/index';
+import { makeCsvDecoder } from '@/decoding/csv';
+import { makeXlsxDecoder } from '@/decoding/xlsx';
+
 
 test('decoderForFile', () => {
   expect(decoderForFile(SUPPORTED_FILE_TYPES.CSV)).toEqual(makeCsvDecoder);

@@ -13,62 +13,66 @@
 
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
-import { SUPPORTED_VALIDATORS } from '../../src/validation';
-import { MinValueValidator } from '../../src/validation/validators/min_value';
+import { describe, test, expect } from 'vitest';
 
-test('MinValueValidator', () => {
-  const v = new MinValueValidator({ op: SUPPORTED_VALIDATORS.MIN_VALUE, value: 100 });
+import { SUPPORTED_VALIDATORS } from '@/validation';
+import { MinValueValidator } from '@/validation/validators/min_value';
 
-  expect(v.validate('')).toEqual({
-    ok: false,
-    kind: 'min_value',
-    message: 'must be text or a number',
+describe("validation::minValue", () => {
+  test('MinValueValidator', () => {
+    const v = new MinValueValidator({ op: SUPPORTED_VALIDATORS.MIN_VALUE, value: 100 });
+
+    expect(v.validate('')).toEqual({
+      ok: false,
+      kind: 'min_value',
+      message: 'must be text or a number',
+    });
+
+    expect(v.validate('1')).toEqual({
+      ok: false,
+      kind: 'min_value',
+      message: 'must be at least 100',
+    });
+    expect(v.validate('10')).toEqual({
+      ok: false,
+      kind: 'min_value',
+      message: 'must be at least 100',
+    });
+    expect(v.validate('100')).toEqual({ ok: true, kind: 'min_value' });
+    expect(v.validate('1000')).toEqual({ ok: true, kind: 'min_value' });
+
+    expect(v.validate(1)).toEqual({
+      ok: false,
+      kind: 'min_value',
+      message: 'must be at least 100',
+    });
+    expect(v.validate(10)).toEqual({
+      ok: false,
+      kind: 'min_value',
+      message: 'must be at least 100',
+    });
+    expect(v.validate(100)).toEqual({ ok: true, kind: 'min_value' });
+    expect(v.validate(1000)).toEqual({ ok: true, kind: 'min_value' });
+
+    expect(v.validate('AAB')).toEqual({
+      ok: false,
+      kind: 'min_value',
+      message: 'must be text or a number',
+    });
+    expect(v.validate(' ')).toEqual({
+      ok: false,
+      kind: 'min_value',
+      message: 'must be text or a number',
+    });
+    expect(v.validate('ab')).toEqual({
+      ok: false,
+      kind: 'min_value',
+      message: 'must be text or a number',
+    });
   });
 
-  expect(v.validate('1')).toEqual({
-    ok: false,
-    kind: 'min_value',
-    message: 'must be at least 100',
+  test('MinValueValidator fails for invalid options', () => {
+    // @ts-expect-error
+    expect(() => new MinValueValidator({ op: SUPPORTED_VALIDATORS.MIN_VALUE, value: '[[[' })).toThrow();
   });
-  expect(v.validate('10')).toEqual({
-    ok: false,
-    kind: 'min_value',
-    message: 'must be at least 100',
-  });
-  expect(v.validate('100')).toEqual({ ok: true, kind: 'min_value' });
-  expect(v.validate('1000')).toEqual({ ok: true, kind: 'min_value' });
-
-  expect(v.validate(1)).toEqual({
-    ok: false,
-    kind: 'min_value',
-    message: 'must be at least 100',
-  });
-  expect(v.validate(10)).toEqual({
-    ok: false,
-    kind: 'min_value',
-    message: 'must be at least 100',
-  });
-  expect(v.validate(100)).toEqual({ ok: true, kind: 'min_value' });
-  expect(v.validate(1000)).toEqual({ ok: true, kind: 'min_value' });
-
-  expect(v.validate('AAB')).toEqual({
-    ok: false,
-    kind: 'min_value',
-    message: 'must be text or a number',
-  });
-  expect(v.validate(' ')).toEqual({
-    ok: false,
-    kind: 'min_value',
-    message: 'must be text or a number',
-  });
-  expect(v.validate('ab')).toEqual({
-    ok: false,
-    kind: 'min_value',
-    message: 'must be text or a number',
-  });
-});
-
-test('MinValueValidator fails for invalid options', () => {
-  // @ts-expect-error
-  expect(() => new MinValueValidator({ op: SUPPORTED_VALIDATORS.MIN_VALUE, value: '[[[' })).toThrow();
 });

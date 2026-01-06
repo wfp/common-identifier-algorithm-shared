@@ -14,9 +14,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import { BaseHasher } from '../../src/hashing/base';
-import type { Config } from '../../src/config/Config';
-import type { Validator } from '../../src/validation/Validation';
+import { describe, test, expect } from 'vitest';
+import { BaseHasher } from '@/hashing/base';
+import type { Config } from '@/config/Config';
+import type { Validator } from '@/validation/Validation';
 
 const BASE_CFG: Config.CoreConfiguration['algorithm'] = {
   columns: { static: [], process: [], reference: [] },
@@ -36,16 +37,19 @@ function makeBaseHasher(cfg = BASE_CFG) {
   return new TestHasher();
 }
 
-test('BaseHasher::generateHash', () => {
-  const h = makeBaseHasher();
+describe("hashing::base", () => {
 
-  expect(h.generateHashForValue('TEST123')).toEqual(
-    '3RYYVQ6SB2UT5NKYHRBKLRBZUR6WHXXEUCV5LPATTYAQEFCZWLSA====',
-  );
-});
+  test('generateHash', () => {
+    const h = makeBaseHasher();
 
-test('BaseHasher::invalid', () => {
-  BASE_CFG.salt.source = 'FILE';
+    expect(h.generateHashForValue('TEST123')).toEqual(
+      '3RYYVQ6SB2UT5NKYHRBKLRBZUR6WHXXEUCV5LPATTYAQEFCZWLSA====',
+    );
+  });
 
-  expect(() => makeBaseHasher(BASE_CFG)).toThrow();
+  test('invalid', () => {
+    BASE_CFG.salt.source = 'FILE';
+
+    expect(() => makeBaseHasher(BASE_CFG)).toThrow();
+  });
 });
