@@ -16,7 +16,7 @@
 *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ************************************************************************ */
 
-import { GpgWrapper } from '@/crypto/gpg';
+import { GpgWrapper } from '../crypto/gpg';
 import type { Config } from '../config/Config';
 
 import Debug from 'debug';
