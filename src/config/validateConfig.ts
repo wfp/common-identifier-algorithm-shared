@@ -1,18 +1,21 @@
-// Common Identifier Application
-// Copyright (C) 2024 World Food Programme
+/* ************************************************************************
+*  Common Identifier Application
+*  Copyright (C) 2026  World Food Programme
+*  
+*  This program is free software: you can redistribute it and/or modify
+*  it under the terms of the GNU Affero General Public License as published by
+*  the Free Software Foundation, either version 3 of the License, or
+*  (at your option) any later version.
+*  
+*  This program is distributed in the hope that it will be useful,
+*  but WITHOUT ANY WARRANTY; without even the implied warranty of
+*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+*  GNU Affero General Public License for more details.
+*  
+*  You should have received a copy of the GNU Affero General Public License
+*  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+************************************************************************ */
 
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import type { Config } from './Config';
 import {
   SUPPORTED_VALIDATORS,
@@ -35,6 +38,8 @@ type ConfigValidator = (label: string, v: unknown) => ConfigValidatorResult;
 
 const isTrue: ConfigValidator = (label: string, v: unknown) => (!v ? label : undefined);
 const isFalse: ConfigValidator = (label: string, v: unknown) => (!!v ? label : undefined);
+const isBoolean: ConfigValidator = (label: string, v: unknown) =>
+  typeof v !== 'boolean' ? `${label} must be a boolean` : undefined;
 const isObject: ConfigValidator = (label: string, v: unknown) =>
   typeof v !== 'object' ? `Missing ${label}` : undefined;
 const isNumber: ConfigValidator = (label: string, v: unknown) =>
@@ -118,6 +123,7 @@ const checkSource = (source: Config.CoreConfiguration['source']) => {
 const checkDestination = (label: string, destination: Config.FileConfiguration['destination']) => {
   return (
     isObject(`[${label}]`, destination) ||
+    isOptional(`[${label}].prefix?`, destination.prefix, isString) ||
     isOptional(`[${label}].postfix?`, destination.postfix, isString) ||
     checkColumns(`[${label}]`, destination.columns)
   );
@@ -129,7 +135,8 @@ function checkPostProcessing(proc: Config.FileConfiguration["post_processing"]) 
 
   const encryptionCheck = 
     isOptional('[post_processing].encryption', proc.encryption, isObject) ||
-    isString("[post_processing].encryption.key_path", proc.encryption?.key_path)
+    isNotEmptyString("[post_processing].encryption.recipient", proc.encryption?.recipient) ||
+    isOptional("[post_processing].encryption.gpgBinaryPath?", proc.encryption?.gpgBinaryPath, isNotEmptyString);
   
   return encryptionCheck
 }

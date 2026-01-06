@@ -1,18 +1,20 @@
-// Common Identifier Application
-// Copyright (C) 2024 World Food Programme
-
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+/* ************************************************************************
+*  Common Identifier Application
+*  Copyright (C) 2026  World Food Programme
+*  
+*  This program is free software: you can redistribute it and/or modify
+*  it under the terms of the GNU Affero General Public License as published by
+*  the Free Software Foundation, either version 3 of the License, or
+*  (at your option) any later version.
+*  
+*  This program is distributed in the hope that it will be useful,
+*  but WITHOUT ANY WARRANTY; without even the implied warranty of
+*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+*  GNU Affero General Public License for more details.
+*  
+*  You should have received a copy of the GNU Affero General Public License
+*  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+************************************************************************ */
 
 import fs from 'node:fs';
 import os from 'node:os';
@@ -84,11 +86,12 @@ export abstract class EncoderBase {
     return this.outputPath;
   }
 
-  // internal helper to return a full name (with a timestamp according to the config)
-  protected getOutputNameFor(baseFileName: string) {
-    let fullName = `${baseFileName}${this.mapping.postfix}`;
-    // TODO: add logic from config
-    return formatName(fullName, new Date());
+  // take a file path, split into filename, apply prefix/postfix, resolve subsitutions, return full path
+  protected getOutputNameFor(filePath: string) {
+    const fileParts = path.parse(filePath);
+    const fileName = `${this.mapping.prefix ?? ''}${fileParts.name}${this.mapping.postfix ?? ''}`;
+    const formatted = formatName(fileName, new Date());
+    return path.join(fileParts.dir, formatted);
   }  
 
   protected withTemporaryFile(outputPath: string, pred: CallableFunction) {

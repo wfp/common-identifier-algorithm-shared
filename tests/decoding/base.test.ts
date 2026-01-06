@@ -1,20 +1,24 @@
-// Common Identifier Application
-// Copyright (C) 2024 World Food Programme
+/* ************************************************************************
+*  Common Identifier Application
+*  Copyright (C) 2026  World Food Programme
+*  
+*  This program is free software: you can redistribute it and/or modify
+*  it under the terms of the GNU Affero General Public License as published by
+*  the Free Software Foundation, either version 3 of the License, or
+*  (at your option) any later version.
+*  
+*  This program is distributed in the hope that it will be useful,
+*  but WITHOUT ANY WARRANTY; without even the implied warranty of
+*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+*  GNU Affero General Public License for more details.
+*  
+*  You should have received a copy of the GNU Affero General Public License
+*  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+************************************************************************ */
 
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
 
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-import { DecoderBase } from '../../src/decoding/base';
+import { describe, test, expect } from 'vitest';
+import { DecoderBase } from '@/decoding/base';
 
 const BASE_CFG = {
   columns: [
@@ -47,22 +51,24 @@ function makeDecoderBase(cfg = BASE_CFG) {
   return new TestDecoder();
 }
 
-test('Decoderbase::sheetFromRawData', () => {
-  const d = makeDecoderBase();
-  const s = d.documentFromRawData('path', TEST_DATA);
-  expect(s.data).toEqual(TEST_DATA_OUT);
-});
+describe("decoding::base", () => {
+  test('sheetFromRawData', () => {
+    const d = makeDecoderBase();
+    const s = d.documentFromRawData('path', TEST_DATA);
+    expect(s.data).toEqual(TEST_DATA_OUT);
+  });
 
-test('Decoderbase::mapColumnNamesToIds', () => {
-  const d = makeDecoderBase();
+  test('mapColumnNamesToIds', () => {
+    const d = makeDecoderBase();
 
-  expect(d.mapColumnNamesToIds(['A', 'B', 'C'])).toEqual(['col_a', 'col_b', 'C']);
-});
+    expect(d.mapColumnNamesToIds(['A', 'B', 'C'])).toEqual(['col_a', 'col_b', 'C']);
+  });
 
-test('Decoderbase::convertSheetRowsToObjects', () => {
-  const d = makeDecoderBase();
-  expect(d.convertSheetRowsToObjects([])).toEqual([]);
-  expect(d.convertSheetRowsToObjects([['A', 'B', 'C']])).toEqual([]);
+  test('convertSheetRowsToObjects', () => {
+    const d = makeDecoderBase();
+    expect(d.convertSheetRowsToObjects([])).toEqual([]);
+    expect(d.convertSheetRowsToObjects([['A', 'B', 'C']])).toEqual([]);
 
-  expect(d.convertSheetRowsToObjects(TEST_DATA)).toEqual(TEST_DATA_OUT);
+    expect(d.convertSheetRowsToObjects(TEST_DATA)).toEqual(TEST_DATA_OUT);
+  });
 });

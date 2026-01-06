@@ -1,25 +1,29 @@
-// Common Identifier Application
-// Copyright (C) 2024 World Food Programme
+/* ************************************************************************
+*  Common Identifier Application
+*  Copyright (C) 2026  World Food Programme
+*  
+*  This program is free software: you can redistribute it and/or modify
+*  it under the terms of the GNU Affero General Public License as published by
+*  the Free Software Foundation, either version 3 of the License, or
+*  (at your option) any later version.
+*  
+*  This program is distributed in the hope that it will be useful,
+*  but WITHOUT ANY WARRANTY; without even the implied warranty of
+*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+*  GNU Affero General Public License for more details.
+*  
+*  You should have received a copy of the GNU Affero General Public License
+*  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+************************************************************************ */
 
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import fs from 'node:fs';
 import os from 'node:os';
 import toml from 'toml';
-import { makeConfigStore } from '../../src/config/configStore';
+import { describe, test, expect } from 'vitest';
+import { makeConfigStore } from '@/config/configStore';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -49,163 +53,165 @@ function placeTestConfigFiles(basePathPrefix: string) {
   return basePath;
 }
 
-test('ConfigStore loading', () => {
-  const basePath = placeTestConfigFiles('ConfigStore-normal');
+describe("config::configStore", () => {
+  test('loading', () => {
+    const basePath = placeTestConfigFiles('ConfigStore-normal');
 
-  const c = makeConfigStore(makeTestConfig(basePath));
+    const c = makeConfigStore(makeTestConfig(basePath));
 
-  c.boot();
-
-  expect(c.isUsingBackupConfig).toEqual(false);
-  expect(c.isValid).toEqual(true);
-
-  const config = Object.assign({}, c.getConfig());
-
-  expect(config.meta.id).toEqual('ANY');
-  expect(config.meta.version).toEqual('0.1.0');
-
-  expect(config.algorithm.salt.source).toEqual('STRING');
-
-  config.algorithm.salt.source = "STRING"
-  config.algorithm.salt.value = "QWERTY"
-
-  const originalConfig = JSON.parse(fs.readFileSync(join(__dirname, 'files', CONFIG_FILE_NAME), 'utf-8'));
-  // check that the columns are actually sorted alphabetically.
-  originalConfig.algorithm.columns.process = ['col_a', 'col_b', 'col_c', 'col_d', 'col_e'];
-  originalConfig.algorithm.columns.reference = ['col_1', 'col_2', 'col_3'];
-
-  originalConfig.algorithm.salt.source = "STRING"
-  originalConfig.algorithm.salt.value = "QWERTY"
-
-  expect(config).toEqual(originalConfig);
-});
-
-test('ConfigStore backup loading', () => {
-  const basePath = placeTestConfigFiles('ConfigStore-backup');
-  fs.unlinkSync(join(basePath, CONFIG_FILE_NAME));
-
-  const c = makeConfigStore(makeTestConfig(basePath));
-
-  c.boot();
-
-  expect(c.isUsingBackupConfig).toEqual(true);
-  expect(c.isValid).toEqual(true);
-
-  const config = Object.assign({}, c.getConfig());
-
-  expect(config.isBackup).toEqual(true);
-  expect(config.algorithm.salt.source).toEqual('STRING');
-
-  delete config.isBackup;
-  config.algorithm.salt.source = "STRING"
-  config.algorithm.salt.value = "QWERTY"
-
-  const originalConfig = toml.parse(
-    fs.readFileSync(join(__dirname, 'files', BACKUP_CONFIG_FILE_NAME), 'utf-8'),
-  );
-  // check that the columns are actually sorted alphabetically.
-  originalConfig.algorithm.columns.process = ['col_a', 'col_b', 'col_c', 'col_d', 'col_e'];
-  originalConfig.algorithm.columns.reference = ['col_1', 'col_2', 'col_3'];
-
-  originalConfig.algorithm.salt.source = "STRING"
-  originalConfig.algorithm.salt.value = "QWERTY"
-
-  expect(config).toEqual(originalConfig);
-});
-
-test('ConfigStore error loading', () => {
-  const basePath = placeTestConfigFiles('ConfigStore-error');
-  fs.unlinkSync(join(basePath, CONFIG_FILE_NAME));
-  fs.unlinkSync(join(basePath, BACKUP_CONFIG_FILE_NAME));
-
-  const c = makeConfigStore(makeTestConfig(basePath));
-
-  c.boot();
-
-  expect(c.isUsingBackupConfig).toEqual(false);
-  expect(c.isValid).toEqual(false);
-
-  const config = Object.assign({}, c.getConfig());
-  expect(config).toEqual({});
-});
-
-////////////////////////////////////////////////////////////////////////////////
-
-test('ConfigStore saving and loading user config', () => {
-  const basePath = placeTestConfigFiles('ConfigStore-saving-user-config');
-  fs.unlinkSync(join(basePath, CONFIG_FILE_NAME));
-  // fs.unlinkSync(join(basePath, BACKUP_CONFIG_FILE_NAME));
-
-  const c = makeConfigStore(makeTestConfig(basePath));
-
-  c.boot();
-  expect(c.isUsingBackupConfig).toEqual(true);
-
-  // updating user config
-  {
-    // OK
-    expect(fs.existsSync(join(basePath, CONFIG_FILE_NAME))).toEqual(false);
-    expect(c.updateUserConfig(join(basePath, BACKUP_CONFIG_FILE_NAME))).toEqual(undefined);
-    expect(fs.existsSync(join(basePath, CONFIG_FILE_NAME))).toEqual(true);
+    c.boot();
 
     expect(c.isUsingBackupConfig).toEqual(false);
     expect(c.isValid).toEqual(true);
 
     const config = Object.assign({}, c.getConfig());
+
     expect(config.meta.id).toEqual('ANY');
+    expect(config.meta.version).toEqual('0.1.0');
 
-    // ERROR
-    const errResult = c.updateUserConfig(join(basePath, 'config.xxx.toml'));
-    expect(typeof errResult).toEqual('string');
+    expect(config.algorithm.salt.source).toEqual('STRING');
 
-    expect(c.isUsingBackupConfig).toEqual(false);
-    expect(c.isValid).toEqual(true);
-  }
-  // removing user config
-  {
-    expect(fs.existsSync(join(basePath, CONFIG_FILE_NAME))).toEqual(true);
-    expect(c.removeUserConfig()).toEqual(undefined);
-    expect(fs.existsSync(join(basePath, CONFIG_FILE_NAME))).toEqual(false);
+    config.algorithm.salt.source = "STRING"
+    config.algorithm.salt.value = "QWERTY"
+
+    const originalConfig = JSON.parse(fs.readFileSync(join(__dirname, 'files', CONFIG_FILE_NAME), 'utf-8'));
+    // check that the columns are actually sorted alphabetically.
+    originalConfig.algorithm.columns.process = ['col_a', 'col_b', 'col_c', 'col_d', 'col_e'];
+    originalConfig.algorithm.columns.reference = ['col_1', 'col_2', 'col_3'];
+
+    originalConfig.algorithm.salt.source = "STRING"
+    originalConfig.algorithm.salt.value = "QWERTY"
+
+    expect(config).toEqual(originalConfig);
+  });
+
+  test('backup loading', () => {
+    const basePath = placeTestConfigFiles('ConfigStore-backup');
+    fs.unlinkSync(join(basePath, CONFIG_FILE_NAME));
+
+    const c = makeConfigStore(makeTestConfig(basePath));
+
+    c.boot();
 
     expect(c.isUsingBackupConfig).toEqual(true);
     expect(c.isValid).toEqual(true);
 
-    // already using a backup, not able to remove, but not fail
-    expect(c.removeUserConfig()).toEqual(undefined);
+    const config = Object.assign({}, c.getConfig());
 
-    expect(c.isUsingBackupConfig).toEqual(true);
-    expect(c.isValid).toEqual(true);
+    expect(config.isBackup).toEqual(true);
+    expect(config.algorithm.salt.source).toEqual('STRING');
 
-    // load the config back
-    expect(c.updateUserConfig(join(basePath, BACKUP_CONFIG_FILE_NAME))).toEqual(undefined);
+    delete config.isBackup;
+    config.algorithm.salt.source = "STRING"
+    config.algorithm.salt.value = "QWERTY"
 
-    // remove the backup
+    const originalConfig = toml.parse(
+      fs.readFileSync(join(__dirname, 'files', BACKUP_CONFIG_FILE_NAME), 'utf-8'),
+    );
+    // check that the columns are actually sorted alphabetically.
+    originalConfig.algorithm.columns.process = ['col_a', 'col_b', 'col_c', 'col_d', 'col_e'];
+    originalConfig.algorithm.columns.reference = ['col_1', 'col_2', 'col_3'];
+
+    originalConfig.algorithm.salt.source = "STRING"
+    originalConfig.algorithm.salt.value = "QWERTY"
+
+    expect(config).toEqual(originalConfig);
+  });
+
+  test('error loading', () => {
+    const basePath = placeTestConfigFiles('ConfigStore-error');
+    fs.unlinkSync(join(basePath, CONFIG_FILE_NAME));
     fs.unlinkSync(join(basePath, BACKUP_CONFIG_FILE_NAME));
 
-    // check if we have an error on removal
-    expect(typeof c.removeUserConfig()).toEqual('string');
-
-    // yet keep the existing config
-    expect(c.isValid).toEqual(true);
-  }
-});
-
-test('ConfigStore app config TnS', () => {
-  const basePath = placeTestConfigFiles('ConfigStore-appconfig');
-
-  {
     const c = makeConfigStore(makeTestConfig(basePath));
+
     c.boot();
 
-    expect(c.hasAcceptedTermsAndConditions()).toEqual(false);
-    c.acceptTermsAndConditions();
-    expect(c.hasAcceptedTermsAndConditions()).toEqual(true);
-  }
-  // should keep between instantiations
-  {
-    const c = makeConfigStore(makeTestConfig(basePath));
-    c.boot();
+    expect(c.isUsingBackupConfig).toEqual(false);
+    expect(c.isValid).toEqual(false);
 
-    expect(c.hasAcceptedTermsAndConditions()).toEqual(true);
-  }
+    const config = Object.assign({}, c.getConfig());
+    expect(config).toEqual({});
+  });
+
+  ////////////////////////////////////////////////////////////////////////////////
+
+  test('saving and loading user config', () => {
+    const basePath = placeTestConfigFiles('ConfigStore-saving-user-config');
+    fs.unlinkSync(join(basePath, CONFIG_FILE_NAME));
+    // fs.unlinkSync(join(basePath, BACKUP_CONFIG_FILE_NAME));
+
+    const c = makeConfigStore(makeTestConfig(basePath));
+
+    c.boot();
+    expect(c.isUsingBackupConfig).toEqual(true);
+
+    // updating user config
+    {
+      // OK
+      expect(fs.existsSync(join(basePath, CONFIG_FILE_NAME))).toEqual(false);
+      expect(c.updateUserConfig(join(basePath, BACKUP_CONFIG_FILE_NAME))).toEqual(undefined);
+      expect(fs.existsSync(join(basePath, CONFIG_FILE_NAME))).toEqual(true);
+
+      expect(c.isUsingBackupConfig).toEqual(false);
+      expect(c.isValid).toEqual(true);
+
+      const config = Object.assign({}, c.getConfig());
+      expect(config.meta.id).toEqual('ANY');
+
+      // ERROR
+      const errResult = c.updateUserConfig(join(basePath, 'config.xxx.toml'));
+      expect(typeof errResult).toEqual('string');
+
+      expect(c.isUsingBackupConfig).toEqual(false);
+      expect(c.isValid).toEqual(true);
+    }
+    // removing user config
+    {
+      expect(fs.existsSync(join(basePath, CONFIG_FILE_NAME))).toEqual(true);
+      expect(c.removeUserConfig()).toEqual(undefined);
+      expect(fs.existsSync(join(basePath, CONFIG_FILE_NAME))).toEqual(false);
+
+      expect(c.isUsingBackupConfig).toEqual(true);
+      expect(c.isValid).toEqual(true);
+
+      // already using a backup, not able to remove, but not fail
+      expect(c.removeUserConfig()).toEqual(undefined);
+
+      expect(c.isUsingBackupConfig).toEqual(true);
+      expect(c.isValid).toEqual(true);
+
+      // load the config back
+      expect(c.updateUserConfig(join(basePath, BACKUP_CONFIG_FILE_NAME))).toEqual(undefined);
+
+      // remove the backup
+      fs.unlinkSync(join(basePath, BACKUP_CONFIG_FILE_NAME));
+
+      // check if we have an error on removal
+      expect(typeof c.removeUserConfig()).toEqual('string');
+
+      // yet keep the existing config
+      expect(c.isValid).toEqual(true);
+    }
+  });
+
+  test('app config TnS', () => {
+    const basePath = placeTestConfigFiles('ConfigStore-appconfig');
+
+    {
+      const c = makeConfigStore(makeTestConfig(basePath));
+      c.boot();
+
+      expect(c.hasAcceptedTermsAndConditions()).toEqual(false);
+      c.acceptTermsAndConditions();
+      expect(c.hasAcceptedTermsAndConditions()).toEqual(true);
+    }
+    // should keep between instantiations
+    {
+      const c = makeConfigStore(makeTestConfig(basePath));
+      c.boot();
+
+      expect(c.hasAcceptedTermsAndConditions()).toEqual(true);
+    }
+  });
 });

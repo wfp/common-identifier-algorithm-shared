@@ -1,23 +1,28 @@
-// Common Identifier Application
-// Copyright (C) 2024 World Food Programme
+/* ************************************************************************
+*  Common Identifier Application
+*  Copyright (C) 2026  World Food Programme
+*  
+*  This program is free software: you can redistribute it and/or modify
+*  it under the terms of the GNU Affero General Public License as published by
+*  the Free Software Foundation, either version 3 of the License, or
+*  (at your option) any later version.
+*  
+*  This program is distributed in the hope that it will be useful,
+*  but WITHOUT ANY WARRANTY; without even the implied warranty of
+*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+*  GNU Affero General Public License for more details.
+*  
+*  You should have received a copy of the GNU Affero General Public License
+*  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+************************************************************************ */
 
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
+import { test, expect } from 'vitest';
 
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
+import { SUPPORTED_FILE_TYPES } from '@/document';
+import { decoderForFile, fileTypeOf } from '@/decoding/index';
+import { makeCsvDecoder } from '@/decoding/csv';
+import { makeXlsxDecoder } from '@/decoding/xlsx';
 
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-import { SUPPORTED_FILE_TYPES } from '../../src/document';
-import { decoderForFile, fileTypeOf } from '../../src/decoding/index';
-import { makeCsvDecoder } from '../../src/decoding/csv';
-import { makeXlsxDecoder } from '../../src/decoding/xlsx';
 
 test('decoderForFile', () => {
   expect(decoderForFile(SUPPORTED_FILE_TYPES.CSV)).toEqual(makeCsvDecoder);

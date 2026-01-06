@@ -1,6 +1,6 @@
 // REPLACE ALL REFERENCES TO "_generic_hasher" WITH THE DESIRED ALGORITHM IN THE ALGORITHMS DIRECTORY.
-import { generateHashesForDocument, validateConfigCore, validateDocument, type CidDocument, type Config } from '../src/index';
-import { SUPPORTED_VALIDATORS } from '../src/validation/Validation';
+import { generateHashesForDocument, validateConfigCore, validateDocument, type CidDocument, type Config } from '@/index';
+import { SUPPORTED_VALIDATORS } from '@/validation/Validation';
 import { makeHasher } from './example_algorithm/_generic_hasher';
 
 /*
@@ -54,7 +54,7 @@ const doc: CidDocument = {
   ]
 }
 
-function main() {
+async function main() {
   const configValidationResult = validateConfigCore(config, "UNKNOWN");
   if (!!configValidationResult) {
     console.log(`ERROR: ${configValidationResult}`);
@@ -75,6 +75,9 @@ function main() {
 
   // print the results, save the results, up to you.
   console.dir(result, { depth: 5 });
+
+  // NOTE: do any postprocessing steps as required, e.g. encryption, signing, etc.
+  //       see the GpgWrapper class in src/crypto/gpg.ts for example usage.
 }
 
 main();

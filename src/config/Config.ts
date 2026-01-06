@@ -1,28 +1,32 @@
-// Common Identifier Application
-// Copyright (C) 2024 World Food Programme
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Affero General Public License for more details.
-
-// You should have received a copy of the GNU Affero General Public License
-// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+/* ************************************************************************
+*  Common Identifier Application
+*  Copyright (C) 2026  World Food Programme
+*  
+*  This program is free software: you can redistribute it and/or modify
+*  it under the terms of the GNU Affero General Public License as published by
+*  the Free Software Foundation, either version 3 of the License, or
+*  (at your option) any later version.
+*  
+*  This program is distributed in the hope that it will be useful,
+*  but WITHOUT ANY WARRANTY; without even the implied warranty of
+*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+*  GNU Affero General Public License for more details.
+*  
+*  You should have received a copy of the GNU Affero General Public License
+*  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+************************************************************************ */
 
 import type { ValidationRule } from "../validation/Validation";
 
 export namespace Config {
   export interface Column {
     name: string;
-    alias: string;
+    alias: string; // TODOL: make alias optional for programmatic usage
     default?: string | number | string[] | number[];
   }
   export interface ColumnMap {
     columns: Column[];
+    prefix?: string;
     postfix?: string;
   }
   export interface AlgorithmColumns {
@@ -32,6 +36,7 @@ export namespace Config {
   }
   export type StringBasedSalt = { source: 'STRING'; value: string };
   export type FileBasedSalt =   { source: 'FILE'; value: string; validator_regex?: string };
+  export type CryptoPinentryMode = 'default' | 'loopback';
   export interface CoreConfiguration {
     meta: { id: string }
     source: ColumnMap;
@@ -43,6 +48,12 @@ export namespace Config {
       };
       salt: StringBasedSalt | FileBasedSalt;
     };
+    post_processing?: {
+      encryption?: {
+        recipient: string;
+        gpgBinaryPath?: string;
+      }
+    }
   }
   export interface FileConfiguration extends CoreConfiguration {
     isBackup?: boolean;
@@ -61,11 +72,6 @@ export namespace Config {
     destination: ColumnMap;
     destination_map: ColumnMap;
     destination_errors: ColumnMap;
-    post_processing?: {
-      encryption?: {
-        key_path: string;
-      }
-    }
   }
 }
 

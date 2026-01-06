@@ -1,7 +1,7 @@
 [meta]
 id="ANY"
 version="1.0.0"
-signature="a36d008f81060928709a6704da61bbd6"
+signature="f2789d9afdb774d88be5998aa37bdb78"
 
 [source]
 columns = [
@@ -35,18 +35,25 @@ strategy = "SHA256"
 columns = [
     { name = "Common Identifier", alias = "hashed_id" },
 ]
-postfix = "-OUTPUT-{{yyyy-MM-dd--HH-mm-ss}}"
+prefix = "OUTPUT-"
+postfix = "-{{yyyyMMddHHmm}}"
 
 [destination_map]
 columns = [
     { name = "ID",       alias = "id" },
     { name = "Common Identifier", alias = "hashed_id" }
 ]
-postfix = "-MAPPING-{{yyyy-MM-dd--HH-mm-ss}}"
+prefix = "MAPPING-"
+postfix = "-{{yyyyMMddHHmm}}"
 
 [destination_errors]
 columns = [
     { name = "Errors",            alias = "errors" },
     { name = "ID",                alias = "id" },
 ]
-postfix = "-ERRORS-{{yyyy-MM-dd--HH-mm-ss}}"
+prefix = "ERRORS-"
+postfix = "-{{yyyyMMddHHmm}}"
+
+# [post_processing]
+# [post_processing.encryption]
+# recipient = "SOME_PUBLIC_KEY_FINGERPRINT"
