@@ -69,6 +69,10 @@
       "types": "./dist/config/index.d.ts",
       "default": "./dist/config/index.js"
     },
+    "./crypto": {
+      "types": "./dist/crypto/index.d.ts",
+      "default": "./dist/crypto/index.js"
+    },
     "./validation": {
       "types": "./dist/validation/index.d.ts",
       "default": "./dist/validation/index.js"
