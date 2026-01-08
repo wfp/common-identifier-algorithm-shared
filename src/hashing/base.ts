@@ -43,7 +43,7 @@ export abstract class BaseHasher {
 
     // load the salt value based on the config
     this.saltValue = config.salt.value;
-    log(`[DEBUG] Instantiated hasher; saltLen='${this.saltValue.length}', config='${JSON.stringify(this.config, null, 4)}'`);
+    log(`[DEBUG] Instantiated hasher; saltLen='${this.saltValue.length}', config='${JSON.stringify(this.config)}'`);
   }
 
   // Generates a hash based on the configuration from an already concatenated string
