@@ -20,6 +20,7 @@ export { SUPPORTED_FILE_TYPES } from './document';
 export type { CidDocument } from './document';
 
 export * from './config/index';
+export * from './crypto/index';
 export * from './validation/index';
 export * from './processing/index';
 export * from './hashing/index';

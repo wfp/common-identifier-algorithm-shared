@@ -1,67 +1,107 @@
-
+/* ************************************************************************
+*  Common Identifier Application
+*  Copyright (C) 2026  World Food Programme
+*  
+*  This program is free software: you can redistribute it and/or modify
+*  it under the terms of the GNU Affero General Public License as published by
+*  the Free Software Foundation, either version 3 of the License, or
+*  (at your option) any later version.
+*  
+*  This program is distributed in the hope that it will be useful,
+*  but WITHOUT ANY WARRANTY; without even the implied warranty of
+*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+*  GNU Affero General Public License for more details.
+*  
+*  You should have received a copy of the GNU Affero General Public License
+*  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+************************************************************************ */
 import { describe, it, expect, beforeEach, vi, type Mock } from 'vitest';
 import * as child from 'node:child_process';
 import * as fsPromises from 'node:fs/promises';
 import * as fs from 'node:fs';
 import { GpgWrapper } from '@/crypto/gpg';
+import EventEmitter from 'node:events';
+import { Readable, Writable } from 'node:stream';
 
 vi.mock('node:child_process');
 vi.mock('node:fs/promises');
 vi.mock('node:fs');
 
-vi.mock('is-executable', () => ({
-  isExecutableSync: vi.fn(() => true)
-}));
-
-
 const okAccess = () => Promise.resolve(undefined);
 const failAccess = () => Promise.reject(new Error('EACCES'));
 
-function mockSpawnSyncOnce(result: Partial<child.SpawnSyncReturns<string>>) {
-  const r: child.SpawnSyncReturns<string> = {
-    pid: 123,
-    output: ['', result.stdout ?? '', result.stderr ?? ''],
-    stdout: result.stdout ?? '',
-    stderr: result.stderr ?? '',
-    status: result.status ?? 0,
-    signal: null,
-  };
-  (child.spawnSync as unknown as Mock).mockReturnValueOnce(r);
+type SpawnScenario = {
+  stdout?: string;
+  stderr?: string;
+  status?: number;
+  delayMs?: number;
+  neverCloseUntilKilled?: boolean;
+  signal?: NodeJS.Signals | null;
+};
+
+class MockChildProcess extends EventEmitter {
+  stdin = new Writable({ write(_chunk, _enc, cb) { cb(); } });
+  stdout = new Readable({ read() {} });
+  stderr = new Readable({ read() {} });
+  killed = false;
+
+  constructor(private scenario: SpawnScenario) {
+    super();
+    if (scenario.stdout) this.stdout.push(scenario.stdout);
+    this.stdout.push(null);
+
+    if (scenario.stderr) this.stderr.push(scenario.stderr);
+    this.stderr.push(null);
+
+    if (!scenario.neverCloseUntilKilled) {
+      const delay = scenario.delayMs ?? 0;
+      setTimeout(() => this.emit('close', scenario.status ?? 0, scenario.signal ?? null), delay);
+    }
+  }
+
+  kill(signal?: NodeJS.Signals) {
+    this.killed = true;
+    if (this.scenario.neverCloseUntilKilled) {
+      setTimeout(() => this.emit('close', this.scenario.status ?? null, signal ?? null), 10);
+    }
+    return true;
+  }
 }
 
+const queue: SpawnScenario[] = [];
+const enqueueScenario = (s: SpawnScenario) => queue.push(s);
+const dequeueScenario = (): SpawnScenario => queue.length ? queue.shift()! : { status: 0, stdout: '' };
+
 describe('crypto::gpg', () => {
-  beforeEach(() => {
+  beforeEach(() => {  
     vi.restoreAllMocks();
     vi.resetAllMocks();
 
     vi.mocked(fs.existsSync).mockReturnValue(true);
     vi.mocked(fsPromises.access).mockImplementation(okAccess);
 
-    // if querying PATH ("which"/"where"), return a valid path.
-    vi.mocked(child.spawnSync).mockImplementation((cmd: any, args: any) => {
-      const isWhich =
-        (cmd === 'which' || cmd === 'where') &&
-        Array.isArray(args) &&
-        args[0] === 'gpg';
+    vi.mocked(child.spawn).mockImplementation((cmd: any, args: any) => {
+      const isVersion = Array.isArray(args) && args[0] === '--version';
+      const isEncrypt = Array.isArray(args) && args.includes('--encrypt');
 
-      if (isWhich) {
-        return {
-          pid: 123,
-          output: ['', '/usr/bin/gpg\n', ''],
-          stdout: '/usr/bin/gpg\n',
-          stderr: '',
-          status: 0,
-          signal: null,
-        } as any;
-      }
+      let scenario: SpawnScenario;
 
-      return { pid: 123, output: ['', '', ''], stdout: '', stderr: '', status: 0, signal: null } as any;
+      // Always succeed for binary check
+      if (isVersion) scenario = { status: 0, stdout: 'gpg (GnuPG) 2.4.0\n', stderr: '' };
+      // Consume the queued scenario for the encrypt call
+      else if (isEncrypt) scenario = dequeueScenario();
+      // Any other gpg call (e.g., --list-keys if verifyKeys: true)
+      else scenario = { status: 0, stdout: '' };
+
+      return new MockChildProcess(scenario) as unknown as child.ChildProcess;
     });
+
   });
 
-
   it('fails when input file is not readable', async () => {
-    (fsPromises.access as unknown as Mock).mockImplementationOnce(failAccess);
+    vi.mocked(fsPromises.access)
+      .mockImplementationOnce(failAccess) // read fails
+      .mockImplementationOnce(okAccess);  // write okay
 
     const gpg = new GpgWrapper();
     const res = await gpg.encryptFile({
@@ -96,7 +136,7 @@ describe('crypto::gpg', () => {
       .mockImplementationOnce(okAccess); // write okay
 
     // spawnSync returns status 0 (success).
-    mockSpawnSyncOnce({ status: 0, stdout: '' });
+    enqueueScenario({ status: 0, stdout: '' });
 
     const gpg = new GpgWrapper();
     const res = await gpg.encryptFile({
@@ -113,7 +153,7 @@ describe('crypto::gpg', () => {
       .mockImplementationOnce(okAccess)
       .mockImplementationOnce(okAccess);
 
-    mockSpawnSyncOnce({ status: 0 });
+    enqueueScenario({ status: 0 });
 
     const gpg = new GpgWrapper({ pinentryMode: 'loopback' as any });
     const res = await gpg.encryptFile({
@@ -126,9 +166,12 @@ describe('crypto::gpg', () => {
 
     expect(res.success).toBe(true);
 
-    const call = (child.spawnSync as unknown as Mock).mock.calls.at(-1);
-    expect(call?.[1]).toContain('--passphrase-fd');
-    expect(call?.[1]).toContain('0');
+    const calls = (child.spawn as unknown as Mock).mock.calls;
+    const encryptCall = calls.find(([, args]) => Array.isArray(args) && args.includes('--encrypt'))!;
+    const args = encryptCall?.[1] as string[];
+
+    expect(args).toContain('--passphrase-fd');
+    expect(args).toContain('0');
   });
 
   it('warns when loopback is set but no signer passphrase (still proceeds)', async () => {
@@ -136,7 +179,7 @@ describe('crypto::gpg', () => {
       .mockImplementationOnce(okAccess)
       .mockImplementationOnce(okAccess);
 
-    mockSpawnSyncOnce({ status: 0 });
+    enqueueScenario({ status: 0 });
 
     const gpg = new GpgWrapper({ pinentryMode: 'loopback' as any });
     const res = await gpg.encryptFile({
@@ -155,7 +198,7 @@ describe('crypto::gpg', () => {
       .mockImplementationOnce(okAccess);
 
     // Simulate NEED_TTY error in stderr and non-zero status.
-    mockSpawnSyncOnce({
+    enqueueScenario({
       status: 2,
       stderr: `[GNUPG:] NEED_TTY
 gpg: pinentry launched
@@ -181,7 +224,7 @@ Inappropriate ioctl for device`,
       .mockImplementationOnce(okAccess)
       .mockImplementationOnce(okAccess);
 
-    mockSpawnSyncOnce({ status: 0 });
+    enqueueScenario({ status: 0 });
 
     const gpg = new GpgWrapper({
       armor: true,
@@ -197,8 +240,10 @@ Inappropriate ioctl for device`,
 
     expect(res.success).toBe(true);
 
-    const call = (child.spawnSync as unknown as Mock).mock.calls.at(-1);
-    const args = call?.[1] as string[];
+    const calls = (child.spawn as unknown as Mock).mock.calls;
+    const encryptCall = calls.find(([, args]) => Array.isArray(args) && args.includes('--encrypt'))!;
+    const args = encryptCall?.[1] as string[];
+
     expect(args).toContain('--armor');
     expect(args).toContain('--trust-model');
     expect(args).toContain('always');
@@ -210,27 +255,20 @@ Inappropriate ioctl for device`,
 
 
   it('reports timeout as failure', async () => {
-    vi.mocked(child.spawnSync).mockReturnValueOnce({
-      pid: 1, output: [], stdout: '', stderr: '',
-      status: null, signal: null, error: Object.assign(new Error('ETIMEDOUT'), { code: 'ETIMEDOUT' })
-    } as any);
+    enqueueScenario({ neverCloseUntilKilled: true, stderr: "" });
 
-    const gpg = new GpgWrapper({ binaryPathOverride: '/usr/bin/gpg' });
+    const gpg = new GpgWrapper({ binaryPathOverride: '/usr/bin/gpg', timeoutMs: 100 });
     const res = await gpg.encryptFile({ inputPath: 'in.csv', outputPath: 'out.gpg', recipient: 'RECIP' });
     expect(res.success).toBe(false);
     if (!res.success) expect(res.error).toMatch(/timed out/i);
   });
 
   it('reports success=false on general gpg termination', async () => {
-    vi.mocked(child.spawnSync).mockReturnValueOnce({
-      pid: 1, output: [], stdout: '', stderr: '',
-      status: null, signal: null, error: Object.assign(new Error('qwerty'), { code: 'qwerty' })
-    } as any);
+    enqueueScenario({ status: 1, stderr: "unexpected close" });
 
     const gpg = new GpgWrapper({ binaryPathOverride: '/usr/bin/gpg' });
     const res = await gpg.encryptFile({ inputPath: 'in.csv', outputPath: 'out.gpg', recipient: 'RECIP' });
     expect(res.success).toBe(false);
-    if (!res.success) expect(res.error).toMatch(/terminated without an exit status/i);
   });
 
 });

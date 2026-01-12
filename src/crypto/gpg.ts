@@ -19,11 +19,10 @@
 import { constants, existsSync } from 'node:fs';
 import { access } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
-import { spawnSync } from 'node:child_process';
+import { spawn } from 'node:child_process';
 import Debug from 'debug';
 import type { Config } from '../config';
 import { GpgErrorCode, identifyError } from './gpgError';
-import { isExecutableSync } from 'is-executable';
 
 const log = Debug('cid::engine::crypto::gpg');
 
@@ -78,21 +77,7 @@ export class GpgWrapper {
       }
     }
 
-    // 2. Try PATH
-    const which = isWindows() ? 'where' : 'which';
-    try {
-      const r = spawnSync(which, [ 'gpg' ], { encoding: 'utf-8' });
-      if (r.status === 0 && r.stdout) {
-        const path = r.stdout.split(/\r?\n/).find(Boolean);
-        if (path && existsSync(path)) {
-          log(`[INFO] Found GPG binary at PATH: ${path}`);
-          return path.trim();
-        }
-      }
-    }
-    catch { /* ignore and try next method */}
-
-    // 4. Fallback to 'gpg' and let error handling deal with it.
+    // 3. Fallback to 'gpg' - we'll try PATH later
     log(`[WARN] Falling back to GPG binary 'gpg' without validation.`);
     return 'gpg';
   }
@@ -112,34 +97,76 @@ export class GpgWrapper {
     return opts;
   }
 
-  private keyExists(key: string, keyType: "RECIPIENT" | "SIGNER"): boolean {
+  private async keyExists(key: string, keyType: "RECIPIENT" | "SIGNER"): Promise<boolean> {
     const args = keyType === "RECIPIENT" ? [ '--list-keys', '--with-colons', key ] : [ '--list-secret-keys', '--with-colons', key ];
-    const r = spawnSync(this.binPath, args, { encoding: "utf-8" });
-    return r.status === 0 && r.stdout?.length > 0;
+    const { status, stdout } = await this.runProcess(this.binPath, args, { timeoutMs: this.options.timeoutMs ?? 10_000 });
+    return status === 0 && stdout.length > 0;
+  }
+
+  private async checkBinary(): Promise<boolean> {
+    try {
+      await this.runProcess(this.binPath, ['--version'], { timeoutMs: 5000 });
+      log(`[DEBUG] GPG binary check succeeded.`);
+      return true;
+    }
+    catch (err) {
+      log(`[ERROR] GPG binary check failed at path: '${this.binPath}': ${String(err)}`);
+      return false
+    }
+  }
+
+  private runProcess(cmd: string, args: string[], opts?: { timeoutMs?: number; cwd?: string; env?: NodeJS.ProcessEnv; input?: string})
+    : Promise<{ status: number; stdout: string, stderr: string; signal?: NodeJS.Signals }> {
+    return new Promise((resolve, reject) => {
+      const child = spawn(cmd, args, { stdio: ['pipe', 'pipe', 'pipe'], cwd: opts?.cwd, env: { ...process.env, ...(opts?.env ?? {}) } });
+
+      let stdout = '';
+      let stderr = '';
+      child.stdout.setEncoding('utf-8');
+      child.stderr.setEncoding('utf-8');
+      child.stdout.on('data', (data) => { stdout += data; });
+      child.stderr.on('data', (data) => { stderr += data; });
+
+      let timedOut = false;
+      let timer: NodeJS.Timeout | undefined;
+      if (opts?.timeoutMs) {
+        timer = setTimeout(() => {
+          timedOut = true;
+          try { child.kill('SIGTERM'); }
+          catch {}
+        }, opts.timeoutMs);
+      }
+
+      if (opts?.input) { child.stdin.write(opts.input); }
+      child.stdin.end();
+
+      child.on('error', (err) => {
+        if (timer) clearTimeout(timer);
+        reject(err);
+      });
+
+      child.on('close', (code, signal) => {
+        if (timer) clearTimeout(timer);
+        if (timedOut) {
+          const e: any = new Error("Process timed out");
+          e.code = "ETIMEDOUT";
+          reject(e);
+        } else {
+          resolve({ status: code ?? -1, stdout, stderr, signal: signal ?? undefined });
+        }
+      });
+    });
   }
 
   public async encryptFile({ inputPath, outputPath, recipient, signer, signerPassphrase }: EncryptFileInput): Promise<EncryptFileResult> {
-    // TODO: move this into the constructor?
-
-    // TODO: find an alternative for checking existence/accessibility of GPG binary.
-    //       since access() on some platforms (Windows) may return false negatives due to ACLs.
-    //       For now, swapping in 3rd party library (isExecutable) to get it working, but perhaps
-    //       it is better to just attempt to run GPG and handle the errors?
-    try {
-      log(`[DEBUG] Checking GPG binary at path: '${this.binPath}'`);
-      isExecutableSync(this.binPath);
-      log(`[DEBUG] GPG binary is executable.`);
-    }
-    catch (err) {
-      log(`[ERROR] GPG binary not found or not executable at path: '${this.binPath}'`);
-      return { success: false, error: `GPG binary not found or not executable at path: '${this.binPath}'`, code: GpgErrorCode.GPG_NOT_FOUND }
-    }
+    // check gpg binary exists and is executable
+    const okay = await this.checkBinary();
+    if (!okay) return { success: false, error: `GPG binary not found or not executable at path: '${this.binPath}'`, code: GpgErrorCode.GPG_NOT_FOUND }
 
     // check read permissions on input
     try {
       log(`[DEBUG] Checking read access for input file at path: '${inputPath}'`);
       await access(inputPath, constants.R_OK);
-      log(`[DEBUG] Read access confirmed for input file.`);
     }
     catch {
       log(`[ERROR] Unable to read input file, insufficient permissions for path: '${inputPath}'`);
@@ -151,7 +178,6 @@ export class GpgWrapper {
     try {
       log(`[DEBUG] Checking write access for output directory at path: '${outputDir}'`);
       await access(outputDir, constants.W_OK);
-      log(`[DEBUG] Write access confirmed for output directory.`);
     }
     catch {
       log(`[ERROR] Unable to write to output directory, insufficient permissions for path: '${outputDir}'`);
@@ -161,20 +187,22 @@ export class GpgWrapper {
     // check recipient key is in keyring and valid
     if (this.options.verifyKeys) {
       log(`[DEBUG] Verifying recipient key exists in keyring: '${recipient}'`);
-      const okay = this.keyExists(recipient, "RECIPIENT");
-      if (!okay) {
+      const recipientOkay = await this.keyExists(recipient, "RECIPIENT");
+  
+      if (!recipientOkay) {
         const msg = `Recipient key not found in local keyring: '${recipient}'`;
         log(`[ERROR] ${msg}`);
         return { success: false, error: msg, code: GpgErrorCode.RECIPIENT_KEY_NOT_FOUND }
       }
+
       log(`[DEBUG] Recipient key exists in keyring.`);
     }
 
     // check signer key is in the keyring and valid
     if (signer && signer.length > 0 && this.options.verifyKeys) {
       log(`[DEBUG] Verifying signer secret key exists in keyring: '${signer}'`);
-      const okay = this.keyExists(signer, "SIGNER");
-      if (!okay) {
+      const signerOkay = await this.keyExists(signer, "SIGNER");
+      if (!signerOkay) {
         const msg = `Signer secret key not found in local keyring: '${signer}'`
         log(`[ERROR] ${msg}`);
         return { success: false, error: msg, code: GpgErrorCode.SIGNER_KEY_NOT_FOUND }
@@ -198,51 +226,37 @@ export class GpgWrapper {
       }
     }
 
-    args.push('--encrypt');
-    args.push('--recipient', recipient);
-    args.push(inputPath);
+    args.push('--encrypt', '--recipient', recipient, inputPath);
 
     log(`Running cmd: ${JSON.stringify(this.binPath)} ${args.map(a => JSON.stringify(a)).join(' ')}`);
 
-    let finalArgs = args.slice();
     let inputData: string | undefined;
 
     if (signer && this.options.pinentryMode === "loopback" && signerPassphrase) {
-      finalArgs = [ ...args.slice(0, 1), '--passphrase-fd', '0', ...args.slice(1)];
+      args.unshift('--passphrase-fd', '0');
       inputData = signerPassphrase.endsWith("\n") ? signerPassphrase : signerPassphrase + "\n";
     }
 
-    const result = spawnSync(this.binPath, finalArgs, {
-      stdio: ['pipe', 'pipe', 'pipe'],
-      env: { ...process.env },
-      timeout: this.options.timeoutMs ?? 60_000,
-      encoding: "utf-8",
-      input: inputData
-    });
+    try {
+      const { status, stderr } = await this.runProcess(this.binPath, args, { timeoutMs: this.options.timeoutMs, input: inputData });
 
-    if ((result as any).error?.code === "ETIMEDOUT") {
-      log(`[ERROR] GPG timed out while encrypting file '${inputPath}'`);
-      log(`\tstderr: \n${result.stderr}`);
-      return { success: false, error: `GPG operation timed out`, code: GpgErrorCode.GENERAL_GPG_ERROR }
+      if (status !== 0) {
+        const errorDetail = identifyError(stderr);
+
+        log(`[ERROR] Unable to encrypt file '${inputPath};\n\terrorCode=${errorDetail.code};\n\tmessage=${errorDetail.message}'`);
+        log(`\tstderr: \n${stderr}`);
+        return { success: false, error: errorDetail.message, code: errorDetail.code }
+      }
+      log(`[INFO] Successfully encrypted file ${outputPath}`);
+      return { success: true, outputPath };
     }
-
-    if (result.status == null) {
-      log(`[ERROR] GPG terminated without an exit status (timeout/signal).`);
-      log(`\tstderr: \n${result.stderr}`);
-      return { success: false, error: `GPG terminated without an exit status`, code: GpgErrorCode.GENERAL_GPG_ERROR }
+    catch (err: any) {
+      if (err?.code === "ETIMEDOUT") {
+        log(`[ERROR] GPG timed out while encrypting file '${inputPath}'`);
+        return { success: false, error: `GPG operation timed out`, code: GpgErrorCode.GENERAL_GPG_ERROR }
+      }
+      return { success: false, error: `GPG operation failed: ${String(err)}`, code: GpgErrorCode.GENERAL_GPG_ERROR }
     }
-
-    if (result.status !== 0) {
-      const errorDetail = identifyError(result.stderr);
-
-      log(`[ERROR] Unable to encrypt file '${inputPath};\n\terrorCode=${errorDetail.code};\n\tmessage=${errorDetail.message}'`);
-      log(`\tstderr: \n${result.stderr}`);
-      return { success: false, error: errorDetail.message, code: errorDetail.code }
-    }
-
-    log(`[INFO] Successfully encrypted file ${outputPath}`);
-
-    return { success: true, outputPath }
   }
 
 }

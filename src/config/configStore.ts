@@ -26,6 +26,7 @@ import { loadConfig, CONFIG_FILE_ENCODING } from './loadConfig';
 import { loadAppConfig, saveAppConfig, DEFAULT_APP_CONFIG } from './appConfig';
 
 import type { AppConfigData, Config } from './Config';
+import { generateConfigHash } from './utils';
 
 // Ensure the application's config file directory exists
 function ensureAppDirectoryExists(appDir: string) {
@@ -40,7 +41,11 @@ function ensureAppDirectoryExists(appDir: string) {
 // (that should have happened after loading the config)
 // NOTE: the config is saved as JSON (TOML serialization can be weird)
 function saveConfig(configData: Config.FileConfiguration, outputPath: string) {
-  // update the config hash on import to account for the
+  // update the signature with the hash of the config - this is necessary in the case of an embedded salt from the UI
+  const sig = generateConfigHash(configData);
+  configData.meta.signature = sig;
+
+  // write out the config as JSON
   const outputData = JSON.stringify(configData, null, '    ');
   fs.writeFileSync(outputPath, outputData, CONFIG_FILE_ENCODING);
   log(`[INFO] Written config data to ${outputPath}`);

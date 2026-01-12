@@ -17,4 +17,6 @@
 ************************************************************************ */
 
 export { GpgWrapper } from './gpg';
+export type { EncryptFileInput, EncryptFileResult, GpgOptions } from './gpg';
+
 export { GpgErrorCode, GpgErrorMap, identifyError } from './gpgError';
