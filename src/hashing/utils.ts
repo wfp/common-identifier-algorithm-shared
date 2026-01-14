@@ -31,9 +31,9 @@ export function extractAlgoColumnsFromObject(
   }
 
   let output: Config.CoreConfiguration['algorithm']['columns'] = {
-    static: columnConfig.static.map((colName) => obj[colName]).filter(Boolean),
-    process: columnConfig.process.map((colName) => obj[colName]).filter(Boolean),
-    reference: columnConfig.reference.map((colName) => obj[colName]).filter(Boolean),
+    static: columnConfig.static.map((colName) => obj[colName]),
+    process: columnConfig.process.map((colName) => obj[colName]),
+    reference: columnConfig.reference.map((colName) => obj[colName]),
   };
 
   return output;

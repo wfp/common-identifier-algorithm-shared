@@ -35,7 +35,12 @@ describe("hashing::util", () => {
         reference: ['col_refa', 'col_refb'],
       },
       {},
-    )).toEqual({ static: [], process: [], reference: [] });
+    )).toEqual({ 
+      static: [ undefined, undefined ],
+      process: [ undefined, undefined ],
+      reference: [ undefined, undefined ]
+    });
+    // TODO: come back and revisit this - the undefineds are needed by the NWS tests
 
     expect(extractAlgoColumnsFromObject(
       {
