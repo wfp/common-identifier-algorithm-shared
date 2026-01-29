@@ -23,9 +23,8 @@ import Debug from 'debug';
 const log = Debug('cid::engine::config::store');
 
 import { loadConfig, CONFIG_FILE_ENCODING } from './loadConfig';
-import { loadAppConfig, saveAppConfig, DEFAULT_APP_CONFIG } from './appConfig';
 
-import type { AppConfigData, Config } from './Config';
+import type { Config } from './Config';
 import { generateConfigHash } from './utils';
 
 // Ensure the application's config file directory exists
@@ -53,7 +52,6 @@ function saveConfig(configData: Config.FileConfiguration, outputPath: string) {
 
 interface ConfigStorePaths {
   config: string;
-  appConfig: string;
   backupConfig: string;
 }
 
@@ -68,7 +66,6 @@ export class ConfigStore {
   usingUI: boolean;
 
   algorithmId: string;
-  appConfig: AppConfigData = DEFAULT_APP_CONFIG;
   filePaths: ConfigStorePaths;
   saltConfiguration?: Config.FileBasedSalt | Config.StringBasedSalt;
 
@@ -84,14 +81,11 @@ export class ConfigStore {
   getAlgorithmId = () => this.algorithmId;
   getConfigFilePath = () => this.filePaths.config;
   getBackupConfigFilePath = () => this.filePaths.backupConfig;
-  getAppConfigFilePath = () => this.filePaths.appConfig;
   isCurrentConfigBackup = () => this.data && this.data.isBackup;
 
   // On boot we try to load the user config from AppData
   // or fall back to a backup config
   boot() {
-    // attempt to load the application configuration
-    this.appConfig = loadAppConfig(this.getAppConfigFilePath());
 
     // attempt to load the default app config
     const userConfigLoad = loadConfig({
@@ -261,39 +255,11 @@ export class ConfigStore {
     saveConfig(configData, this.getConfigFilePath());
   }
 
-  // Overwrites the application configuration with the current
-  // appConfig value.
-  _saveAppConfig() {
-    ensureAppDirectoryExists(dirname(this.getAppConfigFilePath()));
-    saveAppConfig(this.appConfig, this.getAppConfigFilePath());
-  }
-
-  _currentSignature() {
+  currentSignature() {
     if (this.data && this.data.meta.signature) {
       return this.data.meta.signature;
     }
     return 'INVALID CONFIG, NO SIGNATURE';
-  }
-
-  // Updates the appconfig file with the dimensions of the last used screen.
-  // Ensures that on next launch, the application has the same size and display.
-  updateDisplayConfig(windowConfig: AppConfigData["window"]) {
-    this.appConfig.window = windowConfig;
-    this._saveAppConfig();
-  }
-
-  // Marks the terms and conditions as accepted for the curent config hash
-  // and saves the application config so the user doesn't have to accept it
-  // anymore
-  acceptTermsAndConditions() {
-    this.appConfig.termsAndConditions[this._currentSignature()] = true;
-    this._saveAppConfig();
-  }
-
-  // Returns true if the user has accepted the terms and conditions of the current
-  // config (as indicated by the signature)
-  hasAcceptedTermsAndConditions() {
-    return this.appConfig.termsAndConditions[this._currentSignature()] == true;
   }
 }
 

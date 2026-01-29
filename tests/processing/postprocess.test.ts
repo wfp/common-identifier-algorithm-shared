@@ -89,7 +89,7 @@ describe('postprocess::encrypt', () => {
     hoisted.encryptFileMock.mockResolvedValueOnce({ success: true, outputPath: 'out.gpg' });
 
     const config = { meta: { signature: 'QWERTY' }, post_processing: { encryption: { recipient: 'RECIP' }}} as any;
-    const res = await postprocessFile({ config, inputPath: 'in.csv', outputPath: 'out.gpg' });
+    const res = await postprocessFile({ config, inputPath: 'in.csv', outputPath: 'out.gpg', options: { signer: 'SIGNER' } });
 
     expect(res.success).toBe(true);
     expect(res.steps).toEqual([{ success: true, step: 'ENCRYPTION', outputPath: 'out.gpg' }]);
@@ -99,8 +99,8 @@ describe('postprocess::encrypt', () => {
     expect(callArgs).toMatchObject({
       inputPath: 'in.csv',
       outputPath: 'out.gpg',
-      recipient: 'RECIP',
-      signer: undefined,
+      recipients: ['RECIP', 'SIGNER'],
+      signer: "SIGNER",
     });
 
     expect(hoisted.constructedOptions).toEqual([{ trustAlways: true, timeoutMs: 60_000, verifyKeys: true }]);

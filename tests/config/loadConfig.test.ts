@@ -45,7 +45,7 @@ describe("config::loadConfig", () => {
   });
 
   test('invalid', () => {
-    const TEST_FILE_PATH = join(FILES_PATH, 'test-appconfig.json');
+    const TEST_FILE_PATH = join(FILES_PATH, 'test-invalid.json');
     expect(() => loadConfig({ configPath: TEST_FILE_PATH, algorithmId: ALGORITHM_ID, usingUI: false })).toThrow();
   });
 

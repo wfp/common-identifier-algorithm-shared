@@ -107,7 +107,7 @@ describe('crypto::gpg', () => {
     const res = await gpg.encryptFile({
       inputPath: '/path/in.csv',
       outputPath: '/path/out.gpg',
-      recipient: 'RECIP',
+      recipients: ['RECIP'],
     });
 
     expect(res.success).toBe(false);
@@ -123,7 +123,7 @@ describe('crypto::gpg', () => {
     const res = await gpg.encryptFile({
       inputPath: '/path/in.csv',
       outputPath: '/protected/out.gpg',
-      recipient: 'RECIP',
+      recipients: ['RECIP'],
     });
 
     expect(res.success).toBe(false);
@@ -142,7 +142,7 @@ describe('crypto::gpg', () => {
     const res = await gpg.encryptFile({
       inputPath: 'in.csv',
       outputPath: 'out.gpg',
-      recipient: 'RECIP',
+      recipients: ['RECIP'],
     });
 
     expect(res).toEqual({ success: true, outputPath: 'out.gpg' });
@@ -159,7 +159,7 @@ describe('crypto::gpg', () => {
     const res = await gpg.encryptFile({
       inputPath: 'in.csv',
       outputPath: 'out.gpg',
-      recipient: 'RECIP',
+      recipients: ['RECIP'],
       signer: 'SIGNER',
       signerPassphrase: 'secret',
     });
@@ -185,7 +185,7 @@ describe('crypto::gpg', () => {
     const res = await gpg.encryptFile({
       inputPath: 'in.csv',
       outputPath: 'out.gpg',
-      recipient: 'RECIP',
+      recipients: ['RECIP'],
       signer: 'SIGNER',
     });
 
@@ -212,7 +212,7 @@ Inappropriate ioctl for device`,
     const res = await gpg.encryptFile({
       inputPath: 'in.csv',
       outputPath: 'out.gpg',
-      recipient: 'RECIP',
+      recipients: ['RECIP'],
       signer: 'SIGNER',
     });
 
@@ -235,7 +235,7 @@ Inappropriate ioctl for device`,
     const res = await gpg.encryptFile({
       inputPath: 'in.csv',
       outputPath: 'out.asc',
-      recipient: 'RECIP',
+      recipients: ['RECIP'],
     });
 
     expect(res.success).toBe(true);
@@ -258,7 +258,7 @@ Inappropriate ioctl for device`,
     enqueueScenario({ neverCloseUntilKilled: true, stderr: "" });
 
     const gpg = new GpgWrapper({ binaryPathOverride: '/usr/bin/gpg', timeoutMs: 100 });
-    const res = await gpg.encryptFile({ inputPath: 'in.csv', outputPath: 'out.gpg', recipient: 'RECIP' });
+    const res = await gpg.encryptFile({ inputPath: 'in.csv', outputPath: 'out.gpg', recipients: ['RECIP'] });
     expect(res.success).toBe(false);
     if (!res.success) expect(res.error).toMatch(/timed out/i);
   });
@@ -267,7 +267,7 @@ Inappropriate ioctl for device`,
     enqueueScenario({ status: 1, stderr: "unexpected close" });
 
     const gpg = new GpgWrapper({ binaryPathOverride: '/usr/bin/gpg' });
-    const res = await gpg.encryptFile({ inputPath: 'in.csv', outputPath: 'out.gpg', recipient: 'RECIP' });
+    const res = await gpg.encryptFile({ inputPath: 'in.csv', outputPath: 'out.gpg', recipients: ['RECIP'] });
     expect(res.success).toBe(false);
   });
 

@@ -36,7 +36,6 @@ function makeTestConfig(basePath: string) {
     filePaths: {
       config: join(basePath, CONFIG_FILE_NAME),
       backupConfig: join(basePath, BACKUP_CONFIG_FILE_NAME),
-      appConfig: join(basePath, APP_CONFIG_FILE_NAME),
     },
     algorithmId: 'ANY',
     usingUI: false
@@ -48,7 +47,7 @@ function placeTestConfigFiles(basePathPrefix: string) {
   const basePath = fs.mkdtempSync(join(os.tmpdir(), basePathPrefix));
 
   const cp = (n: string) => fs.copyFileSync(join(fromPath, n), join(basePath, n));
-  [CONFIG_FILE_NAME, BACKUP_CONFIG_FILE_NAME, APP_CONFIG_FILE_NAME].forEach(cp);
+  [CONFIG_FILE_NAME, BACKUP_CONFIG_FILE_NAME].forEach(cp);
 
   return basePath;
 }
@@ -192,26 +191,6 @@ describe("config::configStore", () => {
 
       // yet keep the existing config
       expect(c.isValid).toEqual(true);
-    }
-  });
-
-  test('app config TnS', () => {
-    const basePath = placeTestConfigFiles('ConfigStore-appconfig');
-
-    {
-      const c = makeConfigStore(makeTestConfig(basePath));
-      c.boot();
-
-      expect(c.hasAcceptedTermsAndConditions()).toEqual(false);
-      c.acceptTermsAndConditions();
-      expect(c.hasAcceptedTermsAndConditions()).toEqual(true);
-    }
-    // should keep between instantiations
-    {
-      const c = makeConfigStore(makeTestConfig(basePath));
-      c.boot();
-
-      expect(c.hasAcceptedTermsAndConditions()).toEqual(true);
     }
   });
 });

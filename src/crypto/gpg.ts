@@ -39,7 +39,7 @@ export type GpgOptions = {
 export type EncryptFileInput = {
   inputPath: string;
   outputPath: string;
-  recipient: string;
+  recipients: string[];
   signer?: string;
   signerPassphrase?: string;
 }
@@ -158,7 +158,7 @@ export class GpgWrapper {
     });
   }
 
-  public async encryptFile({ inputPath, outputPath, recipient, signer, signerPassphrase }: EncryptFileInput): Promise<EncryptFileResult> {
+  public async encryptFile({ inputPath, outputPath, recipients, signer, signerPassphrase }: EncryptFileInput): Promise<EncryptFileResult> {
     // check gpg binary exists and is executable
     const okay = await this.checkBinary();
     if (!okay) return { success: false, error: `GPG binary not found or not executable at path: '${this.binPath}'`, code: GpgErrorCode.GPG_NOT_FOUND }
@@ -186,16 +186,17 @@ export class GpgWrapper {
 
     // check recipient key is in keyring and valid
     if (this.options.verifyKeys) {
-      log(`[DEBUG] Verifying recipient key exists in keyring: '${recipient}'`);
-      const recipientOkay = await this.keyExists(recipient, "RECIPIENT");
-  
-      if (!recipientOkay) {
-        const msg = `Recipient key not found in local keyring: '${recipient}'`;
-        log(`[ERROR] ${msg}`);
-        return { success: false, error: msg, code: GpgErrorCode.RECIPIENT_KEY_NOT_FOUND }
+      for (const recipient of recipients) {
+        log(`[DEBUG] Verifying recipient key exists in keyring: '${recipient}'`);
+        const recipientOkay = await this.keyExists(recipient, "RECIPIENT");
+    
+        if (!recipientOkay) {
+          const msg = `Recipient key not found in local keyring: '${recipient}'`;
+          log(`[ERROR] ${msg}`);
+          return { success: false, error: msg, code: GpgErrorCode.RECIPIENT_KEY_NOT_FOUND }
+        }
+        log(`[DEBUG] Recipient key exists in keyring.`);
       }
-
-      log(`[DEBUG] Recipient key exists in keyring.`);
     }
 
     // check signer key is in the keyring and valid
@@ -226,7 +227,9 @@ export class GpgWrapper {
       }
     }
 
-    args.push('--encrypt', '--recipient', recipient, inputPath);
+    args.push('--encrypt');
+    recipients.forEach(recipient => args.push('--recipient', recipient));
+    args.push(inputPath);
 
     log(`Running cmd: ${JSON.stringify(this.binPath)} ${args.map(a => JSON.stringify(a)).join(' ')}`);
 

@@ -56,20 +56,6 @@ export function attemptToReadTOMLData<T>(filePath: string, encoding: fs.Encoding
   }
 }
 
-// Returns the prefered Application Data storage location based on the operating system
-export function appDataLocation() {
-  switch (process.platform) {
-    case 'win32':
-      return process.env.APPDATA as string;
-    case 'darwin':
-      return process.env.HOME + '/Library/Preferences';
-    case 'linux':
-      return process.env.HOME + '/.local/share';
-    default:
-      throw new Error(`Unsupported platform for salt file location: ${process.platform}`);
-  }
-}
-
 const DEFAULT_HASH_TYPE = 'md5';
 const HASH_DIGEST_TYPE = 'hex';
 

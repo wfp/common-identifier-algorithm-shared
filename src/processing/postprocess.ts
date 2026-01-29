@@ -78,7 +78,7 @@ export async function postprocessFile({ config, inputPath, outputPath, options }
     const encryptResult = await gpg.encryptFile({
       inputPath: inputPath,
       outputPath: outputPath,
-      recipient: config.post_processing.encryption.recipient,
+      recipients: [config.post_processing.encryption.recipient, options?.signer].filter((r): r is string => !!r),
       signer: options?.signer,
     });
 
