@@ -53,7 +53,7 @@
     "is-executable": "^2.0.2",
     "openpgp": "^6.3.1",
     "safe-stable-stringify": "^2.5.0",
-    "toml": "^3.0.0",
+    "toml": "^5.0.1",
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
   },
   "keywords": [
