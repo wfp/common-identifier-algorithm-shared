@@ -1,17 +1,17 @@
 /* ************************************************************************
 *  Common Identifier Application
 *  Copyright (C) 2026  World Food Programme
-*  
+*
 *  This program is free software: you can redistribute it and/or modify
 *  it under the terms of the GNU Affero General Public License as published by
 *  the Free Software Foundation, either version 3 of the License, or
 *  (at your option) any later version.
-*  
+*
 *  This program is distributed in the hope that it will be useful,
 *  but WITHOUT ANY WARRANTY; without even the implied warranty of
 *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 *  GNU Affero General Public License for more details.
-*  
+*
 *  You should have received a copy of the GNU Affero General Public License
 *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ************************************************************************ */
@@ -34,7 +34,7 @@ class CsvDecoder extends DecoderBase {
     if (limit) this.csvOptions.to = limit + 1; // n+1 since header is included
   }
 
-  decodeFile(path: string, fileEncoding: fs.EncodingOption = 'utf-8') {
+  decodeFile(path: string, fileEncoding: BufferEncoding = 'utf-8') {
     log(`[INFO] Reading CSV file from ${path} with encoding '${fileEncoding}'`);
     const data = fs.readFileSync(path, fileEncoding);
     const parsed = csv_parse(data, this.csvOptions);

@@ -1,17 +1,17 @@
 /* ************************************************************************
 *  Common Identifier Application
 *  Copyright (C) 2026  World Food Programme
-*  
+*
 *  This program is free software: you can redistribute it and/or modify
 *  it under the terms of the GNU Affero General Public License as published by
 *  the Free Software Foundation, either version 3 of the License, or
 *  (at your option) any later version.
-*  
+*
 *  This program is distributed in the hope that it will be useful,
 *  but WITHOUT ANY WARRANTY; without even the implied warranty of
 *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 *  GNU Affero General Public License for more details.
-*  
+*
 *  You should have received a copy of the GNU Affero General Public License
 *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ************************************************************************ */
@@ -29,7 +29,7 @@ import Debug from 'debug';
 const log = Debug('cid::engine::config::loadConfig');
 
 // The encoding used by the config file
-export const CONFIG_FILE_ENCODING: fs.EncodingOption = 'utf-8';
+export const CONFIG_FILE_ENCODING: BufferEncoding = 'utf-8';
 
 type LoadConfigResult =
   | { success: true; lastUpdated: Date; config: Config.FileConfiguration; }
@@ -65,7 +65,7 @@ export function loadConfig({ configPath, algorithmId, embeddedSalt, usingUI=fals
     log('[INFO] Validating config');
     // validate the config
     const validationResult = validateConfigFile(configData, algorithmId, usingUI);
-  
+
     // if the config is not valid return false
     if (validationResult) {
       return {
@@ -104,7 +104,7 @@ export function loadConfig({ configPath, algorithmId, embeddedSalt, usingUI=fals
     log('[DEBUG] Using string-based salt from configuration file');
     return { success: true, lastUpdated: lastUpdateDate, config: configData };
   }
-  
+
   if (configData.algorithm.salt && configData.algorithm.salt.source == "FILE") {
     log('[DEBUG] Using file-based salt from configuration file');
     // load the file, convert to a string value, update the config to be of type: "STRING"
@@ -112,13 +112,13 @@ export function loadConfig({ configPath, algorithmId, embeddedSalt, usingUI=fals
     const validatorRegexp = configData.algorithm.salt.validator_regex ? new RegExp(configData.algorithm.salt.validator_regex) : undefined;
     return tryLoadSaltFile({ saltFilePath, validatorRegexp, configData, lastUpdateDate, label: "salt" });
   }
-  
+
   if (embeddedSalt && embeddedSalt.source == "STRING") {
     log('[DEBUG] Using string-based salt from embedded configuration');
     configData.algorithm.salt = { source: "STRING", value: embeddedSalt.value }
     return { success: true, lastUpdated: lastUpdateDate, config: configData };
   }
-  
+
   if (embeddedSalt && embeddedSalt.source == "FILE") {
     log('[DEBUG] Using file-based salt from embedded configuration');
     const saltFilePath = embeddedSalt.value;

@@ -1,42 +1,41 @@
 /* ************************************************************************
 *  Common Identifier Application
 *  Copyright (C) 2026  World Food Programme
-*  
+*
 *  This program is free software: you can redistribute it and/or modify
 *  it under the terms of the GNU Affero General Public License as published by
 *  the Free Software Foundation, either version 3 of the License, or
 *  (at your option) any later version.
-*  
+*
 *  This program is distributed in the hope that it will be useful,
 *  but WITHOUT ANY WARRANTY; without even the implied warranty of
 *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 *  GNU Affero General Public License for more details.
-*  
+*
 *  You should have received a copy of the GNU Affero General Public License
 *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ************************************************************************ */
 
-import fs from 'node:fs';
+import { readFileSync } from 'node:fs';
 import toml from 'toml';
 import { createHash } from 'node:crypto';
 import stableStringify from 'safe-stable-stringify';
 
 import type { Config } from './Config';
 
-
 // Tries to read the file data, returns null if unsuccessful
-export function attemptToReadFileData(filePath: string, encoding: fs.EncodingOption = 'utf-8') {
+export function attemptToReadFileData(filePath: string, encoding: BufferEncoding = 'utf-8') {
   try {
-    return fs.readFileSync(filePath, encoding) as string;
+    return readFileSync(filePath, encoding);
   } catch (e) {
     return null;
   }
 }
 
 // Tries to read the file data decoded from TOML, returns null if unsuccessful
-export function attemptToReadTOMLData<T>(filePath: string, encoding: fs.EncodingOption="utf-8"): T | null {
+export function attemptToReadTOMLData<T>(filePath: string, encoding: BufferEncoding = "utf-8"): T | null {
   try {
-    const fileData = fs.readFileSync(filePath, encoding) as string;
+    const fileData = readFileSync(filePath, encoding);
 
     // handle TOML
     if (filePath.toLowerCase().endsWith('.toml')) {
